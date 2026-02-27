@@ -6,42 +6,197 @@
   <title>BSJP Screener — Cukong Reborn</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
-  <script src="config.js"></script>
-<script src="https://s3.tradingview.com/tv.js"></script>
+  <script src="https://s3.tradingview.com/tv.js"></script>
   <link rel="stylesheet" href="style.css">
+  <style>
+    main { max-width: 1400px; margin: auto; padding: 28px 24px 60px; position: relative; z-index: 1; }
+
+    .analysis-panel {
+      background: rgba(0,229,160,0.04);
+      border: 1px solid rgba(0,229,160,0.15);
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 28px;
+      display: none;
+    }
+    .analysis-panel.visible { display: block; }
+    .analysis-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .analysis-title { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .analysis-title .sym-badge {
+      background: var(--accent);
+      color: #060c14;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+    .analysis-close {
+      background: rgba(255,69,96,0.15);
+      border: 1px solid rgba(255,69,96,0.3);
+      color: var(--danger);
+      border-radius: 8px;
+      padding: 6px 14px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .analysis-close:hover { background: rgba(255,69,96,0.25); }
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .a-metric {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .a-metric-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .a-metric-value { font-size: 18px; font-weight: 700; font-family: var(--font-mono); }
+    .a-metric-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .val-green { color: var(--accent); }
+    .val-red { color: var(--danger); }
+    .val-yellow { color: var(--warn); }
+    .val-blue { color: var(--accent2); }
+
+    .score-gauge-wrap {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .score-gauge-num { font-size: 48px; font-weight: 900; font-family: var(--font-mono); line-height: 1; }
+    .score-gauge-info { flex: 1; }
+    .score-gauge-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .score-gauge-bar { height: 8px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; }
+    .score-gauge-fill { height: 100%; border-radius: 999px; transition: width 0.8s ease; }
+    .score-segments { display: flex; gap: 6px; margin-top: 8px; font-size: 11px; }
+    .seg { padding: 2px 8px; border-radius: 999px; }
+    .seg.skip { background: rgba(255,69,96,0.15); color: var(--danger); }
+    .seg.valid { background: rgba(245,197,24,0.15); color: var(--warn); }
+    .seg.strong { background: rgba(0,229,160,0.15); color: var(--accent); }
+    .seg.active { font-weight: 700; ring: 1px solid currentColor; }
+
+    .bsjp-criteria {
+      background: rgba(0,184,240,0.05);
+      border: 1px solid rgba(0,184,240,0.2);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .bsjp-title { font-size: 13px; font-weight: 700; color: var(--accent2); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bsjp-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+    .bsjp-row:last-child { border-bottom: none; }
+
+    .levels-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .level-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 12px 14px;
+      text-align: center;
+    }
+    .level-label { font-size: 11px; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; }
+    .level-price { font-size: 16px; font-weight: 700; font-family: var(--font-mono); }
+    .level-pct { font-size: 11px; margin-top: 4px; }
+
+    .signal-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .signal-title { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .signal-items { display: flex; flex-wrap: wrap; gap: 8px; }
+    .signal-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 13px;
+    }
+    .signal-item.s-ok { border-left: 3px solid var(--accent); }
+    .signal-item.s-bad { border-left: 3px solid var(--danger); }
+
+    .rec-box {
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin-bottom: 4px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .rec-box.rec-buy { background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.3); }
+    .rec-box.rec-wait { background: rgba(245,197,24,0.08); border: 1px solid rgba(245,197,24,0.3); }
+    .rec-box.rec-avoid { background: rgba(255,69,96,0.08); border: 1px solid rgba(255,69,96,0.3); }
+    .rec-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .rec-buy .rec-title { color: var(--accent); }
+    .rec-wait .rec-title { color: var(--warn); }
+    .rec-avoid .rec-title { color: var(--danger); }
+
+    .btn-analyze {
+      background: rgba(0,184,240,0.15);
+      border: 1px solid rgba(0,184,240,0.3);
+      color: var(--accent2);
+      border-radius: 6px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 11px;
+      font-family: var(--font-mono);
+    }
+    .btn-analyze:hover { background: rgba(0,184,240,0.25); }
+  </style>
 </head>
 <body>
 
-  <!-- Background -->
   <div class="topbar" id="topbar">
     <div class="topbar-left">
-      <a href="index.html" class="topbar-logo">▲ Cukong Reborn</a>
+      <a href="index.html" class="topbar-logo">&#9650; Cukong Reborn</a>
       <span class="topbar-sep">|</span>
       <span class="topbar-badge">BSJP SCREENER</span>
     </div>
     <nav class="topbar-nav">
-      <a href="screener.html" class="active">📊 Screener</a>
-      <a href="sr.html">📉 S&R Finder</a>
-      <a href="volume.html">🔥 Volume Anomaly</a>
-      <a href="scanner.html">🔭 Market Scanner</a>
-      <a href="#" class="soon">📈 Trend Dashboard</a>
-      <a href="#" class="soon">🕯 Candlestick</a>
-      <a href="#" class="soon">⚡ Momentum</a>
+      <a href="screener.html" class="active">&#128202; Screener</a>
+      <a href="sr.html">&#128201; S&amp;R Finder</a>
+      <a href="volume.html">&#128293; Volume Anomaly</a>
+      <a href="scanner.html">&#128301; Market Scanner</a>
+      <a href="#" class="soon">&#128200; Trend Dashboard</a>
+      <a href="#" class="soon">&#128337; Candlestick</a>
+      <a href="#" class="soon">&#9889; Momentum</a>
     </nav>
-    <a href="index.html" class="topbar-home">← Beranda</a>
+    <a href="index.html" class="topbar-home">&larr; Beranda</a>
   </div>
   <div class="bg-grid"></div>
   <div class="bg-glow glow-1"></div>
   <div class="bg-glow glow-2"></div>
 
-  <!-- Header -->
   <header>
     <div class="header-inner">
       <div class="logo">
-        <span class="logo-icon">▲</span>
+        <span class="logo-icon">&#9650;</span>
         <div>
           <div class="logo-title">BSJP Screener <span class="logo-pro">PRO</span></div>
-          <div class="logo-sub">by AlviZevalli · IDX Market</div>
+          <div class="logo-sub">by AlviZevalli &middot; IDX Market</div>
         </div>
       </div>
       <div class="header-right">
@@ -53,17 +208,12 @@
     </div>
   </header>
 
-  <!-- Main -->
   <main>
-
-    <!-- Search Panel -->
     <section class="search-panel">
       <div class="search-bar">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon">&#128269;</span>
         <input id="sym" placeholder="Masukkan kode saham... (contoh: BBRI, TLKM, BMRI)" autocomplete="off" spellcheck="false">
-        <button class="btn-add" onclick="addStock()">
-          <span>+ Tambah</span>
-        </button>
+        <button class="btn-add" onclick="addStock()"><span>+ Tambah</span></button>
       </div>
       <div class="quick-picks">
         <span class="qp-label">Cepat:</span>
@@ -78,42 +228,25 @@
       </div>
     </section>
 
-    <!-- Tabs -->
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('screener', this)">📊 Screener</button>
-      <button class="tab" onclick="switchTab('watchlist', this)">👁 Watchlist</button>
-      <button class="tab" onclick="switchTab('backtest', this)">🔁 Backtest</button>
-      <button class="tab" onclick="switchTab('info', this)">ℹ️ Panduan</button>
+      <button class="tab active" onclick="switchTab('screener', this)">&#128202; Screener</button>
+      <button class="tab" onclick="switchTab('watchlist', this)">&#128065; Watchlist</button>
+      <button class="tab" onclick="switchTab('backtest', this)">&#128257; Backtest</button>
+      <button class="tab" onclick="switchTab('info', this)">&#8505;&#65039; Panduan</button>
       <div class="tab-actions">
-        <button class="btn-export" onclick="exportCSV()">⬇ Export CSV</button>
-        <button class="btn-clear" onclick="clearAll()">🗑 Hapus Semua</button>
+        <button class="btn-export" onclick="exportCSV()">&#11015; Export CSV</button>
+        <button class="btn-clear" onclick="clearAll()">&#128465; Hapus Semua</button>
       </div>
     </div>
 
-    <!-- Tab: Screener -->
     <div id="tab-screener" class="tab-content active">
-
-      <!-- Summary Cards -->
       <div class="summary-cards" id="summaryCards" style="display:none">
-        <div class="s-card" id="cardTotal">
-          <div class="s-card-val" id="totalCount">0</div>
-          <div class="s-card-label">Total Saham</div>
-        </div>
-        <div class="s-card strong-card" id="cardStrong">
-          <div class="s-card-val" id="strongCount">0</div>
-          <div class="s-card-label">STRONG 🔥</div>
-        </div>
-        <div class="s-card valid-card" id="cardValid">
-          <div class="s-card-val" id="validCount">0</div>
-          <div class="s-card-label">VALID ✅</div>
-        </div>
-        <div class="s-card skip-card" id="cardSkip">
-          <div class="s-card-val" id="skipCount">0</div>
-          <div class="s-card-label">SKIP ⛔</div>
-        </div>
+        <div class="s-card"><div class="s-card-val" id="totalCount">0</div><div class="s-card-label">Total Saham</div></div>
+        <div class="s-card strong-card"><div class="s-card-val" id="strongCount">0</div><div class="s-card-label">STRONG &#128293;</div></div>
+        <div class="s-card valid-card"><div class="s-card-val" id="validCount">0</div><div class="s-card-label">VALID &#9989;</div></div>
+        <div class="s-card skip-card"><div class="s-card-val" id="skipCount">0</div><div class="s-card-label">SKIP &#9940;</div></div>
       </div>
 
-      <!-- Filter Bar -->
       <div class="filter-bar" id="filterBar" style="display:none">
         <span class="filter-label">Filter:</span>
         <button class="filter-btn active" onclick="filterTable('ALL', this)">Semua</button>
@@ -123,39 +256,28 @@
         <span class="filter-label" style="margin-left:16px">Urutkan:</span>
         <select id="sortSelect" onchange="sortTable()">
           <option value="none">Default</option>
-          <option value="score-desc">Score ↓</option>
-          <option value="score-asc">Score ↑</option>
-          <option value="price-desc">Harga ↓</option>
-          <option value="price-asc">Harga ↑</option>
+          <option value="score-desc">Score &darr;</option>
+          <option value="score-asc">Score &uarr;</option>
+          <option value="price-desc">Harga &darr;</option>
+          <option value="price-asc">Harga &uarr;</option>
         </select>
       </div>
 
-      <!-- Table -->
       <div class="table-wrap">
         <table id="screenerTable">
           <thead>
             <tr>
-              <th>Emiten</th>
-              <th>Harga</th>
-              <th>Open</th>
-              <th>High</th>
-              <th>Low</th>
-              <th>Volume</th>
-              <th>Vol Ratio</th>
-              <th>MA5</th>
-              <th>Score</th>
-              <th>Status</th>
-              <th>Risk</th>
-              <th>TP (+3%)</th>
-              <th>CL (-3%)</th>
-              <th>Aksi</th>
+              <th>Emiten</th><th>Harga</th><th>% Chg</th><th>High</th><th>Low</th>
+              <th>Volume</th><th>Vol Ratio</th><th>MA5</th><th>RSI</th>
+              <th>Score</th><th>Status</th><th>Risk</th>
+              <th>TP (+3%)</th><th>CL (-3%)</th><th>Aksi</th>
             </tr>
           </thead>
           <tbody id="tableBody">
             <tr class="empty-row">
-              <td colspan="14">
+              <td colspan="15">
                 <div class="empty-state">
-                  <div class="empty-icon">📈</div>
+                  <div class="empty-icon">&#128200;</div>
                   <div>Belum ada saham. Masukkan kode emiten di atas untuk mulai screening.</div>
                 </div>
               </td>
@@ -163,67 +285,109 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Deep Analysis Panel -->
+      <div class="analysis-panel" id="analysisPanel">
+        <div class="analysis-header">
+          <div class="analysis-title">
+            &#128302; Analisa Mendalam &mdash; <span class="sym-badge" id="analysisSym">-</span>
+          </div>
+          <button class="analysis-close" onclick="closeAnalysis()">&#10005; Tutup</button>
+        </div>
+
+        <div class="score-gauge-wrap">
+          <div class="score-gauge-num" id="gaugeNum">0</div>
+          <div class="score-gauge-info">
+            <div class="score-gauge-label">BSJP Score &mdash; Max 140 poin</div>
+            <div class="score-gauge-bar">
+              <div class="score-gauge-fill" id="gaugeFill" style="width:0%"></div>
+            </div>
+            <div class="score-segments">
+              <span class="seg skip" id="segSkip">SKIP &lt;70</span>
+              <span class="seg valid" id="segValid">VALID 70-89</span>
+              <span class="seg strong" id="segStrong">STRONG &ge;90</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="analysis-grid" id="metricsGrid"></div>
+
+        <div class="bsjp-criteria">
+          <div class="bsjp-title">&#128203; Cek Kriteria BSJP</div>
+          <div id="bsjpChecks"></div>
+        </div>
+
+        <div class="levels-row" id="levelsRow"></div>
+
+        <div class="signal-box">
+          <div class="signal-title">&#129522; Sinyal Teknikal</div>
+          <div class="signal-items" id="signalItems"></div>
+        </div>
+
+        <div id="recBox"></div>
+      </div>
     </div>
 
-    <!-- Tab: Watchlist -->
     <div id="tab-watchlist" class="tab-content">
       <div class="wl-header">
         <h3>Watchlist Saya</h3>
         <span class="wl-count" id="wlCount">0 saham</span>
       </div>
       <div id="watchlistGrid" class="wl-grid">
-        <div class="wl-empty">Belum ada saham di watchlist. Klik ⭐ di tabel screener untuk menambahkan.</div>
+        <div class="wl-empty">Belum ada saham di watchlist. Klik &#11088; di tabel screener untuk menambahkan.</div>
       </div>
     </div>
 
-    <!-- Tab: Backtest -->
     <div id="tab-backtest" class="tab-content">
       <div class="bt-header">
         <h3>Hasil Backtest</h3>
-        <p class="bt-desc">Sistem akan menguji sinyal beli pada data historis 120 hari. Sinyal dianggap berhasil jika harga naik >2% di hari berikutnya.</p>
+        <p class="bt-desc">Sistem menguji sinyal beli pada data historis 120 hari. Sinyal berhasil jika harga naik &gt;2% di hari berikutnya.</p>
       </div>
       <div id="backtestResults" class="bt-grid">
         <div class="bt-empty">Tambahkan saham di Screener untuk melihat hasil backtest.</div>
       </div>
     </div>
 
-    <!-- Tab: Info -->
     <div id="tab-info" class="tab-content">
       <div class="info-grid">
         <div class="info-card">
-          <div class="info-icon">📊</div>
+          <div class="info-icon">&#128202;</div>
           <h4>Cara Penggunaan</h4>
-          <p>Masukkan kode saham IDX (contoh: BBRI, TLKM) di kolom pencarian, lalu klik <strong>+ Tambah</strong>. Sistem akan menganalisis data real-time dari yfinance.</p>
+          <p>Masukkan kode saham IDX (contoh: BBRI, TLKM) lalu klik <strong>+ Tambah</strong>. Klik tombol <strong>&#128302;</strong> untuk membuka panel analisa mendalam tiap emiten BSJP.</p>
         </div>
         <div class="info-card">
-          <div class="info-icon">🧮</div>
-          <h4>Sistem Scoring</h4>
+          <div class="info-icon">&#129518;</div>
+          <h4>Sistem Scoring BSJP</h4>
           <ul>
-            <li><strong>+30</strong> Harga > MA5 (Trend naik)</li>
+            <li><strong>+30</strong> Harga &gt; MA5 (Trend naik)</li>
             <li><strong>+30</strong> Dekat High harian (&lt;2%)</li>
-            <li><strong>+40</strong> Volume > 130% rata-rata</li>
+            <li><strong>+40</strong> Volume &gt; 130% rata-rata</li>
             <li><strong>+20</strong> Candle kuat (body ratio &gt;0.6)</li>
             <li><strong>+20</strong> Gap naik dari open</li>
           </ul>
         </div>
         <div class="info-card">
-          <div class="info-icon">🎯</div>
+          <div class="info-icon">&#127919;</div>
           <h4>Interpretasi Status</h4>
           <ul>
-            <li><span class="badge-strong">STRONG</span> Score ≥ 90 · Risk Rendah</li>
-            <li><span class="badge-valid">VALID</span> Score 70-89 · Risk Sedang</li>
-            <li><span class="badge-skip">SKIP</span> Score &lt; 70 · Risk Tinggi</li>
+            <li><span class="badge-strong">STRONG</span> Score &ge; 90 &middot; Entry kuat</li>
+            <li><span class="badge-valid">VALID</span> Score 70-89 &middot; Konfirmasi dulu</li>
+            <li><span class="badge-skip">SKIP</span> Score &lt; 70 &middot; Hindari</li>
           </ul>
         </div>
         <div class="info-card">
-          <div class="info-icon">⚠️</div>
+          <div class="info-icon">&#128302;</div>
+          <h4>Analisa Mendalam BSJP</h4>
+          <p>Panel analisa menampilkan: RSI, MA5 vs MA20, body ratio candle, gap analisis, level TP/SL otomatis (TP3%, TP5%, CL3%), checklist kriteria BSJP, sinyal teknikal, dan rekomendasi aksi.</p>
+        </div>
+        <div class="info-card">
+          <div class="info-icon">&#9888;&#65039;</div>
           <h4>Disclaimer</h4>
-          <p>Tools ini bersifat edukatif dan bukan rekomendasi investasi. Selalu lakukan riset mandiri dan konsultasikan dengan profesional keuangan sebelum mengambil keputusan investasi.</p>
+          <p>Tools ini bersifat edukatif dan bukan rekomendasi investasi. Selalu riset mandiri dan konsultasikan dengan profesional keuangan sebelum mengambil keputusan.</p>
         </div>
       </div>
     </div>
 
-    <!-- Chart Box -->
     <div id="chartBox" class="chart-box">
       <div class="chart-header">
         <div class="chart-title-area">
@@ -234,23 +398,367 @@
           <button class="chart-tf active" onclick="setTF('D', this)">1D</button>
           <button class="chart-tf" onclick="setTF('W', this)">1W</button>
           <button class="chart-tf" onclick="setTF('M', this)">1M</button>
-          <button class="chart-close" onclick="closeChart()">✕</button>
+          <button class="chart-close" onclick="closeChart()">&#10005;</button>
         </div>
       </div>
       <div id="tvchart"></div>
     </div>
-
   </main>
 
-  <!-- Toast -->
   <div id="toast" class="toast"></div>
-
-  <!-- Loading overlay -->
   <div id="loading" class="loading-overlay" style="display:none">
     <div class="spinner"></div>
     <div class="loading-text" id="loadingText">Mengambil data...</div>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+  const API_BASE = (() => {
+    const RAILWAY_URL = "https://stockwebsite-production.up.railway.app";
+    const h = window.location.hostname;
+    return (h === "localhost" || h === "127.0.0.1") ? "http://localhost:5000" : RAILWAY_URL;
+  })();
+
+  let stockData = [];
+  let watchlist = JSON.parse(localStorage.getItem("bsjp_watchlist") || "[]");
+  let currentSymbol = "";
+  let currentTF = "D";
+  let activeFilter = "ALL";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    updateClock();
+    setInterval(updateClock, 1000);
+    renderWatchlist();
+    document.getElementById("sym").addEventListener("keydown", e => {
+      if (e.key === "Enter") addStock();
+    });
+  });
+
+  function updateClock() {
+    const now = new Date();
+    const wib = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
+    document.getElementById("clock").textContent =
+      wib.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) + " WIB";
+    updateMarketStatus(wib);
+  }
+
+  function updateMarketStatus(wib) {
+    if (!wib) return;
+    const day = wib.getDay(), h = wib.getHours(), m = wib.getMinutes(), time = h * 100 + m;
+    const el = document.getElementById("marketStatus");
+    if (day === 0 || day === 6) el.innerHTML = '<span class="dot"></span> Market Tutup (Akhir Pekan)';
+    else if (time >= 900 && time < 1600) el.innerHTML = '<span class="dot open"></span> Market Buka (09:00â16:00)';
+    else el.innerHTML = '<span class="dot"></span> Market Tutup';
+  }
+
+  async function addStock() {
+    const sym = document.getElementById("sym").value.trim().toUpperCase();
+    if (!sym) { showToast("Masukkan kode saham terlebih dahulu!"); return; }
+    if (stockData.find(d => d.symbol === sym)) { showToast(sym + " sudah ada di tabel."); return; }
+    showLoading("Mengambil data " + sym + "...");
+    document.getElementById("sym").value = "";
+    try {
+      const res = await fetch(API_BASE + "/stock/" + sym);
+      if (!res.ok) throw new Error("Emiten tidak ditemukan atau API tidak tersedia");
+      const d = await res.json();
+      if (d.error) throw new Error(d.error);
+      const score = calcScore(d);
+      const { status, cls, risk } = getStatus(score);
+      const inWatchlist = watchlist.includes(sym);
+      stockData.push({ symbol: sym, data: d, score, status, cls, risk, inWatchlist });
+      updateSummary();
+      renderTable();
+      showToast("Berhasil ditambahkan! " + sym + " Score: " + score);
+      fetchBacktest(sym);
+    } catch (err) {
+      showToast("Error: " + err.message);
+    } finally {
+      hideLoading();
+    }
+  }
+
+  function quickAdd(sym) { document.getElementById("sym").value = sym; addStock(); }
+
+  function calcScore(d) {
+    let score = 0;
+    if (d.price > d.ma5) score += 30;
+    if (((d.high - d.price) / d.high) < 0.02) score += 30;
+    if ((d.volume / d.avg_volume) * 100 > 130) score += 40;
+    if (d.body_ratio > 0.6) score += 20;
+    if (d.gap > 1) score += 20;
+    return score;
+  }
+
+  function getStatus(score) {
+    if (score >= 90) return { status: "STRONG", cls: "strong", risk: "LOW" };
+    if (score >= 70) return { status: "VALID",  cls: "valid",  risk: "MEDIUM" };
+    return               { status: "SKIP",   cls: "skip",   risk: "HIGH" };
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById("tableBody");
+    const filtered = activeFilter === "ALL" ? stockData : stockData.filter(e => e.status === activeFilter);
+    const sorted = sortData([...filtered]);
+    if (sorted.length === 0) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="15"><div class="empty-state"><div class="empty-icon">&#128202;</div><div>Tidak ada saham yang sesuai filter.</div></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = sorted.map(e => {
+      const d = e.data;
+      const tp = (d.price * 1.03).toFixed(0), cl = (d.price * 0.97).toFixed(0);
+      const volRatio = (d.volume / d.avg_volume * 100).toFixed(0);
+      const volClass = volRatio > 130 ? "vol-hot" : volRatio > 80 ? "vol-warm" : "vol-cold";
+      const riskClass = e.risk === "LOW" ? "risk-low" : e.risk === "MEDIUM" ? "risk-med" : "risk-high";
+      const scoreColor = e.score >= 90 ? "#00e5a0" : e.score >= 70 ? "#f5c518" : "#ff4560";
+      const fillPct = Math.min((e.score / 140) * 100, 100);
+      const starClass = e.inWatchlist ? "btn-wl starred" : "btn-wl";
+      const starIcon = e.inWatchlist ? "&#11088;" : "&#9734;";
+      const chgPct = d.change_pct || 0;
+      const chgColor = chgPct >= 0 ? "var(--accent)" : "var(--danger)";
+      const rsi = d.rsi || 50;
+      const rsiColor = rsi >= 70 ? "var(--danger)" : rsi <= 30 ? "var(--accent)" : "var(--text)";
+      return "<tr id=\"row-" + e.symbol + "\">" +
+        "<td class=\"emiten-cell\" onclick=\"showChart('" + e.symbol + "')\">" + e.symbol + "</td>" +
+        "<td>" + rupiah(d.price) + "</td>" +
+        "<td style=\"color:" + chgColor + ";font-weight:600\">" + (chgPct>=0?"+":"") + chgPct + "%</td>" +
+        "<td>" + rupiah(d.high) + "</td>" +
+        "<td>" + rupiah(d.low) + "</td>" +
+        "<td>" + formatVol(d.volume) + "</td>" +
+        "<td class=\"" + volClass + "\">" + volRatio + "%</td>" +
+        "<td>" + rupiah(d.ma5) + "</td>" +
+        "<td style=\"color:" + rsiColor + ";font-family:var(--font-mono)\">" + rsi + "</td>" +
+        "<td><div class=\"score-bar-wrap\"><span class=\"score-num\" style=\"color:" + scoreColor + "\">" + e.score + "</span><div class=\"score-bar\"><div class=\"score-fill\" style=\"width:" + fillPct + "%;background:" + scoreColor + "\"></div></div></div></td>" +
+        "<td><span class=\"badge badge-" + e.cls + "\">" + e.status + "</span></td>" +
+        "<td class=\"" + riskClass + "\">" + e.risk + "</td>" +
+        "<td style=\"color:var(--accent)\">" + rupiah(tp) + "</td>" +
+        "<td style=\"color:var(--danger)\">" + rupiah(cl) + "</td>" +
+        "<td><button class=\"" + starClass + "\" onclick=\"toggleWatchlist('" + e.symbol + "')\" title=\"Watchlist\">" + starIcon + "</button> <button class=\"btn-del\" onclick=\"removeStock('" + e.symbol + "')\" title=\"Hapus\">&#128465;</button> <button class=\"btn-analyze\" onclick=\"showAnalysis('" + e.symbol + "')\" title=\"Analisa BSJP\">&#128302; Analisa</button></td>" +
+        "</tr>";
+    }).join("");
+  }
+
+  function sortData(arr) {
+    const val = document.getElementById("sortSelect")?.value || "none";
+    if (val === "score-desc") arr.sort((a, b) => b.score - a.score);
+    else if (val === "score-asc") arr.sort((a, b) => a.score - b.score);
+    else if (val === "price-desc") arr.sort((a, b) => b.data.price - a.data.price);
+    else if (val === "price-asc") arr.sort((a, b) => a.data.price - b.data.price);
+    return arr;
+  }
+
+  function sortTable() { renderTable(); }
+
+  function updateSummary() {
+    const total = stockData.length, strong = stockData.filter(e => e.status === "STRONG").length,
+          valid = stockData.filter(e => e.status === "VALID").length, skip = stockData.filter(e => e.status === "SKIP").length;
+    document.getElementById("totalCount").textContent  = total;
+    document.getElementById("strongCount").textContent = strong;
+    document.getElementById("validCount").textContent  = valid;
+    document.getElementById("skipCount").textContent   = skip;
+    const show = total > 0;
+    document.getElementById("summaryCards").style.display = show ? "grid" : "none";
+    document.getElementById("filterBar").style.display    = show ? "flex" : "none";
+  }
+
+  function filterTable(filter, btn) {
+    activeFilter = filter;
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+    renderTable();
+  }
+
+  function showAnalysis(sym) {
+    const entry = stockData.find(e => e.symbol === sym);
+    if (!entry) return;
+    const d = entry.data, score = entry.score;
+    const panel = document.getElementById("analysisPanel");
+    panel.classList.add("visible");
+    document.getElementById("analysisSym").textContent = sym;
+    setTimeout(() => panel.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+
+    const scoreColor = score >= 90 ? "#00e5a0" : score >= 70 ? "#f5c518" : "#ff4560";
+    const fillPct = Math.min((score / 140) * 100, 100);
+    document.getElementById("gaugeNum").textContent = score;
+    document.getElementById("gaugeNum").style.color = scoreColor;
+    document.getElementById("gaugeFill").style.width = fillPct + "%";
+    document.getElementById("gaugeFill").style.background = scoreColor;
+    ["segSkip","segValid","segStrong"].forEach(id => document.getElementById(id).classList.remove("active"));
+    if (score >= 90) document.getElementById("segStrong").classList.add("active");
+    else if (score >= 70) document.getElementById("segValid").classList.add("active");
+    else document.getElementById("segSkip").classList.add("active");
+
+    const volRatio = d.avg_volume > 0 ? ((d.volume / d.avg_volume) * 100).toFixed(0) : 0;
+    const rsi = d.rsi || 50;
+    const rsiLabel = rsi >= 70 ? "Overbought" : rsi <= 30 ? "Oversold" : "Netral";
+    const rsiColorClass = rsi >= 70 ? "val-red" : rsi <= 30 ? "val-green" : "";
+    const chgPct = d.change_pct || 0;
+    const ma5vsMA20 = d.ma20 > 0 ? (((d.ma5 - d.ma20) / d.ma20) * 100).toFixed(2) : null;
+    const nearHigh = d.high > 0 ? (((d.high - d.price) / d.high) * 100).toFixed(2) : null;
+
+    document.getElementById("metricsGrid").innerHTML = [
+      { label: "Harga Terakhir", value: rupiah(d.price), sub: (chgPct>=0?"+":"")+chgPct+"% hari ini", vcls: chgPct>=0?"val-green":"val-red" },
+      { label: "RSI (14)", value: rsi, sub: rsiLabel, vcls: rsiColorClass },
+      { label: "Volume Ratio", value: volRatio+"%", sub: "vs rata-rata 5 hari", vcls: volRatio > 130 ? "val-green" : volRatio < 80 ? "val-red" : "" },
+      { label: "Body Ratio Candle", value: d.body_ratio, sub: d.body_ratio > 0.6 ? "Candle kuat" : "Candle lemah", vcls: d.body_ratio > 0.6 ? "val-green" : "val-red" },
+      { label: "Gap Open", value: d.gap+"%", sub: d.gap > 1 ? "Gap naik" : d.gap < 0 ? "Gap turun" : "Flat", vcls: d.gap > 1 ? "val-green" : d.gap < 0 ? "val-red" : "" },
+      { label: "MA5 vs MA20", value: ma5vsMA20 ? (parseFloat(ma5vsMA20)>=0?"+":"")+ma5vsMA20+"%" : "-", sub: ma5vsMA20 ? (parseFloat(ma5vsMA20)>=0?"Golden cross":"Death cross") : "-", vcls: ma5vsMA20 && parseFloat(ma5vsMA20)>=0 ? "val-green" : "val-red" },
+      { label: "Jarak ke High", value: nearHigh ? nearHigh+"%" : "-", sub: nearHigh && parseFloat(nearHigh) < 2 ? "Dekat high" : "Jauh dari high", vcls: nearHigh && parseFloat(nearHigh) < 2 ? "val-green" : "val-yellow" },
+      { label: "52W High", value: rupiah(d.high_52w || 0), sub: "Low: "+rupiah(d.low_52w || 0), vcls: "val-blue" },
+    ].map(m => `<div class="a-metric"><div class="a-metric-label">${m.label}</div><div class="a-metric-value ${m.vcls}">${m.value}</div><div class="a-metric-sub">${m.sub}</div></div>`).join("");
+
+    const criteria = [
+      { label: "Harga > MA5 (Trend naik)", ok: d.price > d.ma5, pts: 30 },
+      { label: "Dekat High harian (<2%) — "+(nearHigh||"-")+"%", ok: nearHigh && parseFloat(nearHigh) < 2, pts: 30 },
+      { label: "Volume > 130% rata-rata — "+volRatio+"%", ok: parseFloat(volRatio) > 130, pts: 40 },
+      { label: "Body Ratio > 0.6 — "+d.body_ratio, ok: d.body_ratio > 0.6, pts: 20 },
+      { label: "Gap naik dari Open — "+d.gap+"%", ok: d.gap > 1, pts: 20 },
+    ];
+    document.getElementById("bsjpChecks").innerHTML = criteria.map(c =>
+      `<div class="bsjp-row"><span>${c.label}</span><span>${c.ok?"&#9989;":"&#10060;"} <span style="font-size:11px;color:var(--muted)">+${c.pts}</span></span></div>`
+    ).join("");
+
+    const tp3 = (d.price * 1.03).toFixed(0), tp5 = (d.price * 1.05).toFixed(0), cl3 = (d.price * 0.97).toFixed(0);
+    document.getElementById("levelsRow").innerHTML = `
+      <div class="level-card"><div class="level-label">&#127919; TP Konservatif (+3%)</div><div class="level-price" style="color:var(--accent)">${rupiah(tp3)}</div><div class="level-pct" style="color:var(--accent)">+3% dari ${rupiah(d.price)}</div></div>
+      <div class="level-card"><div class="level-label">&#128640; TP Agresif (+5%)</div><div class="level-price" style="color:var(--accent2)">${rupiah(tp5)}</div><div class="level-pct" style="color:var(--accent2)">+5% dari ${rupiah(d.price)}</div></div>
+      <div class="level-card"><div class="level-label">&#128721; Cut Loss (-3%)</div><div class="level-price" style="color:var(--danger)">${rupiah(cl3)}</div><div class="level-pct" style="color:var(--danger)">-3% dari ${rupiah(d.price)}</div></div>`;
+
+    const signals = [];
+    if (d.price > d.ma5) signals.push({ icon: "&#128200;", label: "Harga di atas MA5", ok: true });
+    if (d.price > (d.ma20||0)) signals.push({ icon: "&#128202;", label: "Harga di atas MA20", ok: true });
+    else signals.push({ icon: "&#128201;", label: "Harga di bawah MA20", ok: false });
+    if (rsi <= 30) signals.push({ icon: "&#128142;", label: "RSI Oversold ("+rsi+") — Potensi pantul", ok: true });
+    if (rsi >= 70) signals.push({ icon: "&#9888;&#65039;", label: "RSI Overbought ("+rsi+")", ok: false });
+    if (parseFloat(volRatio) > 200) signals.push({ icon: "&#128293;", label: "Volume Ekstrem "+volRatio+"%", ok: true });
+    if (d.gap > 1) signals.push({ icon: "&#8593;", label: "Gap naik "+d.gap+"%", ok: true });
+    if (d.gap < 0) signals.push({ icon: "&#8595;", label: "Gap turun "+d.gap+"%", ok: false });
+    if (d.body_ratio > 0.7) signals.push({ icon: "&#128170;", label: "Candle sangat kuat (>0.7)", ok: true });
+    if (chgPct > 3) signals.push({ icon: "&#128640;", label: "Kenaikan kuat +"+chgPct+"%", ok: true });
+    if (chgPct < -3) signals.push({ icon: "&#129656;", label: "Penurunan besar "+chgPct+"%", ok: false });
+    document.getElementById("signalItems").innerHTML = signals.length ? signals.map(s =>
+      `<div class="signal-item ${s.ok?"s-ok":"s-bad}">${s.icon} ${s.label}</div>`
+    ).join("") : `<div class="signal-item s-ok" style="border-left-color:var(--muted)">Tidak ada sinyal signifikan</div>`;
+
+    let recClass, recTitle, recText;
+    if (score >= 90) {
+      recClass = "rec-buy"; recTitle = "&#9989; MASUK / BUY — Kondisi Ideal";
+      recText = sym+" memenuhi hampir semua kriteria BSJP dengan score "+score+"/140. Tren naik, volume mendukung, candle kuat. Entry di "+rupiah(d.price)+" dengan TP "+rupiah(tp3)+"&ndash;"+rupiah(tp5)+" dan cut loss di "+rupiah(cl3)+". Risk/Reward &asymp; 1:1 hingga 1:1.7.";
+    } else if (score >= 70) {
+      recClass = "rec-wait"; recTitle = "&#9203; WAIT &amp; SEE — Konfirmasi Dulu";
+      recText = sym+" punya potensi (score "+score+"/140) tapi belum semua kriteria terpenuhi. Tunggu konfirmasi: volume > 130%, candle hijau kuat, atau breakout dari high. Jika terkonfirmasi, entry dengan TP "+rupiah(tp3)+" dan CL "+rupiah(cl3)+".";
+    } else {
+      recClass = "rec-avoid"; recTitle = "&#9940; HINDARI / SKIP";
+      recText = sym+" tidak memenuhi kriteria BSJP (score "+score+"/140). Kondisi teknikal lemah. Hindari entry sekarang dan pantau kembali jika volume meningkat dan RSI tidak ekstrem.";
+    }
+    document.getElementById("recBox").innerHTML = `<div class="rec-box ${recClass}"><div class="rec-title">${recTitle}</div><div>${recText}</div></div>`;
+  }
+
+  function closeAnalysis() { document.getElementById("analysisPanel").classList.remove("visible"); }
+
+  async function fetchBacktest(sym) {
+    try {
+      const res = await fetch(API_BASE + "/backtest/" + sym);
+      const b = await res.json();
+      renderBacktestCard(b);
+    } catch {}
+  }
+
+  function renderBacktestCard(b) {
+    if (document.getElementById("bt-"+b.symbol)) return;
+    const empty = document.querySelector(".bt-empty"); if (empty) empty.remove();
+    const wr = b.winrate, wrClass = wr >= 60 ? "wr-high" : wr >= 40 ? "wr-med" : "wr-low";
+    const fillColor = wr >= 60 ? "#00e5a0" : wr >= 40 ? "#f5c518" : "#ff4560";
+    const card = document.createElement("div");
+    card.className = "bt-card"; card.id = "bt-"+b.symbol;
+    card.innerHTML = `<div class="bt-symbol">${b.symbol}</div><div class="bt-stats"><div class="bt-stat"><div class="bt-stat-val ${wrClass}">${wr}%</div><div class="bt-stat-lbl">Win Rate</div></div><div class="bt-stat"><div class="bt-stat-val">${b.signal_count}</div><div class="bt-stat-lbl">Total Sinyal</div></div><div class="bt-stat"><div class="bt-stat-val" style="color:var(--accent2)">${Math.round(b.signal_count*wr/100)}</div><div class="bt-stat-lbl">Menang</div></div></div><div class="winrate-bar"><div class="winrate-fill" style="width:${wr}%;background:${fillColor}"></div></div>`;
+    document.getElementById("backtestResults").appendChild(card);
+  }
+
+  function toggleWatchlist(sym) {
+    const idx = watchlist.indexOf(sym);
+    if (idx === -1) { watchlist.push(sym); showToast(sym+" ditambahkan ke watchlist"); }
+    else { watchlist.splice(idx, 1); showToast(sym+" dihapus dari watchlist"); }
+    localStorage.setItem("bsjp_watchlist", JSON.stringify(watchlist));
+    const entry = stockData.find(e => e.symbol === sym);
+    if (entry) entry.inWatchlist = watchlist.includes(sym);
+    renderTable(); renderWatchlist();
+  }
+
+  function renderWatchlist() {
+    const grid = document.getElementById("watchlistGrid");
+    document.getElementById("wlCount").textContent = watchlist.length + " saham";
+    if (watchlist.length === 0) { grid.innerHTML = '<div class="wl-empty">Belum ada saham di watchlist.</div>'; return; }
+    grid.innerHTML = watchlist.map(sym => {
+      const entry = stockData.find(e => e.symbol === sym);
+      const price = entry ? rupiah(entry.data.price) : "–";
+      const status = entry ? `<span class="badge badge-${entry.cls}">${entry.status}</span>` : "";
+      const score = entry ? "Score: "+entry.score : "Belum dianalisis";
+      return `<div class="wl-card" onclick="showChart('${sym}')"><div class="wl-card-top"><div class="wl-symbol">${sym}</div><div>${status}</div></div><div class="wl-price">${price}</div><div class="wl-meta"><span>${score}</span><span onclick="event.stopPropagation();toggleWatchlist('${sym}')" style="cursor:pointer;color:var(--danger)">Hapus &#10005;</span></div></div>`;
+    }).join("");
+  }
+
+  function removeStock(sym) {
+    stockData = stockData.filter(e => e.symbol !== sym);
+    updateSummary(); renderTable();
+    const bt = document.getElementById("bt-"+sym); if (bt) bt.remove();
+    if (!document.getElementById("backtestResults").children.length)
+      document.getElementById("backtestResults").innerHTML = '<div class="bt-empty">Tambahkan saham di Screener untuk melihat hasil backtest.</div>';
+    if (document.getElementById("analysisSym").textContent === sym) closeAnalysis();
+    showToast(sym+" dihapus dari screener");
+  }
+
+  function showChart(symbol) {
+    currentSymbol = symbol;
+    document.getElementById("chartTitle").textContent = symbol;
+    document.getElementById("chartBox").style.display = "block";
+    document.getElementById("chartBox").scrollIntoView({ behavior: "smooth" });
+    renderChart(symbol, currentTF);
+  }
+
+  function renderChart(symbol, tf) {
+    document.getElementById("tvchart").innerHTML = "";
+    new TradingView.widget({ symbol: "IDX:"+symbol, container_id: "tvchart", width: "100%", height: 450, interval: tf, theme: "dark", style: "1", locale: "id", allow_symbol_change: true, toolbar_bg: "#0b1521", hide_side_toolbar: false, withdateranges: true });
+  }
+
+  function setTF(tf, btn) {
+    currentTF = tf;
+    document.querySelectorAll(".chart-tf").forEach(b => b.classList.remove("active")); btn.classList.add("active");
+    if (currentSymbol) renderChart(currentSymbol, tf);
+  }
+
+  function closeChart() { document.getElementById("chartBox").style.display = "none"; document.getElementById("tvchart").innerHTML = ""; currentSymbol = ""; }
+
+  function switchTab(name, btn) {
+    document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+    document.getElementById("tab-"+name).classList.add("active");
+    if (btn) btn.classList.add("active");
+  }
+
+  function clearAll() {
+    if (!confirm("Hapus semua saham dari screener?")) return;
+    stockData = []; updateSummary(); renderTable(); closeAnalysis();
+    document.getElementById("backtestResults").innerHTML = '<div class="bt-empty">Tambahkan saham di Screener untuk melihat hasil backtest.</div>';
+    closeChart(); showToast("Semua saham dihapus");
+  }
+
+  function exportCSV() {
+    if (!stockData.length) { showToast("Tidak ada data untuk diekspor."); return; }
+    const header = ["Emiten","Harga","Chg%","Open","High","Low","Volume","AvgVol","MA5","MA20","RSI","Score","Status","Risk","TP3%","TP5%","CL3%"].join(",");
+    const rows = stockData.map(e => {
+      const d = e.data;
+      return [e.symbol,d.price,d.change_pct||0,d.open,d.high,d.low,d.volume,d.avg_volume,d.ma5,d.ma20||0,d.rsi||50,e.score,e.status,e.risk,(d.price*1.03).toFixed(0),(d.price*1.05).toFixed(0),(d.price*0.97).toFixed(0)].join(",");
+    });
+    const blob = new Blob([[header,...rows].join("\n")], { type: "text/csv" });
+    const url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = "bsjp_screener_"+new Date().toISOString().slice(0,10)+".csv"; a.click(); URL.revokeObjectURL(url);
+    showToast("CSV berhasil diekspor!");
+  }
+
+  function rupiah(x) { return "Rp " + Math.round(Number(x)).toLocaleString("id-ID"); }
+  function formatVol(v) { if (v>=1e9) return (v/1e9).toFixed(1)+"M"; if (v>=1e6) return (v/1e6).toFixed(1)+"jt"; if (v>=1e3) return (v/1e3).toFixed(1)+"rb"; return v; }
+  function showToast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.style.display = "block"; setTimeout(() => t.style.display = "none", 3200); }
+  function showLoading(msg) { document.getElementById("loadingText").textContent = msg || "Mengambil data..."; document.getElementById("loading").style.display = "flex"; }
+  function hideLoading() { document.getElementById("loading").style.display = "none"; }
+  </script>
 </body>
 </html>
