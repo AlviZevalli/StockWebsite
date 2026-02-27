@@ -11,11 +11,16 @@ Cukong Reborn adalah sebuah platform frontend analisis saham IDX berbasis **data
 ## 🔎 Fitur Utama
 
 🔹 **Screener** — Analisis trend, momentum, volume, strength score, serta rekomendasi TP & Cut Loss otomatis berdasarkan scoring terstruktur.
-🔹 **S&R Finder** — Deteksi level support & resistance otomatis lengkap dengan struktur dan fibonacci. 
-🔹 **Volume Anomaly** — Identifikasi lonjakan volume yang tidak biasa untuk deteksi akumulasi / distribusi.
+
+🔹 **S&R Finder** — Deteksi level support & resistance otomatis lengkap dengan struktur dan fibonacci.
+
+🔹 **Volume Anomaly** — Identifikasi lonjakan volume yang tidak biasa untuk deteksi akumulasi / distribusi. 
+
 🔹 **Market Scanner** — Scan sektor, rating, dan performa multi emiten.
+
 🔹 **Foreign Flow** — Pantau arus dana asing per emiten sebagai leading indicator.
-🔹 **AI Signal Engine** — Engine berbasis market structure: HH/HL, BOS, value area, konfirmasi momentum → hasilkan entry, SL, dan TP (atau skip jika setup tidak valid).  
+
+🔹 **AI Signal Engine** — Engine berbasis market structure: HH/HL, BOS, value area, konfirmasi momentum → hasilkan entry, SL, dan TP (atau skip jika setup tidak valid).
 
 ---
 
