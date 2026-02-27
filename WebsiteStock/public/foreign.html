@@ -201,6 +201,77 @@
     .ff-empty-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
     .ff-empty-sub { font-size: 13px; line-height: 1.6; }
 
+    /* Heatmap */
+    .ff-heatmap-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 4px;
+      margin-top: 12px;
+    }
+    .heatmap-cell {
+      aspect-ratio: 1;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      cursor: default;
+      transition: transform 0.15s;
+      position: relative;
+    }
+    .heatmap-cell:hover { transform: scale(1.15); z-index: 10; }
+    .heatmap-cell.buy-strong { background: rgba(0,229,160,0.85); color: #060c14; }
+    .heatmap-cell.buy-med { background: rgba(0,229,160,0.45); color: #060c14; }
+    .heatmap-cell.buy-weak { background: rgba(0,229,160,0.2); color: var(--accent); }
+    .heatmap-cell.sell-strong { background: rgba(255,69,96,0.85); color: #fff; }
+    .heatmap-cell.sell-med { background: rgba(255,69,96,0.45); color: #fff; }
+    .heatmap-cell.sell-weak { background: rgba(255,69,96,0.2); color: var(--danger); }
+    .heatmap-cell.neutral { background: rgba(255,255,255,0.1); color: var(--muted); }
+    .heatmap-legend { display: flex; gap: 16px; margin-top: 12px; font-size: 11px; color: var(--muted); align-items: center; flex-wrap: wrap; }
+
+    /* Net Flow Bar Chart */
+    .ff-chart-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    #netFlowCanvas { width: 100%; display: block; border-radius: 8px; margin-top: 12px; }
+
+    /* Liquidation Zones */
+    .liq-zones {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .liq-zones-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    @media (max-width: 600px) { .liq-zones-grid { grid-template-columns: 1fr; } }
+    .liq-zone-card { border-radius: 10px; padding: 14px 16px; }
+    .liq-zone-card.long-liq { background: rgba(255,69,96,0.08); border: 1px solid rgba(255,69,96,0.25); }
+    .liq-zone-card.short-liq { background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.25); }
+    .liq-zone-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .liq-zone-card.long-liq .liq-zone-label { color: var(--danger); }
+    .liq-zone-card.short-liq .liq-zone-label { color: var(--accent); }
+    .liq-zone-price { font-size: 18px; font-weight: 800; font-family: var(--font-mono); margin-bottom: 4px; }
+    .liq-zone-card.long-liq .liq-zone-price { color: var(--danger); }
+    .liq-zone-card.short-liq .liq-zone-price { color: var(--accent); }
+    .liq-zone-sub { font-size: 11px; color: var(--muted); }
+    .liq-zone-bar { height: 5px; border-radius: 999px; margin-top: 8px; }
+    .liq-zone-card.long-liq .liq-zone-bar { background: linear-gradient(90deg, rgba(255,69,96,0.7), transparent); }
+    .liq-zone-card.short-liq .liq-zone-bar { background: linear-gradient(90deg, rgba(0,229,160,0.7), transparent); }
+
     /* Disclaimer */
     .ff-note {
       background: rgba(245,197,24,0.05);
@@ -211,10 +282,42 @@
       color: rgba(245,197,24,0.7);
       line-height: 1.6;
     }
+
+    /* ---- Mobile overrides ---- */
+    @media (max-width: 768px) {
+      main { padding: 68px 14px 60px !important; }
+      .page-hero h1 { font-size: 22px; }
+      .page-hero p { font-size: 13px; }
+      .ff-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .ff-card { padding: 14px 14px; }
+      .ff-card-val { font-size: 18px; }
+      .fbs-title { font-size: 11px; }
+      .flow-bar-section, .ff-trend, .ff-heatmap-section,
+      .ff-chart-section, .liq-zones { padding: 14px 14px; }
+    }
+    @media (max-width: 600px) {
+      main { padding: 68px 12px 60px !important; }
+      .ff-search { flex-direction: column; gap: 8px; }
+      .ff-input-wrap { width: 100%; }
+      .ff-btn { width: 100%; }
+      .ff-quick { gap: 6px; }
+      .ff-quick button { font-size: 10px; padding: 4px 8px; }
+      .ff-signal { font-size: 11px; padding: 8px 10px; }
+      .ff-table th, .ff-table td { padding: 7px 7px; font-size: 10px; }
+      .heatmap-grid { grid-template-columns: repeat(10, 1fr); gap: 2px; }
+      .heatmap-legend { font-size: 9px; gap: 8px; }
+      .liq-zones-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .liq-zone-price { font-size: 14px; }
+    }
+    @media (max-width: 380px) {
+      .ff-cards { grid-template-columns: 1fr 1fr; }
+      .liq-zones-grid { grid-template-columns: 1fr; }
+      .heatmap-grid { grid-template-columns: repeat(7, 1fr); }
+    }
   </style>
 </head>
 <body>
-  <div class="topbar" id="topbar">
+    <div class="topbar" id="topbar">
     <div class="topbar-left">
       <a href="index.html" class="topbar-logo">&#9650; Cukong Reborn</a>
       <span class="topbar-sep">|</span>
@@ -222,9 +325,9 @@
     </div>
     <nav class="topbar-nav">
       <a href="screener.html">&#128202; Screener</a>
-      <a href="sr.html">&#128201; S&amp;R Finder</a>
-      <a href="volume.html">&#128293; Volume Anomaly</a>
-      <a href="scanner.html">&#128301; Market Scanner</a>
+      <a href="sr.html">&#128201; S&amp;R</a>
+      <a href="volume.html">&#128293; Volume</a>
+      <a href="scanner.html">&#128301; Scanner</a>
       <a href="foreign.html" class="active">&#127758; Foreign Flow</a>
       <a href="ai-signal.html">&#129504; AI Signal</a>
     </nav>
@@ -456,6 +559,28 @@
         </div>
       </div>
 
+      <div class="ff-heatmap-section">
+        <div class="fbs-title">&#127968; Heatmap Net Flow 20 Hari (Intensitas Warna = Kekuatan Flow)</div>
+        <div class="heatmap-grid" id="ffHeatmap"></div>
+        <div class="heatmap-legend">
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:rgba(0,229,160,0.85);display:inline-block"></span> Net Buy Kuat</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:rgba(0,229,160,0.35);display:inline-block"></span> Net Buy Lemah</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:rgba(255,69,96,0.85);display:inline-block"></span> Net Sell Kuat</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:rgba(255,69,96,0.35);display:inline-block"></span> Net Sell Lemah</span>
+          <span style="color:var(--muted);margin-left:auto;font-size:10px">Hover untuk detail</span>
+        </div>
+      </div>
+
+      <div class="ff-chart-section">
+        <div class="fbs-title">&#128202; Bar Chart Net Flow Harian (Hijau = Net Buy, Merah = Net Sell)</div>
+        <canvas id="netFlowCanvas" height="160"></canvas>
+      </div>
+
+      <div class="liq-zones">
+        <div class="fbs-title">&#128293; Estimasi Liquidation Zone</div>
+        <div class="liq-zones-grid" id="ffLiqZones"></div>
+      </div>
+
       <div class="ff-note">
         &#9888;&#65039; <strong>Disclaimer:</strong> Data foreign flow di atas adalah <strong>estimasi</strong> yang dihitung dari pola volume institusional yfinance. 
         Data real foreign flow IDX tersedia di situs resmi Bursa Efek Indonesia (idx.co.id). Gunakan sebagai referensi tambahan, bukan sumber utama.
@@ -463,6 +588,138 @@
     `;
 
     document.getElementById("ffContent").innerHTML = content;
+    // Render visualizations after DOM update
+    setTimeout(() => {
+      renderHeatmap(history);
+      renderNetFlowChart(history);
+      renderLiquidationZones(stock, history);
+    }, 50);
+  }
+
+  function renderHeatmap(history) {
+    const grid = document.getElementById("ffHeatmap");
+    if (!grid) return;
+    const maxAbs = Math.max(...history.map(h => Math.abs(h.net)));
+    grid.innerHTML = history.map(h => {
+      const intensity = maxAbs > 0 ? Math.abs(h.net) / maxAbs : 0;
+      let cls;
+      if (h.net > 0) cls = intensity > 0.6 ? "buy-strong" : intensity > 0.3 ? "buy-med" : "buy-weak";
+      else if (h.net < 0) cls = intensity > 0.6 ? "sell-strong" : intensity > 0.3 ? "sell-med" : "sell-weak";
+      else cls = "neutral";
+      const label = Math.abs(h.net) >= 1000 ? (Math.abs(h.net)/1000).toFixed(0)+"k" : Math.abs(h.net).toString();
+      const dateShort = h.date ? h.date.split("-").slice(1).join("/") : "";
+      return `<div class="heatmap-cell ${cls}" title="${h.date} | Net: ${h.net >= 0 ? '+' : ''}${h.net} | Harga: ${Math.round(h.price).toLocaleString('id-ID')}">
+        <span style="font-size:8px;text-align:center;line-height:1.2">${dateShort}</span>
+      </div>`;
+    }).join("");
+  }
+
+  function renderNetFlowChart(history) {
+    const canvas = document.getElementById("netFlowCanvas");
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.parentElement.clientWidth - 48;
+    canvas.width = W * dpr;
+    canvas.height = 160 * dpr;
+    canvas.style.width = W + "px";
+    canvas.style.height = "160px";
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+
+    const data = history;
+    const n = data.length;
+    const maxAbs = Math.max(...data.map(d => Math.abs(d.net)), 1);
+    const padL = 48, padR = 8, padT = 16, padB = 28;
+    const chartW = W - padL - padR;
+    const chartH = 160 - padT - padB;
+    const midY = padT + chartH / 2;
+    const barW = Math.max(4, chartW / n - 3);
+
+    // Grid lines
+    ctx.strokeStyle = "rgba(255,255,255,0.06)";
+    ctx.lineWidth = 1;
+    [-0.5, -0.25, 0, 0.25, 0.5].forEach(v => {
+      const y = midY - (v * chartH / 2) / 0.5 * 0.5;
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+    });
+
+    // Zero line
+    ctx.strokeStyle = "rgba(255,255,255,0.2)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(padL, midY); ctx.lineTo(W - padR, midY); ctx.stroke();
+
+    // Bars
+    data.forEach((d, i) => {
+      const x = padL + i * (chartW / n) + (chartW / n - barW) / 2;
+      const normH = (Math.abs(d.net) / maxAbs) * (chartH / 2) * 0.92;
+      const isPos = d.net >= 0;
+      const y = isPos ? midY - normH : midY;
+      const grad = ctx.createLinearGradient(0, y, 0, y + normH);
+      if (isPos) {
+        grad.addColorStop(0, "rgba(0,229,160,0.9)");
+        grad.addColorStop(1, "rgba(0,229,160,0.3)");
+      } else {
+        grad.addColorStop(0, "rgba(255,69,96,0.35)");
+        grad.addColorStop(1, "rgba(255,69,96,0.9)");
+      }
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.roundRect ? ctx.roundRect(x, y, barW, normH, 2) : ctx.rect(x, y, barW, normH);
+      ctx.fill();
+    });
+
+    // X axis labels (every 4 days)
+    ctx.fillStyle = "rgba(232,240,254,0.4)";
+    ctx.font = "10px 'Space Mono', monospace";
+    ctx.textAlign = "center";
+    data.forEach((d, i) => {
+      if (i % 4 === 0 && d.date) {
+        const x = padL + i * (chartW / n) + barW / 2;
+        const parts = d.date.split("-");
+        ctx.fillText(parts[1]+"/"+parts[2], x, 160 - 8);
+      }
+    });
+
+    // Y labels
+    ctx.textAlign = "right";
+    ctx.fillStyle = "rgba(232,240,254,0.4)";
+    const fmt = v => v >= 1000 ? (v/1000).toFixed(0)+"k" : v;
+    ctx.fillText("+" + fmt(Math.round(maxAbs * 0.5)), padL - 4, midY - (chartH * 0.25) + 4);
+    ctx.fillText("-" + fmt(Math.round(maxAbs * 0.5)), padL - 4, midY + (chartH * 0.25) + 4);
+    ctx.fillText("0", padL - 4, midY + 4);
+  }
+
+  function renderLiquidationZones(stock, history) {
+    const el = document.getElementById("ffLiqZones");
+    if (!el) return;
+    const price = stock.price;
+    // Long liquidation: just below recent swing low (support)
+    const lows = history.map(h => h.price).filter(p => p > 0);
+    const recentLow = Math.min(...lows.slice(-5));
+    const longLiqZone = recentLow * 0.975;
+    // Short liquidation: just above recent swing high (resistance)
+    const highs = history.map(h => h.price).filter(p => p > 0);
+    const recentHigh = Math.max(...highs.slice(-5));
+    const shortLiqZone = recentHigh * 1.025;
+    const longRisk = ((price - longLiqZone) / price * 100).toFixed(1);
+    const shortRisk = ((shortLiqZone - price) / price * 100).toFixed(1);
+
+    el.innerHTML = `
+      <div class="liq-zone-card long-liq">
+        <div class="liq-zone-label">&#128293; Long Liquidation Zone</div>
+        <div class="liq-zone-price">Rp ${Math.round(longLiqZone).toLocaleString("id-ID")}</div>
+        <div class="liq-zone-sub">Estimasi stop hunt area di bawah swing low terbaru</div>
+        <div class="liq-zone-sub" style="margin-top:4px;color:var(--danger)">−${longRisk}% dari harga saat ini</div>
+        <div class="liq-zone-bar"></div>
+      </div>
+      <div class="liq-zone-card short-liq">
+        <div class="liq-zone-label">&#128200; Short Liquidation Zone</div>
+        <div class="liq-zone-price">Rp ${Math.round(shortLiqZone).toLocaleString("id-ID")}</div>
+        <div class="liq-zone-sub">Estimasi area likuidasi short di atas swing high</div>
+        <div class="liq-zone-sub" style="margin-top:4px;color:var(--accent)">+${shortRisk}% dari harga saat ini</div>
+        <div class="liq-zone-bar"></div>
+      </div>
+    `;
   }
 
   function buildTrendRows(stock) {

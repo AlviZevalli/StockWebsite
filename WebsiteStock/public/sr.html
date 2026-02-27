@@ -151,8 +151,29 @@
       .main-grid{grid-template-columns:1fr}
       .summary-row{grid-template-columns:repeat(2,1fr)}
       .bottom-grid{grid-template-columns:1fr}
-      .topbar-nav{display:none}
-      main{padding:70px 16px 40px}
+      .topbar-nav{gap:0;overflow-x:auto}
+      main{padding:68px 16px 40px}
+    }
+    @media(max-width:600px){
+      .search-row{flex-direction:column;max-width:100%;gap:8px}
+      .sr-input{width:100%;font-size:14px;letter-spacing:1px}
+      .btn-analyze{width:100%}
+      .summary-row{grid-template-columns:repeat(2,1fr);gap:8px}
+      .main-grid{grid-template-columns:1fr}
+      .bottom-grid{grid-template-columns:1fr}
+      .hi-title{font-size:clamp(22px,7vw,36px)}
+      .hi-sub{font-size:12px}
+      .quick-row{gap:6px}
+      .qbtn{padding:4px 9px;font-size:10px}
+      main{padding:68px 12px 40px}
+      .levels-body{max-height:300px}
+      .chart-wrap{padding:10px}
+      .sum-val{font-size:16px}
+      .sum-lbl{font-size:9px}
+    }
+    @media(max-width:380px){
+      .summary-row{grid-template-columns:1fr 1fr}
+      .fib-bar-wrap{display:none}
     }
   </style>
   <script src="config.js"></script>
@@ -171,8 +192,8 @@
       <a href="sr.html" class="active">📉 S&R Finder</a>
       <a href="volume.html">🔥 Volume Anomaly</a>
       <a href="scanner.html">🔭 Market Scanner</a>
-      <a href="#" class="soon">📈 Trend Dashboard</a>
-      <a href="#" class="soon">🕯 Candlestick</a>
+      <a href="foreign.html">&#127758; Foreign Flow</a>
+      <a href="ai-signal.html">&#129504; AI Signal</a>>
       <a href="#" class="soon">⚡ Momentum</a>
     </nav>
     <a href="index.html" class="topbar-home">← Beranda</a>

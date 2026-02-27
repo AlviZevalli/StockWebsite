@@ -142,11 +142,32 @@
     @media(max-width:900px){
       main{padding:68px 16px 40px}
       .summary-row{grid-template-columns:repeat(2,1fr)}
-      .control-panel{flex-direction:column;align-items:flex-start}
+      .control-panel{flex-direction:column;align-items:flex-start;gap:12px;padding:14px}
       .scan-btn-wrap{width:100%;justify-content:flex-start}
+      .btn-scan{width:100%;justify-content:center}
       .divider{display:none}
       .topbar-nav a{padding:5px 10px;font-size:11px}
       .topbar-home{display:none}
+      .page-header{flex-direction:column;align-items:flex-start;gap:10px}
+      .page-title{font-size:clamp(22px,6vw,40px)}
+    }
+    @media(max-width:600px){
+      main{padding:68px 12px 40px}
+      .summary-row{gap:8px}
+      .sum-card{padding:12px 12px;gap:10px}
+      .sum-icon{font-size:22px}
+      .sum-val{font-size:20px}
+      .universe-pills{flex-wrap:wrap;gap:6px}
+      .upill{padding:5px 12px;font-size:11px}
+      .filter-bar{gap:6px}
+      .fbtn{font-size:11px;padding:5px 10px}
+      .sort-wrap{margin-left:0;width:100%}
+      .results-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+      .page-sub{font-size:12px}
+    }
+    @media(max-width:380px){
+      .summary-row{grid-template-columns:1fr 1fr}
+      .sum-val{font-size:18px}
     }
   </style>
     <script src="config.js"></script>
@@ -165,8 +186,8 @@
       <a href="sr.html">📉 S&R Finder</a>
       <a href="volume.html">🔥 Volume Anomaly</a>
       <a href="scanner.html" class="active">🔭 Market Scanner</a>
-      <a href="#" class="soon">📈 Trend Dashboard</a>
-      <a href="#" class="soon">🕯 Candlestick</a>
+      <a href="foreign.html">&#127758; Foreign Flow</a>
+      <a href="ai-signal.html">&#129504; AI Signal</a>>
     </nav>
     <a href="index.html" class="topbar-home">← Beranda</a>
   </div>

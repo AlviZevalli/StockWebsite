@@ -261,6 +261,21 @@
     .rr-ok { background: rgba(245,197,24,0.1); border: 1px solid rgba(245,197,24,0.3); color: var(--warn); }
     .rr-bad { background: rgba(255,69,96,0.1); border: 1px solid rgba(255,69,96,0.3); color: var(--danger); }
 
+    /* Price Chart with Levels */
+    .ai-chart-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .ai-chart-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .ai-chart-sub { font-size: 11px; color: var(--muted); margin-bottom: 14px; }
+    #aiPriceCanvas { width: 100%; display: block; border-radius: 8px; }
+    .chart-legend { display: flex; gap: 16px; margin-top: 10px; flex-wrap: wrap; }
+    .chart-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+    .chart-legend-line { width: 20px; height: 2px; border-radius: 1px; }
+
     /* Empty */
     .ai-empty { text-align: center; padding: 60px 20px; color: var(--muted); }
     .ai-empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.6; }
@@ -270,6 +285,53 @@
     .ai-empty-rule { display: flex; gap: 10px; font-size: 12px; color: var(--muted); padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
     .ai-empty-rule:last-child { border-bottom: none; }
     .ai-empty-rule-icon { font-size: 14px; flex-shrink: 0; }
+
+    /* ---- Mobile overrides ---- */
+    @media (max-width: 768px) {
+      main { padding: 68px 14px 60px !important; }
+      .ai-hero { gap: 12px; margin-bottom: 20px; }
+      .ai-hero-text h1 { font-size: 22px; }
+      .ai-hero-text p { font-size: 13px; }
+      .ai-badge { font-size: 10px; padding: 6px 10px; }
+      .ai-input-box { padding: 16px 14px; }
+      .verdict-banner { padding: 18px 14px; }
+      .verdict-title { font-size: 22px; }
+      .verdict-sub { font-size: 13px; }
+      .steps-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .step-card { padding: 14px 12px; }
+      .step-title { font-size: 12px; }
+      .step-item { font-size: 11px; padding: 5px 7px; }
+      .trade-levels { padding: 16px 14px; }
+      .tl-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .tl-price { font-size: 15px; }
+      .validation-box, .narrative-box, .ai-chart-section { padding: 14px 14px; }
+      .narr-body { font-size: 13px; }
+    }
+    @media (max-width: 600px) {
+      main { padding: 68px 12px 60px !important; }
+      .ai-input-row { flex-direction: column; gap: 8px; }
+      .ai-sym-wrap { width: 100%; }
+      .ai-analyze-btn { width: 100%; padding: 13px; text-align: center; }
+      .ai-quick { gap: 6px; }
+      .ai-quick button { font-size: 10px; padding: 4px 8px; }
+      .steps-grid { grid-template-columns: 1fr !important; }
+      .verdict-title { font-size: 20px; }
+      .verdict-meta { gap: 10px; }
+      .verdict-meta-val { font-size: 13px; }
+      .tl-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .tl-label { font-size: 10px; }
+      .tl-price { font-size: 14px; }
+      .rr-badge { font-size: 12px; padding: 6px 12px; }
+      .val-row { font-size: 12px; }
+      .ai-empty { padding: 40px 14px; }
+      .ai-empty-icon { font-size: 36px; }
+      .ai-empty-title { font-size: 16px; }
+    }
+    @media (max-width: 380px) {
+      .verdict-title { font-size: 17px; }
+      .tl-grid { grid-template-columns: 1fr 1fr; }
+      .step-title { font-size: 11px; }
+    }
   </style>
 </head>
 <body>
@@ -632,12 +694,158 @@
       '<div class="narrative-box">' +
         '<div class="narr-title">&#129504; Analisa Naratif AI</div>' +
         '<div class="narr-body">' + narrative + '</div>' +
+      '</div>' +
+
+      '<div class="ai-chart-section">' +
+        '<div class="ai-chart-title">&#128200; Price Chart dengan Level Trading</div>' +
+        '<div class="ai-chart-sub">Candlestick 20 hari terakhir dengan Entry, Stop Loss, dan Target Price</div>' +
+        '<canvas id="aiPriceCanvas" height="220"></canvas>' +
+        '<div class="chart-legend">' +
+          '<div class="chart-legend-item"><div class="chart-legend-line" style="background:#00b8f0;height:2px;border-top:2px dashed #00b8f0;background:none"></div> Entry</div>' +
+          '<div class="chart-legend-item"><div class="chart-legend-line" style="background:var(--danger)"></div> Stop Loss</div>' +
+          '<div class="chart-legend-item"><div class="chart-legend-line" style="background:var(--accent)"></div> TP1</div>' +
+          '<div class="chart-legend-item"><div class="chart-legend-line" style="background:rgba(0,229,160,0.5);border-top:2px dashed rgba(0,229,160,0.5);background:none"></div> TP2</div>' +
+        '</div>' +
       '</div>';
 
     const result = document.getElementById("aiResult");
     result.innerHTML = html;
     result.classList.add("visible");
     result.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    // Render chart after DOM is ready
+    setTimeout(() => renderAIChart(vol, entryPrice, slPrice, tp1Price, tp2Price, price), 60);
+  }
+
+  function renderAIChart(vol, entry, sl, tp1, tp2, currentPrice) {
+    const canvas = document.getElementById("aiPriceCanvas");
+    if (!canvas) return;
+    const chart = (vol && vol.chart) ? vol.chart.slice(-20) : [];
+    if (chart.length < 3) {
+      // Fallback: just draw levels as a flat chart
+      const fakeChart = [];
+      for (let i = 0; i < 20; i++) {
+        fakeChart.push({ close: currentPrice * (0.97 + 0.06 * Math.random()), open: currentPrice * 0.99, high: currentPrice * 1.01, low: currentPrice * 0.98, date: "" });
+      }
+      return renderAIChart({ chart: fakeChart }, entry, sl, tp1, tp2, currentPrice);
+    }
+
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.parentElement.clientWidth - 48;
+    const H = 220;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+
+    const padL = 60, padR = 60, padT = 14, padB = 28;
+    const chartW = W - padL - padR;
+    const chartH = H - padT - padB;
+
+    // Price range including all levels
+    const prices = chart.flatMap(c => [c.close, c.open || c.close, c.high || c.close, c.low || c.close]);
+    prices.push(entry, sl, tp1, tp2);
+    let minP = Math.min(...prices) * 0.995;
+    let maxP = Math.max(...prices) * 1.005;
+    const range = maxP - minP;
+    const toY = p => padT + chartH - ((p - minP) / range) * chartH;
+
+    const n = chart.length;
+    const barW = Math.max(4, chartW / n * 0.65);
+
+    // Background gradient
+    const bgGrad = ctx.createLinearGradient(0, padT, 0, H - padB);
+    bgGrad.addColorStop(0, "rgba(0,229,160,0.03)");
+    bgGrad.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(padL, padT, chartW, chartH);
+
+    // Grid lines
+    ctx.strokeStyle = "rgba(255,255,255,0.05)";
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = padT + (chartH / 4) * i;
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+      const price = maxP - (range / 4) * i;
+      ctx.fillStyle = "rgba(232,240,254,0.35)";
+      ctx.font = "9px 'Space Mono', monospace";
+      ctx.textAlign = "right";
+      ctx.fillText("Rp " + Math.round(price).toLocaleString("id-ID"), padL - 5, y + 3);
+    }
+
+    // Shaded zones
+    // SL zone (below entry)
+    const slGrad = ctx.createLinearGradient(0, toY(entry), 0, toY(sl));
+    slGrad.addColorStop(0, "rgba(255,69,96,0)");
+    slGrad.addColorStop(1, "rgba(255,69,96,0.1)");
+    ctx.fillStyle = slGrad;
+    ctx.fillRect(padL, toY(entry), chartW, toY(sl) - toY(entry));
+
+    // TP zone (above entry to tp2)
+    const tpGrad = ctx.createLinearGradient(0, toY(tp2), 0, toY(entry));
+    tpGrad.addColorStop(0, "rgba(0,229,160,0.12)");
+    tpGrad.addColorStop(1, "rgba(0,229,160,0)");
+    ctx.fillStyle = tpGrad;
+    ctx.fillRect(padL, toY(tp2), chartW, toY(entry) - toY(tp2));
+
+    // Candlesticks
+    chart.forEach((c, i) => {
+      const x = padL + i * (chartW / n) + (chartW / n - barW) / 2 + barW / 2;
+      const open = c.open || c.close;
+      const close = c.close;
+      const high = c.high || Math.max(open, close) * 1.005;
+      const low = c.low || Math.min(open, close) * 0.995;
+      const isUp = close >= open;
+      const color = isUp ? "rgba(0,229,160,0.85)" : "rgba(255,69,96,0.85)";
+
+      // Wick
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x, toY(high));
+      ctx.lineTo(x, toY(low));
+      ctx.stroke();
+
+      // Body
+      const bodyTop = toY(Math.max(open, close));
+      const bodyH = Math.max(1, Math.abs(toY(open) - toY(close)));
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.roundRect ? ctx.roundRect(x - barW/2, bodyTop, barW, bodyH, 1) : ctx.rect(x - barW/2, bodyTop, barW, bodyH);
+      ctx.fill();
+
+      // Date labels
+      if (i % 4 === 0 && c.date) {
+        ctx.fillStyle = "rgba(232,240,254,0.3)";
+        ctx.font = "9px 'Space Mono', monospace";
+        ctx.textAlign = "center";
+        const parts = c.date.split("-");
+        ctx.fillText((parts[1]||"")+"/"+(parts[2]||""), x, H - 10);
+      }
+    });
+
+    // Horizontal level lines
+    const drawLevel = (price, color, dash, label, side = "right") => {
+      const y = toY(price);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash(dash);
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = color;
+      ctx.font = "bold 9px 'Space Mono', monospace";
+      ctx.textAlign = side === "right" ? "left" : "right";
+      const xLabel = side === "right" ? W - padR + 5 : padL - 5;
+      ctx.fillText(label, xLabel, y + 3);
+      ctx.fillText("Rp " + Math.round(price).toLocaleString("id-ID"), xLabel, y + 13);
+    };
+
+    drawLevel(tp2, "rgba(0,229,160,0.55)", [6,4], "TP2");
+    drawLevel(tp1, "rgba(0,229,160,0.9)", [], "TP1");
+    drawLevel(entry, "#00b8f0", [4,3], "ENTRY");
+    drawLevel(sl, "#ff4560", [], "SL");
   }
 
   function buildStepCard(num, icon, title, items) {

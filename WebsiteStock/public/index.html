@@ -158,11 +158,32 @@
       .stat-item{border-bottom:1px solid var(--border)}
       .section-header{grid-template-columns:1fr}
       .menu-section{padding:60px 24px 80px}
-      .menu-grid{grid-template-columns:1fr}
+      .menu-grid{grid-template-columns:repeat(2,1fr)}
       .preview-cards{grid-template-columns:repeat(2,1fr)}
       footer{padding:30px 24px;flex-direction:column;gap:16px;text-align:center}
       .footer-disc{text-align:center}
       .scroll-hint{left:24px}
+    }
+    @media(max-width:600px){
+      nav{padding:14px 16px}
+      .hero-content{padding:0 16px}
+      .hero-title{font-size:clamp(32px,9vw,56px)}
+      .hero-desc{font-size:14px;margin-bottom:28px}
+      .stats-section,.preview-section{padding:40px 16px}
+      .stats-grid{grid-template-columns:repeat(2,1fr)}
+      .stat-item{padding:24px 16px}
+      .stat-val{font-size:clamp(28px,7vw,42px)}
+      .section-header{gap:16px;margin-bottom:32px}
+      .menu-section{padding:40px 16px 60px}
+      .menu-grid{grid-template-columns:1fr}
+      .preview-cards{grid-template-columns:1fr}
+      .menu-card{padding:24px 20px}
+      footer{padding:24px 16px}
+      .hero-actions{flex-direction:column;align-items:flex-start;gap:12px}
+    }
+    @media(max-width:380px){
+      .btn-primary,.btn-ghost{font-size:13px;padding:12px 20px}
+      .stats-grid{grid-template-columns:1fr 1fr}
     }
   </style>
 </head>
@@ -178,7 +199,8 @@
       <li><a href="sr.html">S&amp;R Finder</a></li>
       <li><a href="volume.html">Volume Anomaly</a></li>
       <li><a href="scanner.html">Market Scanner</a></li>
-      <li><a href="#">Portofolio</a></li>
+      <li><a href="foreign.html">Foreign Flow</a></li>
+      <li><a href="ai-signal.html">AI Signal</a></li>
       <li><a href="screener.html" class="nav-cta">Mulai Gratis →</a></li>
     </ul>
   </nav>
@@ -233,8 +255,8 @@
         <div class="stat-change">↑ Selalu update</div>
       </div>
       <div class="stat-item">
-        <div class="stat-num"><span class="counter" data-target="5">0</span><span class="stat-unit"> ind</span></div>
-        <div class="stat-label">Indikator teknikal dalam satu tampilan</div>
+        <div class="stat-num"><span class="counter" data-target="6">0</span><span class="stat-unit"> tools</span></div>
+        <div class="stat-label">Tools analisis terintegrasi dalam satu platform</div>
         <div class="stat-change">↑ MA5, RSI, Volume, Gap, Body</div>
       </div>
       <div class="stat-item">
@@ -296,7 +318,7 @@
       </div>
       <p class="section-desc">Ekosistem lengkap untuk trader IDX — dari screening hingga manajemen portofolio.</p>
     </div>
-    <div class="menu-grid">
+    <div class="menu-grid menu-grid-5">
       <a href="screener.html" class="menu-card available">
         <div class="menu-num">01</div>
         <div class="menu-icon">📊</div>
@@ -317,6 +339,20 @@
         <div class="menu-title">Volume Anomaly <span class="menu-arrow">↗</span></div>
         <p class="menu-desc">Deteksi lonjakan volume tidak normal per saham maupun scan seluruh sektor. Identifikasi akumulasi &amp; distribusi dengan alert Extreme / High / Moderate.</p>
         <div class="menu-tag tag-live">● Live</div>
+      </a>
+      <a href="foreign.html" class="menu-card available">
+        <div class="menu-num">04</div>
+        <div class="menu-icon">&#127758;</div>
+        <div class="menu-title">Foreign Flow <span class="menu-arrow">&#8599;</span></div>
+        <p class="menu-desc">Monitor arus dana asing (foreign buy/sell) per emiten IDX. Deteksi pola akumulasi dan distribusi institusional sebagai leading indicator pergerakan harga.</p>
+        <div class="menu-tag tag-live">&#9679; Live</div>
+      </a>
+      <a href="ai-signal.html" class="menu-card available menu-card-ai">
+        <div class="menu-num">05</div>
+        <div class="menu-icon">&#129504;</div>
+        <div class="menu-title">AI Signal Engine <span class="menu-arrow">&#8599;</span></div>
+        <p class="menu-desc">AI analisis berbasis market structure: HH/HL, BOS, CHOCH, value area, konfirmasi momentum. Output: sinyal entry, SL di swing low, TP 1:2 minimum — atau skip jika tidak valid.</p>
+        <div class="menu-tag tag-ai">&#9679; AI Powered</div>
       </a>
     </div>
   </section>

@@ -165,6 +165,23 @@
       font-family: var(--font-mono);
     }
     .btn-analyze:hover { background: rgba(0,184,240,0.25); }
+
+    /* ---- Mobile overrides (screener) ---- */
+    @media (max-width: 768px) {
+      .analysis-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+      .levels-row { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
+      .bsjp-row { font-size: 12px; }
+      .signal-items { gap: 6px; }
+    }
+    @media (max-width: 600px) {
+      .analysis-grid { grid-template-columns: 1fr 1fr !important; }
+      .score-gauge-wrap { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .score-gauge-num { font-size: 36px; }
+    }
+    @media (max-width: 380px) {
+      .analysis-grid { grid-template-columns: 1fr 1fr !important; }
+      .levels-row { grid-template-columns: 1fr 1fr 1fr !important; }
+    }
   </style>
 </head>
 <body>
@@ -177,12 +194,11 @@
     </div>
     <nav class="topbar-nav">
       <a href="screener.html" class="active">&#128202; Screener</a>
-      <a href="sr.html">&#128201; S&amp;R Finder</a>
-      <a href="volume.html">&#128293; Volume Anomaly</a>
-      <a href="scanner.html">&#128301; Market Scanner</a>
-      <a href="#" class="soon">&#128200; Trend Dashboard</a>
-      <a href="#" class="soon">&#128337; Candlestick</a>
-      <a href="#" class="soon">&#9889; Momentum</a>
+      <a href="sr.html">&#128201; S&amp;R</a>
+      <a href="volume.html">&#128293; Volume</a>
+      <a href="scanner.html">&#128301; Scanner</a>
+      <a href="foreign.html">&#127758; Foreign Flow</a>
+      <a href="ai-signal.html">&#129504; AI Signal</a>
     </nav>
     <a href="index.html" class="topbar-home">&larr; Beranda</a>
   </div>
