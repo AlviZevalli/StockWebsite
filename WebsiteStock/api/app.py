@@ -3,6 +3,7 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 from flask_cors import CORS
+import time
 
 app = Flask(__name__)
 CORS(app, origins="*")
@@ -69,6 +70,22 @@ SECTORS = {
 # ================================================================
 # HELPERS
 # ================================================================
+def fetch_history(ticker_symbol, period, interval, retries=3):
+    """Fetch yfinance history dengan retry otomatis jika gagal."""
+    for attempt in range(retries):
+        try:
+            s    = yf.Ticker(ticker_symbol)
+            hist = s.history(period=period, interval=interval)
+            if not hist.empty:
+                return hist
+            # Jika data kosong, tunggu sebentar sebelum retry
+            if attempt < retries - 1:
+                time.sleep(0.5)
+        except Exception:
+            if attempt < retries - 1:
+                time.sleep(0.5)
+    return pd.DataFrame()  # Return DataFrame kosong jika semua retry gagal
+
 def find_pivots(highs, lows, order=3):
     pivot_highs, pivot_lows = [], []
     n = len(highs)
@@ -127,10 +144,9 @@ def stock(symbol):
     symbol = symbol.upper().strip()
     ticker = symbol + ".JK"
     try:
-        s    = yf.Ticker(ticker)
-        hist = s.history(period="30d", interval="1d")
+        hist = fetch_history(ticker, "30d", "1d")
         if hist.empty:
-            return jsonify({"error": "Emiten tidak ditemukan"}), 404
+            return jsonify({"error": f"Emiten {symbol} tidak ditemukan atau data tidak tersedia di Yahoo Finance"}), 404
 
         close  = float(hist["Close"].iloc[-1])
         open_  = float(hist["Open"].iloc[-1])
@@ -150,7 +166,7 @@ def stock(symbol):
         gap        = round((close - open_) / open_ * 100, 2) if open_ != 0 else 0
         rsi        = calc_rsi(hist["Close"].values)
 
-        week52  = s.history(period="1y", interval="1d")
+        week52  = fetch_history(ticker, "1y", "1d")
         high52  = round(float(week52["High"].max()), 2) if not week52.empty else high
         low52   = round(float(week52["Low"].min()),  2) if not week52.empty else low
 
@@ -164,7 +180,7 @@ def stock(symbol):
             "rsi": rsi, "high_52w": high52, "low_52w": low52,
         })
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"Gagal mengambil data {symbol}: {str(e)}"}), 500
 
 # ================================================================
 # ENDPOINT: Backtest
@@ -174,10 +190,9 @@ def backtest(symbol):
     symbol = symbol.upper().strip()
     ticker = symbol + ".JK"
     try:
-        s    = yf.Ticker(ticker)
-        hist = s.history(period="120d", interval="1d")
+        hist = fetch_history(ticker, "120d", "1d")
         if hist.empty:
-            return jsonify({"error": "No data"}), 404
+            return jsonify({"error": f"Emiten {symbol} tidak ditemukan atau data tidak tersedia"}), 404
 
         wins, total = 0, 0
         for i in range(20, len(hist) - 1):
@@ -209,7 +224,7 @@ def backtest(symbol):
         winrate = round((wins / total) * 100, 2) if total > 0 else 0
         return jsonify({"symbol": symbol, "signal_count": total, "wins": wins, "winrate": winrate})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"Gagal backtest {symbol}: {str(e)}"}), 500
 
 # ================================================================
 # ENDPOINT: Support & Resistance
@@ -219,10 +234,11 @@ def support_resistance(symbol):
     symbol = symbol.upper().strip()
     ticker = symbol + ".JK"
     try:
-        s    = yf.Ticker(ticker)
-        hist = s.history(period="6mo", interval="1d")
-        if hist.empty or len(hist) < 20:
-            return jsonify({"error": "Data tidak cukup"}), 404
+        hist = fetch_history(ticker, "6mo", "1d")
+        if hist.empty:
+            return jsonify({"error": f"Emiten {symbol} tidak ditemukan atau data tidak tersedia"}), 404
+        if len(hist) < 20:
+            return jsonify({"error": f"Data {symbol} tidak cukup (hanya {len(hist)} hari, butuh minimal 20)"}), 404
 
         highs  = hist["High"].values
         lows   = hist["Low"].values
@@ -306,7 +322,7 @@ def support_resistance(symbol):
             "candles": candles, "data_period": "6 Bulan",
         })
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"Gagal mengambil data SR {symbol}: {str(e)}"}), 500
 
 # ================================================================
 # ENDPOINT: Volume Single
@@ -316,10 +332,11 @@ def volume_single(symbol):
     symbol = symbol.upper().strip()
     ticker = symbol + ".JK"
     try:
-        s    = yf.Ticker(ticker)
-        hist = s.history(period="3mo", interval="1d")
-        if hist.empty or len(hist) < 10:
-            return jsonify({"error": "Data tidak cukup"}), 404
+        hist = fetch_history(ticker, "3mo", "1d")
+        if hist.empty:
+            return jsonify({"error": f"Emiten {symbol} tidak ditemukan atau data tidak tersedia"}), 404
+        if len(hist) < 10:
+            return jsonify({"error": f"Data {symbol} tidak cukup (hanya {len(hist)} hari)"}), 404
 
         closes  = hist["Close"].values
         volumes = hist["Volume"].values
@@ -384,7 +401,7 @@ def volume_single(symbol):
             "rsi": rsi, "spike_history": spikes, "chart": chart[-60:],
         })
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"Gagal mengambil data volume {symbol}: {str(e)}"}), 500
 
 # ================================================================
 # ENDPOINT: Volume Scan per Sektor
@@ -394,15 +411,16 @@ def volume_scan(sector):
     sector  = sector.strip()
     symbols = SECTORS.get(sector, [])
     if not symbols:
-        return jsonify({"error": f"Sektor '{sector}' tidak ditemukan"}), 404
+        return jsonify({"error": f"Sektor '{sector}' tidak ditemukan. Tersedia: {list(SECTORS.keys())}"}), 404
 
     results = []
+    errors  = []
     for sym in symbols:
         try:
             ticker = sym + ".JK"
-            s      = yf.Ticker(ticker)
-            hist   = s.history(period="3mo", interval="1d")
+            hist   = fetch_history(ticker, "3mo", "1d")
             if hist.empty or len(hist) < 22:
+                errors.append(f"{sym}: data tidak cukup")
                 continue
             avg20      = safe_avg(hist["Volume"], 20)
             cur_vol    = int(hist["Volume"].iloc[-1])
@@ -420,11 +438,12 @@ def volume_scan(sector):
                 "avg_vol": round(avg20, 0), "ratio": ratio,
                 "alert": alert, "alert_type": atype,
             })
-        except:
+        except Exception as e:
+            errors.append(f"{sym}: {str(e)}")
             continue
 
     results.sort(key=lambda x: x["ratio"], reverse=True)
-    return jsonify({"sector": sector, "results": results, "total": len(results)})
+    return jsonify({"sector": sector, "results": results, "total": len(results), "errors": errors})
 
 # ================================================================
 # ENDPOINT: Daftar Sektor
@@ -438,31 +457,33 @@ def sectors():
 # Cara kerja: frontend kirim ?universe=all&chunk=0&size=20
 # Backend scan 20 saham sekaligus, return JSON
 # Frontend polling chunk berikutnya sampai selesai
+# CATATAN: size max 10 di Vercel untuk hindari timeout 10 detik
 # ================================================================
 @app.route("/market-scan")
 def market_scan():
-    from flask import request as req
-    u        = req.args.get("universe", "all").lower()
-    chunk    = int(req.args.get("chunk", 0))
-    size     = int(req.args.get("size", 20))
+    u        = request.args.get("universe", "all").lower()
+    chunk    = int(request.args.get("chunk", 0))
+    # Batasi max 10 per chunk di Vercel agar tidak timeout
+    size     = min(int(request.args.get("size", 10)), 10)
 
-    if u == "lq45":   universe = IDX_LQ45
+    if u == "lq45":    universe = IDX_LQ45
     elif u == "idx30": universe = IDX_IDX30
     else:              universe = IDX_ALL
 
-    total      = len(universe)
-    start      = chunk * size
-    end        = min(start + size, total)
-    batch      = universe[start:end]
-    is_last    = end >= total
+    total   = len(universe)
+    start   = chunk * size
+    end     = min(start + size, total)
+    batch   = universe[start:end]
+    is_last = end >= total
 
-    results  = []
+    results = []
+    errors  = []
     for sym in batch:
         try:
             ticker = sym + ".JK"
-            s      = yf.Ticker(ticker)
-            hist   = s.history(period="1mo", interval="1d")
+            hist   = fetch_history(ticker, "1mo", "1d")
             if hist.empty or len(hist) < 15:
+                errors.append(f"{sym}: data tidak cukup")
                 continue
 
             closes    = hist["Close"].values
@@ -486,15 +507,17 @@ def market_scan():
                     "condition":     "OVERBOUGHT" if rsi >= 70 else "OVERSOLD",
                     "condition_cls": "overbought" if rsi >= 70 else "oversold",
                 })
-        except:
+        except Exception as e:
+            errors.append(f"{sym}: {str(e)}")
             continue
 
     return jsonify({
-        "chunk":    chunk,
-        "total":    total,
-        "scanned":  end,
-        "is_last":  is_last,
-        "results":  results,
+        "chunk":      chunk,
+        "total":      total,
+        "scanned":    end,
+        "is_last":    is_last,
+        "results":    results,
+        "errors":     errors,
         "next_chunk": chunk + 1 if not is_last else None,
     })
 
