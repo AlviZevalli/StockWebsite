@@ -178,27 +178,6 @@
       .mode-toggle{width:100%}
       .page-header{flex-direction:column;align-items:flex-start}
     }
-    @media(max-width:600px){
-      main{padding:68px 12px 40px}
-      .single-search{flex-direction:column;align-items:stretch;gap:8px;padding:14px}
-      .vol-input{width:100%}
-      .btn-scan-single{width:100%;text-align:center}
-      .quick-chips{gap:6px}
-      .chip{font-size:10px;padding:4px 9px}
-      .single-summary{grid-template-columns:1fr 1fr;gap:8px}
-      .ss-val{font-size:16px}
-      .ss-lbl{font-size:9px}
-      .alert-banner{flex-wrap:wrap;gap:8px;padding:12px 12px}
-      .ab-ratio{font-size:18px}
-      .page-title{font-size:clamp(20px,6vw,32px)}
-      .page-sub{font-size:12px}
-      .bulk-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-      .sector-btn{font-size:11px;padding:5px 10px}
-    }
-    @media(max-width:380px){
-      .single-summary{grid-template-columns:1fr 1fr}
-      .mode-toggle .mode-btn{padding:8px 12px;font-size:12px}
-    }
   </style>
   <script src="config.js"></script>
 </head>
@@ -284,20 +263,20 @@
         <button class="sector-btn active" data-sector="Healthcare"
           onclick="selectSector('Healthcare',this)">🩺 Healthcare</button>
 
-        <button class="sector-btn" data-sector="BasicMaterials"
-          onclick="selectSector('BasicMaterials',this)">🧱 Basic Materials</button>
+        <button class="sector-btn" data-sector="Basic_Materials"
+          onclick="selectSector('Basic_Materials',this)">🧱 Basic Materials</button>
 
-        <button class="sector-btn" data-sector="Banking"
-          onclick="selectSector('Banking',this)">🏦 Banking</button>
+        <button class="sector-btn" data-sector="Financials"
+          onclick="selectSector('Financials',this)">🏦 Financials</button>
 
-        <button class="sector-btn" data-sector="TransportLogistic"
-          onclick="selectSector('TransportLogistic',this)">🚚 Transport & Logistic</button>
+        <button class="sector-btn" data-sector="Transportation_Logistic"
+          onclick="selectSector('Transportation_Logistic',this)">🚚 Transport & Logistic</button>
 
         <button class="sector-btn" data-sector="Technology"
           onclick="selectSector('Technology',this)">💻 Technology</button>
 
-        <button class="sector-btn" data-sector="ConsumerNonCyclicals"
-          onclick="selectSector('ConsumerNonCyclicals',this)">🛍 Consumer Non-Cyclicals</button>
+        <button class="sector-btn" data-sector="Consumer_Non_Cyclicals"
+          onclick="selectSector('Consumer_Non_Cyclicals',this)">🛍 Consumer Non-Cyclicals</button>
 
         <button class="sector-btn" data-sector="Industrials"
           onclick="selectSector('Industrials',this)">🏭 Industrials</button>
@@ -305,14 +284,14 @@
         <button class="sector-btn" data-sector="Energy"
           onclick="selectSector('Energy',this)">⚡ Energy</button>
 
-        <button class="sector-btn" data-sector="ConsumerCyclicals"
-          onclick="selectSector('ConsumerCyclicals',this)">🛒 Consumer Cyclicals</button>
+        <button class="sector-btn" data-sector="Consumer_Cyclicals"
+          onclick="selectSector('Consumer_Cyclicals',this)">🛒 Consumer Cyclicals</button>
 
-        <button class="sector-btn" data-sector="Infrastructure"
-          onclick="selectSector('Infrastructure',this)">🏗 Infrastructure</button>
+        <button class="sector-btn" data-sector="Infrastructures"
+          onclick="selectSector('Infrastructures',this)">🏗 Infrastructure</button>
 
-        <button class="sector-btn" data-sector="Property"
-          onclick="selectSector('Property',this)">🏢 Property</button>
+        <button class="sector-btn" data-sector="Properties_Real_Estate"
+          onclick="selectSector('Properties_Real_Estate',this)">🏢 Property & Real Estate</button>
 
         <button class="btn-scan-bulk" onclick="scanBulk()">⚡ Scan Sekarang</button>
       </div>
