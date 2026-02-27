@@ -6,7 +6,8 @@
   <title>Volume Anomaly — Cukong Reborn</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     :root {
       --bg:#080c10;--bg2:#0d1318;--bg3:#111820;
@@ -337,8 +338,7 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const API = window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'
-      ? 'http://localhost:5000' : '';
+    const API = API_BASE;
 
     let volChart = null;
     let currentMode = 'single';

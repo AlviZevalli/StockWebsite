@@ -305,9 +305,11 @@
 
   <div class="toast" id="toast"></div>
 
-  <script>
-    const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? 'http://localhost:5000' : '';
+  <script src="config.js"></script>
+<script>
+    const API = API_BASE;
+    || window.location.hostname === '127.0.0.1'
+      
 
     let universe      = 'all';
     let activeFilter  = 'all';

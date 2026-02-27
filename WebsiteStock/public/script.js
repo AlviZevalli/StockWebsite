@@ -2,7 +2,7 @@
 // BSJP SCREENER PRO — Enhanced Script
 // ============================================================
 
-const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "http://localhost:5000" : "";
+// API_BASE di-load dari config.js
 
 let stockData = []; // {symbol, data, score, status, inWatchlist}
 let watchlist = JSON.parse(localStorage.getItem("bsjp_watchlist") || "[]");
