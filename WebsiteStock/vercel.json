@@ -4,6 +4,13 @@
     {
       "src": "api/app.py",
       "use": "@vercel/python"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static",
+      "config": {
+        "outputDirectory": "public"
+      }
     }
   ],
   "routes": [
@@ -14,6 +21,12 @@
     { "src": "/scan/(.*)",        "dest": "api/app.py" },
     { "src": "/market-scan",      "dest": "api/app.py" },
     { "src": "/sectors",          "dest": "api/app.py" },
-    { "src": "/(.*)",             "dest": "public/$1"  }
+    { "src": "/scanner",          "dest": "public/scanner.html" },
+    { "src": "/screener",         "dest": "public/screener.html" },
+    { "src": "/sr",               "dest": "public/sr.html" },
+    { "src": "/volume",           "dest": "public/volume.html" },
+    { "src": "/style.css",        "dest": "public/style.css" },
+    { "src": "/script.js",        "dest": "public/script.js" },
+    { "src": "/",                 "dest": "public/index.html" }
   ]
 }
