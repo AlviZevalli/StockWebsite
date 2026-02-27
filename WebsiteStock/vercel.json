@@ -87,6 +87,22 @@
       "dest": "public/config.js"
     },
     {
+      "src": "/foreign.html",
+      "dest": "public/foreign.html"
+    },
+    {
+      "src": "/foreign",
+      "dest": "public/foreign.html"
+    },
+    {
+      "src": "/ai-signal.html",
+      "dest": "public/ai-signal.html"
+    },
+    {
+      "src": "/ai-signal",
+      "dest": "public/ai-signal.html"
+    },
+    {
       "src": "/index.html",
       "dest": "public/index.html"
     },
