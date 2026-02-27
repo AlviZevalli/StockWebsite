@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/app.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "src": "/stock/(.*)",       "dest": "api/app.py" },
+    { "src": "/backtest/(.*)",    "dest": "api/app.py" },
+    { "src": "/sr/(.*)",          "dest": "api/app.py" },
+    { "src": "/volume/(.*)",      "dest": "api/app.py" },
+    { "src": "/scan/(.*)",        "dest": "api/app.py" },
+    { "src": "/market-scan",      "dest": "api/app.py" },
+    { "src": "/sectors",          "dest": "api/app.py" },
+    { "src": "/(.*)",             "dest": "public/$1"  }
+  ]
+}

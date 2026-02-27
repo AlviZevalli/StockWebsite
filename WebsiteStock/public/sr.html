@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S&R Finder — Cukong Reborn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#080c10;--bg2:#0d1318;--bg3:#111820;
+      --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+      --gold:#c8a96e;--gold2:#e8c98a;
+      --text:#e8e4dc;--muted:rgba(232,228,220,0.45);
+      --green:#2ecc8a;--red:#e05a5a;--blue:#60c0f0;--warn:#f5c518;
+      --font:'Syne',sans-serif;--mono:'DM Mono',monospace;--serif:'DM Serif Display',serif;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(200,169,110,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(200,169,110,0.03) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0}
+
+    /* ===== UNIFIED TOPBAR ===== */
+    .topbar{position:fixed;top:0;left:0;right:0;z-index:500;display:flex;align-items:center;gap:16px;padding:0 24px;height:48px;background:rgba(8,12,16,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+    .topbar-left{display:flex;align-items:center;gap:12px;flex-shrink:0}
+    .topbar-logo{font-family:var(--serif);font-size:15px;color:var(--gold2);text-decoration:none;font-weight:700;letter-spacing:-0.3px;white-space:nowrap}
+    .topbar-sep{color:rgba(255,255,255,0.15);font-size:14px}
+    .topbar-badge{font-size:9px;font-weight:700;letter-spacing:1.5px;background:rgba(200,169,110,0.1);border:1px solid rgba(200,169,110,0.25);color:var(--gold);padding:2px 8px;border-radius:3px;text-transform:uppercase;white-space:nowrap}
+    .topbar-nav{display:flex;align-items:center;gap:2px;flex:1;overflow-x:auto;scrollbar-width:none}
+    .topbar-nav::-webkit-scrollbar{display:none}
+    .topbar-nav a{font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;padding:6px 14px;border-radius:6px;transition:all .15s;white-space:nowrap;border:1px solid transparent}
+    .topbar-nav a:hover:not(.soon){color:var(--text);background:rgba(255,255,255,0.06)}
+    .topbar-nav a.active{color:var(--gold);background:rgba(200,169,110,0.08);border-color:rgba(200,169,110,0.25)}
+    .topbar-nav a.soon{opacity:.35;cursor:not-allowed;pointer-events:none}
+    .topbar-home{font-size:11px;font-weight:600;color:rgba(200,169,110,0.6);text-decoration:none;white-space:nowrap;flex-shrink:0;transition:color .2s;padding:6px 10px;border-radius:6px;border:1px solid rgba(200,169,110,0.2)}
+    .topbar-home:hover{color:var(--gold);background:rgba(200,169,110,0.06)}
+    main{padding-top:72px!important}
+
+    /* MAIN */
+    main{position:relative;z-index:1;max-width:1300px;margin:auto;padding:80px 32px 60px}
+
+    /* HERO INPUT */
+    .hero-input{padding:40px 0 32px;text-align:center}
+    .hi-eyebrow{font-family:var(--mono);font-size:10px;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px}
+    .hi-title{font-family:var(--serif);font-size:clamp(32px,4vw,52px);line-height:1.1;margin-bottom:8px}
+    .hi-title em{font-style:italic;color:var(--gold2)}
+    .hi-sub{font-size:13px;color:var(--muted);margin-bottom:32px}
+    .search-row{display:flex;align-items:center;gap:10px;max-width:500px;margin:0 auto 16px}
+    .sr-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border2);border-radius:6px;padding:13px 18px;color:var(--text);font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:2px;outline:none;text-transform:uppercase;transition:border-color .2s,background .2s}
+    .sr-input::placeholder{color:var(--muted);font-size:13px;text-transform:none;letter-spacing:0;font-weight:400}
+    .sr-input:focus{border-color:var(--gold);background:rgba(200,169,110,0.04)}
+    .btn-analyze{background:var(--gold);color:#080c10;font-family:var(--font);font-weight:800;font-size:14px;padding:13px 28px;border-radius:6px;border:none;cursor:pointer;transition:all .2s;white-space:nowrap}
+    .btn-analyze:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 8px 30px rgba(200,169,110,0.25)}
+    .quick-row{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+    .ql{font-size:11px;color:var(--muted);font-family:var(--mono)}
+    .qbtn{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:4px;padding:4px 12px;color:var(--text);font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s}
+    .qbtn:hover{background:rgba(200,169,110,0.1);border-color:var(--gold);color:var(--gold)}
+
+    /* RESULT */
+    #result{display:none;animation:fadeUp .4s ease}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+    /* SUMMARY ROW */
+    .summary-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+    .sum-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px 18px}
+    .sum-card.highlight{border-color:rgba(200,169,110,0.3);background:rgba(200,169,110,0.04)}
+    .sum-val{font-family:var(--mono);font-size:20px;font-weight:700;margin-bottom:3px}
+    .sum-lbl{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+    .sum-change{font-family:var(--mono);font-size:11px;margin-top:4px}
+    .up{color:var(--green)}.dn{color:var(--red)}.neu{color:var(--muted)}
+
+    /* SIGNAL BANNER */
+    .signal-banner{border-radius:8px;padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;gap:14px;font-weight:600;font-size:14px}
+    .signal-banner.bullish{background:rgba(46,204,138,0.08);border:1px solid rgba(46,204,138,0.25);color:var(--green)}
+    .signal-banner.bearish{background:rgba(224,90,90,0.08);border:1px solid rgba(224,90,90,0.2);color:var(--red)}
+    .signal-banner.neutral{background:rgba(245,197,24,0.06);border:1px solid rgba(245,197,24,0.2);color:var(--warn)}
+    .sig-icon{font-size:20px}
+    .sig-text{flex:1}
+    .sig-rsi{font-family:var(--mono);font-size:12px;opacity:.8}
+
+    /* MAIN GRID */
+    .main-grid{display:grid;grid-template-columns:1fr 380px;gap:20px;margin-bottom:20px}
+
+    /* CHART */
+    .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+    .card-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
+    .card-title{font-size:13px;font-weight:700;letter-spacing:.3px}
+    .card-sub{font-size:11px;color:var(--muted);font-family:var(--mono)}
+    .chart-wrap{padding:16px;position:relative}
+    canvas#srChart{width:100%!important;display:block}
+
+    /* LEVELS CARD */
+    .levels-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+    .levels-body{padding:14px 16px;flex:1;overflow-y:auto;max-height:420px}
+    .level-section-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:14px 0 8px;display:flex;align-items:center;gap:6px}
+    .level-row{display:flex;align-items:center;justify-content:space-between;padding:9px 10px;border-radius:6px;margin-bottom:4px;transition:background .15s;cursor:default}
+    .level-row:hover{background:rgba(255,255,255,0.04)}
+    .level-row.res-row{border-left:2px solid rgba(224,90,90,0.5)}
+    .level-row.sup-row{border-left:2px solid rgba(46,204,138,0.5)}
+    .lvl-price{font-family:var(--mono);font-size:14px;font-weight:700}
+    .lvl-price.res{color:var(--red)}
+    .lvl-price.sup{color:var(--green)}
+    .lvl-right{display:flex;align-items:center;gap:10px}
+    .lvl-dist{font-family:var(--mono);font-size:11px;color:var(--muted)}
+    .strength-pip{display:flex;gap:3px}
+    .pip{width:6px;height:6px;border-radius:1px;background:rgba(255,255,255,0.1)}
+    .pip.filled.res{background:var(--red)}
+    .pip.filled.sup{background:var(--green)}
+    .cur-price-line{display:flex;align-items:center;gap:10px;padding:10px;margin:6px 0;border-radius:6px;background:rgba(200,169,110,0.06);border:1px dashed rgba(200,169,110,0.3)}
+    .cur-label{font-size:10px;color:var(--gold);font-family:var(--mono);letter-spacing:1px;text-transform:uppercase}
+    .cur-val{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--gold2);margin-left:auto}
+
+    /* BOTTOM GRID */
+    .bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+
+    /* FIB TABLE */
+    .fib-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+    .fib-body{padding:0 16px 16px}
+    .fib-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+    .fib-row:last-child{border-bottom:none}
+    .fib-label{font-family:var(--mono);font-size:12px;color:var(--muted)}
+    .fib-price{font-family:var(--mono);font-size:13px;font-weight:700}
+    .fib-bar-wrap{width:80px;height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;margin:0 12px}
+    .fib-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold),var(--gold2))}
+    .fib-near{font-size:9px;color:var(--gold);font-family:var(--mono);padding:1px 6px;background:rgba(200,169,110,0.1);border-radius:3px;border:1px solid rgba(200,169,110,0.2)}
+
+    /* ZONE CARD */
+    .zone-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+    .zone-body{padding:16px}
+    .zone-item{display:flex;align-items:flex-start;gap:14px;padding:12px;border-radius:8px;margin-bottom:10px;transition:background .15s}
+    .zone-item:last-child{margin-bottom:0}
+    .zone-icon{font-size:22px;flex-shrink:0}
+    .zone-title{font-size:13px;font-weight:700;margin-bottom:3px}
+    .zone-val{font-family:var(--mono);font-size:13px;font-weight:700}
+    .zone-desc{font-size:11px;color:var(--muted);margin-top:2px}
+    .zone-res{background:rgba(224,90,90,0.05);border:1px solid rgba(224,90,90,0.15)}
+    .zone-sup{background:rgba(46,204,138,0.05);border:1px solid rgba(46,204,138,0.15)}
+    .zone-con{background:rgba(245,197,24,0.04);border:1px solid rgba(245,197,24,0.15)}
+
+    /* LOADING */
+    .loading-overlay{position:fixed;inset:0;background:rgba(8,12,16,.8);backdrop-filter:blur(6px);z-index:9000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+    .spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,.08);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading-text{font-family:var(--mono);font-size:13px;color:var(--muted)}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:24px;right:24px;background:rgba(13,19,24,.97);border:1px solid var(--border2);border-radius:8px;padding:12px 20px;font-size:13px;z-index:9999;display:none;backdrop-filter:blur(10px)}
+
+    @media(max-width:900px){
+      .main-grid{grid-template-columns:1fr}
+      .summary-row{grid-template-columns:repeat(2,1fr)}
+      .bottom-grid{grid-template-columns:1fr}
+      .topbar-nav{display:none}
+      main{padding:70px 16px 40px}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Topbar -->
+  <div class="topbar" id="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="topbar-logo">▲ Cukong Reborn</a>
+      <span class="topbar-sep">|</span>
+      <span class="topbar-badge sr-badge">S&R FINDER</span>
+    </div>
+    <nav class="topbar-nav">
+      <a href="screener.html">📊 Screener</a>
+      <a href="sr.html" class="active">📉 S&R Finder</a>
+      <a href="volume.html">🔥 Volume Anomaly</a>
+      <a href="scanner.html">🔭 Market Scanner</a>
+      <a href="#" class="soon">📈 Trend Dashboard</a>
+      <a href="#" class="soon">🕯 Candlestick</a>
+      <a href="#" class="soon">⚡ Momentum</a>
+    </nav>
+    <a href="index.html" class="topbar-home">← Beranda</a>
+  </div>
+
+  <main>
+    <!-- Hero Input -->
+    <div class="hero-input">
+      <div class="hi-eyebrow">Support & Resistance Finder</div>
+      <h1 class="hi-title">Temukan Level <em>Kritis</em> Saham</h1>
+      <p class="hi-sub">Deteksi otomatis zona Support, Resistance, dan Fibonacci dari data 6 bulan historis</p>
+      <div class="search-row">
+        <input class="sr-input" id="symInput" placeholder="Kode emiten... contoh: BBRI" autocomplete="off" spellcheck="false">
+        <button class="btn-analyze" onclick="analyze()">Analisis →</button>
+      </div>
+      <div class="quick-row">
+        <span class="ql">Cepat:</span>
+        <button class="qbtn" onclick="quickSR('BBRI')">BBRI</button>
+        <button class="qbtn" onclick="quickSR('TLKM')">TLKM</button>
+        <button class="qbtn" onclick="quickSR('BMRI')">BMRI</button>
+        <button class="qbtn" onclick="quickSR('BBCA')">BBCA</button>
+        <button class="qbtn" onclick="quickSR('ASII')">ASII</button>
+        <button class="qbtn" onclick="quickSR('ANTM')">ANTM</button>
+        <button class="qbtn" onclick="quickSR('ITMG')">ITMG</button>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div id="result">
+
+      <!-- Summary Row -->
+      <div class="summary-row" id="summaryRow"></div>
+
+      <!-- Signal Banner -->
+      <div class="signal-banner" id="signalBanner"></div>
+
+      <!-- Main Grid -->
+      <div class="main-grid">
+        <!-- Chart -->
+        <div class="chart-card">
+          <div class="card-header">
+            <div class="card-title" id="chartSymbol">—</div>
+            <div class="card-sub" id="chartPeriod">Data 6 Bulan · 60 Candle Terakhir</div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="srChart" height="320"></canvas>
+          </div>
+        </div>
+
+        <!-- Levels -->
+        <div class="levels-card">
+          <div class="card-header">
+            <div class="card-title">Level S/R Terdekat</div>
+            <div class="card-sub">Strength = jumlah sentuhan</div>
+          </div>
+          <div class="levels-body" id="levelsBody"></div>
+        </div>
+      </div>
+
+      <!-- Bottom Grid -->
+      <div class="bottom-grid">
+        <!-- Fibonacci -->
+        <div class="fib-card">
+          <div class="card-header">
+            <div class="card-title">Fibonacci Retracement</div>
+            <div class="card-sub" id="fibPeriod">6 Bulan High–Low</div>
+          </div>
+          <div class="fib-body" id="fibBody"></div>
+        </div>
+
+        <!-- Zone Summary -->
+        <div class="zone-card">
+          <div class="card-header">
+            <div class="card-title">Ringkasan Zona</div>
+            <div class="card-sub">Area kritis & konsolidasi</div>
+          </div>
+          <div class="zone-body" id="zoneBody"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="loading-overlay" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">Menganalisis data 6 bulan...</div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:5000' : '';
+
+    let srChart = null;
+
+    document.getElementById('symInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') analyze();
+    });
+
+    function quickSR(sym) {
+      document.getElementById('symInput').value = sym;
+      analyze();
+    }
+
+    async function analyze() {
+      const sym = document.getElementById('symInput').value.trim().toUpperCase();
+      if (!sym) { toast('⚠️ Masukkan kode emiten!'); return; }
+
+      showLoading(`Menganalisis ${sym}...`);
+      try {
+        const res = await fetch(`${API}/sr/${sym}`);
+        const d   = await res.json();
+        if (d.error) throw new Error(d.error);
+        render(d);
+        document.getElementById('result').style.display = 'block';
+        document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+      } catch(e) {
+        toast('❌ ' + e.message);
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function render(d) {
+      renderSummary(d);
+      renderSignal(d);
+      renderChart(d);
+      renderLevels(d);
+      renderFib(d);
+      renderZones(d);
+    }
+
+    // ---- SUMMARY ----
+    function renderSummary(d) {
+      const chg     = d.price - d.open;
+      const chgPct  = ((chg / d.open) * 100).toFixed(2);
+      const chgCls  = chg >= 0 ? 'up' : 'dn';
+      const chgSign = chg >= 0 ? '+' : '';
+      const rsiCls  = d.rsi > 70 ? 'dn' : d.rsi < 30 ? 'up' : 'neu';
+
+      document.getElementById('summaryRow').innerHTML = `
+        <div class="sum-card highlight">
+          <div class="sum-val" style="color:var(--gold2)">${rp(d.price)}</div>
+          <div class="sum-lbl">Harga Terakhir</div>
+          <div class="sum-change ${chgCls}">${chgSign}${chgPct}% hari ini</div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-val" style="color:var(--red)">${d.nearest_res ? rp(d.nearest_res) : '—'}</div>
+          <div class="sum-lbl">Resistance Terdekat</div>
+          <div class="sum-change neu">${d.nearest_res ? '+'+((d.nearest_res-d.price)/d.price*100).toFixed(1)+'%' : '—'}</div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-val" style="color:var(--green)">${d.nearest_sup ? rp(d.nearest_sup) : '—'}</div>
+          <div class="sum-lbl">Support Terdekat</div>
+          <div class="sum-change neu">${d.nearest_sup ? ((d.nearest_sup-d.price)/d.price*100).toFixed(1)+'%' : '—'}</div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-val ${rsiCls}">${d.rsi}</div>
+          <div class="sum-lbl">RSI (14)</div>
+          <div class="sum-change neu">${d.rsi > 70 ? 'Overbought' : d.rsi < 30 ? 'Oversold' : 'Normal'}</div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-val" style="font-size:14px;color:var(--muted)">${rp(d.period_low)} – ${rp(d.period_high)}</div>
+          <div class="sum-lbl">Range 6 Bulan</div>
+          <div class="sum-change neu">Spread: ${(((d.period_high-d.period_low)/d.period_low)*100).toFixed(1)}%</div>
+        </div>`;
+    }
+
+    // ---- SIGNAL ----
+    function renderSignal(d) {
+      const icons = { bullish:'🟢', bearish:'🔴', neutral:'🟡' };
+      document.getElementById('signalBanner').className = `signal-banner ${d.signal_type}`;
+      document.getElementById('signalBanner').innerHTML = `
+        <span class="sig-icon">${icons[d.signal_type]}</span>
+        <span class="sig-text">${d.symbol} — <strong>${d.signal}</strong></span>
+        <span class="sig-rsi">RSI: ${d.rsi}</span>`;
+    }
+
+    // ---- CHART ----
+    function renderChart(d) {
+      document.getElementById('chartSymbol').textContent = `${d.symbol} · Price Chart + S/R Levels`;
+      const canvas = document.getElementById('srChart');
+      const ctx    = canvas.getContext('2d');
+
+      if (srChart) { srChart.destroy(); srChart = null; }
+
+      const candles  = d.candles;
+      const labels   = candles.map(c => c.date.slice(5)); // MM-DD
+      const closes   = candles.map(c => c.close);
+      const highs    = candles.map(c => c.high);
+      const lows     = candles.map(c => c.low);
+
+      // Min/max for Y axis
+      const allPrices = [...closes, ...highs, ...lows,
+        ...d.resistances.map(r=>r.price), ...d.supports.map(s=>s.price)];
+      const yMin = Math.min(...allPrices) * 0.985;
+      const yMax = Math.max(...allPrices) * 1.015;
+
+      // Build annotation lines for S/R
+      const resLines = d.resistances.slice(0, 3).map(r => ({
+        type: 'line', yMin: r.price, yMax: r.price,
+        borderColor: 'rgba(224,90,90,0.7)', borderWidth: 1.5,
+        borderDash: [4, 4],
+        label: { content: `R ${rp(r.price)}`, enabled: true, position: 'end',
+          backgroundColor: 'rgba(224,90,90,0.15)', color: '#e05a5a',
+          font: { family: 'DM Mono', size: 10 }, padding: {x:6,y:3} }
+      }));
+      const supLines = d.supports.slice(0, 3).map(s => ({
+        type: 'line', yMin: s.price, yMax: s.price,
+        borderColor: 'rgba(46,204,138,0.7)', borderWidth: 1.5,
+        borderDash: [4, 4],
+        label: { content: `S ${rp(s.price)}`, enabled: true, position: 'end',
+          backgroundColor: 'rgba(46,204,138,0.12)', color: '#2ecc8a',
+          font: { family: 'DM Mono', size: 10 }, padding: {x:6,y:3} }
+      }));
+      const curLine = {
+        type: 'line', yMin: d.price, yMax: d.price,
+        borderColor: 'rgba(200,169,110,0.9)', borderWidth: 2,
+        label: { content: `HARGA ${rp(d.price)}`, enabled: true, position: 'end',
+          backgroundColor: 'rgba(200,169,110,0.2)', color: '#e8c98a',
+          font: { family: 'DM Mono', size: 10, weight: 'bold' }, padding: {x:6,y:3} }
+      };
+
+      srChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: d.symbol,
+            data: closes,
+            borderColor: 'rgba(200,169,110,0.9)',
+            borderWidth: 2,
+            backgroundColor: (ctx) => {
+              const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 320);
+              gradient.addColorStop(0, 'rgba(200,169,110,0.15)');
+              gradient.addColorStop(1, 'rgba(200,169,110,0)');
+              return gradient;
+            },
+            fill: true,
+            tension: 0.3,
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: '#e8c98a',
+          }]
+        },
+        options: {
+          responsive: true,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(13,19,24,0.95)',
+              borderColor: 'rgba(255,255,255,0.1)',
+              borderWidth: 1,
+              titleFont: { family: 'DM Mono', size: 11 },
+              bodyFont: { family: 'DM Mono', size: 12 },
+              callbacks: {
+                label: ctx => ` ${rp(ctx.parsed.y)}`
+              }
+            },
+            annotation: {
+              annotations: [...resLines, ...supLines, curLine]
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: 'rgba(232,228,220,0.35)',
+                font: { family: 'DM Mono', size: 9 },
+                maxTicksLimit: 10,
+              },
+              grid: { color: 'rgba(255,255,255,0.04)' }
+            },
+            y: {
+              min: yMin, max: yMax,
+              ticks: {
+                color: 'rgba(232,228,220,0.35)',
+                font: { family: 'DM Mono', size: 9 },
+                callback: v => rp(v)
+              },
+              grid: { color: 'rgba(255,255,255,0.04)' }
+            }
+          }
+        }
+      });
+    }
+
+    // ---- LEVELS ----
+    function renderLevels(d) {
+      let html = '';
+
+      // Resistance (from closest to farthest above)
+      const resAbove = [...d.resistances].sort((a,b) => a.price - b.price);
+      html += `<div class="level-section-title" style="color:var(--red)">▲ Resistance (${resAbove.length})</div>`;
+      resAbove.forEach(r => {
+        const pips = Array.from({length:5}, (_,i) =>
+          `<div class="pip ${i < Math.min(r.strength,5) ? 'filled res' : ''}"></div>`).join('');
+        html += `<div class="level-row res-row">
+          <div class="lvl-price res">${rp(r.price)}</div>
+          <div class="lvl-right">
+            <div class="lvl-dist">+${r.dist_pct.toFixed(1)}%</div>
+            <div class="strength-pip">${pips}</div>
+          </div>
+        </div>`;
+      });
+
+      // Current price
+      html += `<div class="cur-price-line">
+        <span class="cur-label">● Harga Sekarang</span>
+        <span class="cur-val">${rp(d.price)}</span>
+      </div>`;
+
+      // Support (from closest to farthest below)
+      const supBelow = [...d.supports].sort((a,b) => b.price - a.price);
+      html += `<div class="level-section-title" style="color:var(--green)">▼ Support (${supBelow.length})</div>`;
+      supBelow.forEach(s => {
+        const pips = Array.from({length:5}, (_,i) =>
+          `<div class="pip ${i < Math.min(s.strength,5) ? 'filled sup' : ''}"></div>`).join('');
+        html += `<div class="level-row sup-row">
+          <div class="lvl-price sup">${rp(s.price)}</div>
+          <div class="lvl-right">
+            <div class="lvl-dist">${s.dist_pct.toFixed(1)}%</div>
+            <div class="strength-pip">${pips}</div>
+          </div>
+        </div>`;
+      });
+
+      document.getElementById('levelsBody').innerHTML = html;
+    }
+
+    // ---- FIBONACCI ----
+    function renderFib(d) {
+      const fib   = d.fibonacci;
+      const price = d.price;
+      const range = d.period_high - d.period_low;
+      const levels = [
+        { label:'0.0   (Low)',   key:'0.0',   color:'#e05a5a' },
+        { label:'0.236',         key:'0.236', color:'#f5c518' },
+        { label:'0.382',         key:'0.382', color:'#60c0f0' },
+        { label:'0.500',         key:'0.5',   color:'#c8a96e' },
+        { label:'0.618 (Golden)',key:'0.618', color:'#e8c98a' },
+        { label:'0.786',         key:'0.786', color:'#60c0f0' },
+        { label:'1.0   (High)',  key:'1.0',   color:'#2ecc8a' },
+      ];
+      let html = '';
+      levels.forEach(lv => {
+        const lvPrice = fib[lv.key];
+        const pct     = range > 0 ? ((lvPrice - d.period_low) / range) * 100 : 50;
+        const near    = Math.abs(lvPrice - price) / price < 0.015;
+        html += `<div class="fib-row">
+          <div class="fib-label" style="color:${lv.color}">${lv.label}</div>
+          <div class="fib-bar-wrap"><div class="fib-bar-fill" style="width:${pct}%"></div></div>
+          <div class="fib-price" style="color:${near ? 'var(--gold2)' : 'var(--text)'}">${rp(lvPrice)}</div>
+          ${near ? '<div class="fib-near">≈ Harga</div>' : '<div style="width:44px"></div>'}
+        </div>`;
+      });
+      document.getElementById('fibBody').innerHTML = html;
+      document.getElementById('fibPeriod').textContent =
+        `${rp(d.period_low)} — ${rp(d.period_high)}`;
+    }
+
+    // ---- ZONES ----
+    function renderZones(d) {
+      const upside = d.nearest_res ? ((d.nearest_res - d.price) / d.price * 100).toFixed(1) : '—';
+      const downside = d.nearest_sup ? ((d.price - d.nearest_sup) / d.price * 100).toFixed(1) : '—';
+      const rrRaw = d.nearest_res && d.nearest_sup
+        ? ((d.nearest_res - d.price) / (d.price - d.nearest_sup)).toFixed(1) : '—';
+
+      document.getElementById('zoneBody').innerHTML = `
+        <div class="zone-item zone-res">
+          <div class="zone-icon">🔴</div>
+          <div>
+            <div class="zone-title">Resistance Terdekat</div>
+            <div class="zone-val" style="color:var(--red)">${d.nearest_res ? rp(d.nearest_res) : '—'}</div>
+            <div class="zone-desc">+${upside}% dari harga sekarang · Target jual / area waspada</div>
+          </div>
+        </div>
+        <div class="zone-item zone-sup">
+          <div class="zone-icon">🟢</div>
+          <div>
+            <div class="zone-title">Support Terdekat</div>
+            <div class="zone-val" style="color:var(--green)">${d.nearest_sup ? rp(d.nearest_sup) : '—'}</div>
+            <div class="zone-desc">-${downside}% dari harga sekarang · Area cut loss / beli ulang</div>
+          </div>
+        </div>
+        <div class="zone-item zone-con">
+          <div class="zone-icon">📊</div>
+          <div>
+            <div class="zone-title">Risk/Reward Ratio</div>
+            <div class="zone-val" style="color:var(--warn)">${rrRaw}x</div>
+            <div class="zone-desc">Potensi upside vs downside ke S/R terdekat · ${rrRaw >= 2 ? '✅ Layak' : rrRaw >= 1 ? '⚠️ Netral' : '❌ Hindari'}</div>
+          </div>
+        </div>
+        <div class="zone-item zone-con">
+          <div class="zone-icon">🏗</div>
+          <div>
+            <div class="zone-title">Zona Konsolidasi</div>
+            <div class="zone-val" style="color:var(--warn);font-size:12px">${rp(d.consolidation.low)} – ${rp(d.consolidation.high)}</div>
+            <div class="zone-desc">Area harga paling sering berada dalam 6 bulan terakhir</div>
+          </div>
+        </div>`;
+    }
+
+    // ---- HELPERS ----
+    function rp(x) {
+      return 'Rp ' + Math.round(Number(x)).toLocaleString('id-ID');
+    }
+    function showLoading(msg) {
+      document.getElementById('loadingText').textContent = msg;
+      document.getElementById('loading').style.display = 'flex';
+    }
+    function hideLoading() {
+      document.getElementById('loading').style.display = 'none';
+    }
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.style.display = 'block';
+      setTimeout(() => t.style.display = 'none', 3000);
+    }
+  </script>
+
+  <!-- Chart.js + Annotation plugin -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
+</body>
+</html>

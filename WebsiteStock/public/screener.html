@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BSJP Screener — Cukong Reborn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <script src="https://s3.tradingview.com/tv.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Background -->
+  <div class="topbar" id="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="topbar-logo">▲ Cukong Reborn</a>
+      <span class="topbar-sep">|</span>
+      <span class="topbar-badge">BSJP SCREENER</span>
+    </div>
+    <nav class="topbar-nav">
+      <a href="screener.html" class="active">📊 Screener</a>
+      <a href="sr.html">📉 S&R Finder</a>
+      <a href="volume.html">🔥 Volume Anomaly</a>
+      <a href="scanner.html">🔭 Market Scanner</a>
+      <a href="#" class="soon">📈 Trend Dashboard</a>
+      <a href="#" class="soon">🕯 Candlestick</a>
+      <a href="#" class="soon">⚡ Momentum</a>
+    </nav>
+    <a href="index.html" class="topbar-home">← Beranda</a>
+  </div>
+  <div class="bg-grid"></div>
+  <div class="bg-glow glow-1"></div>
+  <div class="bg-glow glow-2"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">▲</span>
+        <div>
+          <div class="logo-title">BSJP Screener <span class="logo-pro">PRO</span></div>
+          <div class="logo-sub">by AlviZevalli · IDX Market</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="market-status" id="marketStatus">
+          <span class="dot"></span> Market Loading...
+        </div>
+        <div class="clock" id="clock"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main>
+
+    <!-- Search Panel -->
+    <section class="search-panel">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input id="sym" placeholder="Masukkan kode saham... (contoh: BBRI, TLKM, BMRI)" autocomplete="off" spellcheck="false">
+        <button class="btn-add" onclick="addStock()">
+          <span>+ Tambah</span>
+        </button>
+      </div>
+      <div class="quick-picks">
+        <span class="qp-label">Cepat:</span>
+        <button onclick="quickAdd('BBRI')">BBRI</button>
+        <button onclick="quickAdd('TLKM')">TLKM</button>
+        <button onclick="quickAdd('BMRI')">BMRI</button>
+        <button onclick="quickAdd('ASII')">ASII</button>
+        <button onclick="quickAdd('GOTO')">GOTO</button>
+        <button onclick="quickAdd('BBCA')">BBCA</button>
+        <button onclick="quickAdd('ANTM')">ANTM</button>
+        <button onclick="quickAdd('ITMG')">ITMG</button>
+      </div>
+    </section>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('screener', this)">📊 Screener</button>
+      <button class="tab" onclick="switchTab('watchlist', this)">👁 Watchlist</button>
+      <button class="tab" onclick="switchTab('backtest', this)">🔁 Backtest</button>
+      <button class="tab" onclick="switchTab('info', this)">ℹ️ Panduan</button>
+      <div class="tab-actions">
+        <button class="btn-export" onclick="exportCSV()">⬇ Export CSV</button>
+        <button class="btn-clear" onclick="clearAll()">🗑 Hapus Semua</button>
+      </div>
+    </div>
+
+    <!-- Tab: Screener -->
+    <div id="tab-screener" class="tab-content active">
+
+      <!-- Summary Cards -->
+      <div class="summary-cards" id="summaryCards" style="display:none">
+        <div class="s-card" id="cardTotal">
+          <div class="s-card-val" id="totalCount">0</div>
+          <div class="s-card-label">Total Saham</div>
+        </div>
+        <div class="s-card strong-card" id="cardStrong">
+          <div class="s-card-val" id="strongCount">0</div>
+          <div class="s-card-label">STRONG 🔥</div>
+        </div>
+        <div class="s-card valid-card" id="cardValid">
+          <div class="s-card-val" id="validCount">0</div>
+          <div class="s-card-label">VALID ✅</div>
+        </div>
+        <div class="s-card skip-card" id="cardSkip">
+          <div class="s-card-val" id="skipCount">0</div>
+          <div class="s-card-label">SKIP ⛔</div>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar" id="filterBar" style="display:none">
+        <span class="filter-label">Filter:</span>
+        <button class="filter-btn active" onclick="filterTable('ALL', this)">Semua</button>
+        <button class="filter-btn" onclick="filterTable('STRONG', this)">STRONG</button>
+        <button class="filter-btn" onclick="filterTable('VALID', this)">VALID</button>
+        <button class="filter-btn" onclick="filterTable('SKIP', this)">SKIP</button>
+        <span class="filter-label" style="margin-left:16px">Urutkan:</span>
+        <select id="sortSelect" onchange="sortTable()">
+          <option value="none">Default</option>
+          <option value="score-desc">Score ↓</option>
+          <option value="score-asc">Score ↑</option>
+          <option value="price-desc">Harga ↓</option>
+          <option value="price-asc">Harga ↑</option>
+        </select>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <table id="screenerTable">
+          <thead>
+            <tr>
+              <th>Emiten</th>
+              <th>Harga</th>
+              <th>Open</th>
+              <th>High</th>
+              <th>Low</th>
+              <th>Volume</th>
+              <th>Vol Ratio</th>
+              <th>MA5</th>
+              <th>Score</th>
+              <th>Status</th>
+              <th>Risk</th>
+              <th>TP (+3%)</th>
+              <th>CL (-3%)</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr class="empty-row">
+              <td colspan="14">
+                <div class="empty-state">
+                  <div class="empty-icon">📈</div>
+                  <div>Belum ada saham. Masukkan kode emiten di atas untuk mulai screening.</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab: Watchlist -->
+    <div id="tab-watchlist" class="tab-content">
+      <div class="wl-header">
+        <h3>Watchlist Saya</h3>
+        <span class="wl-count" id="wlCount">0 saham</span>
+      </div>
+      <div id="watchlistGrid" class="wl-grid">
+        <div class="wl-empty">Belum ada saham di watchlist. Klik ⭐ di tabel screener untuk menambahkan.</div>
+      </div>
+    </div>
+
+    <!-- Tab: Backtest -->
+    <div id="tab-backtest" class="tab-content">
+      <div class="bt-header">
+        <h3>Hasil Backtest</h3>
+        <p class="bt-desc">Sistem akan menguji sinyal beli pada data historis 120 hari. Sinyal dianggap berhasil jika harga naik >2% di hari berikutnya.</p>
+      </div>
+      <div id="backtestResults" class="bt-grid">
+        <div class="bt-empty">Tambahkan saham di Screener untuk melihat hasil backtest.</div>
+      </div>
+    </div>
+
+    <!-- Tab: Info -->
+    <div id="tab-info" class="tab-content">
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-icon">📊</div>
+          <h4>Cara Penggunaan</h4>
+          <p>Masukkan kode saham IDX (contoh: BBRI, TLKM) di kolom pencarian, lalu klik <strong>+ Tambah</strong>. Sistem akan menganalisis data real-time dari yfinance.</p>
+        </div>
+        <div class="info-card">
+          <div class="info-icon">🧮</div>
+          <h4>Sistem Scoring</h4>
+          <ul>
+            <li><strong>+30</strong> Harga > MA5 (Trend naik)</li>
+            <li><strong>+30</strong> Dekat High harian (&lt;2%)</li>
+            <li><strong>+40</strong> Volume > 130% rata-rata</li>
+            <li><strong>+20</strong> Candle kuat (body ratio &gt;0.6)</li>
+            <li><strong>+20</strong> Gap naik dari open</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <div class="info-icon">🎯</div>
+          <h4>Interpretasi Status</h4>
+          <ul>
+            <li><span class="badge-strong">STRONG</span> Score ≥ 90 · Risk Rendah</li>
+            <li><span class="badge-valid">VALID</span> Score 70-89 · Risk Sedang</li>
+            <li><span class="badge-skip">SKIP</span> Score &lt; 70 · Risk Tinggi</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <div class="info-icon">⚠️</div>
+          <h4>Disclaimer</h4>
+          <p>Tools ini bersifat edukatif dan bukan rekomendasi investasi. Selalu lakukan riset mandiri dan konsultasikan dengan profesional keuangan sebelum mengambil keputusan investasi.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart Box -->
+    <div id="chartBox" class="chart-box">
+      <div class="chart-header">
+        <div class="chart-title-area">
+          <span class="chart-badge">IDX</span>
+          <h3 id="chartTitle">Chart</h3>
+        </div>
+        <div class="chart-controls">
+          <button class="chart-tf active" onclick="setTF('D', this)">1D</button>
+          <button class="chart-tf" onclick="setTF('W', this)">1W</button>
+          <button class="chart-tf" onclick="setTF('M', this)">1M</button>
+          <button class="chart-close" onclick="closeChart()">✕</button>
+        </div>
+      </div>
+      <div id="tvchart"></div>
+    </div>
+
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Loading overlay -->
+  <div id="loading" class="loading-overlay" style="display:none">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">Mengambil data...</div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market Scanner — Cukong Reborn</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#080c10;--bg2:#0d1318;--bg3:#111820;
+      --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+      --gold:#c8a96e;--gold2:#e8c98a;
+      --text:#e8e4dc;--muted:rgba(232,228,220,0.45);
+      --green:#2ecc8a;--red:#e05a5a;--blue:#60c0f0;--warn:#f5c518;
+      --ob:#ff4560;--os:#2ecc8a;
+      --font:'Syne',sans-serif;--mono:'DM Mono',monospace;--serif:'DM Serif Display',serif;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(200,169,110,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(200,169,110,0.025) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0}
+
+    /* TOPBAR */
+    .topbar{position:fixed;top:0;left:0;right:0;z-index:500;display:flex;align-items:center;gap:16px;padding:0 24px;height:48px;background:rgba(8,12,16,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+    .topbar-left{display:flex;align-items:center;gap:12px;flex-shrink:0}
+    .topbar-logo{font-family:var(--serif);font-size:15px;color:var(--gold2);text-decoration:none;font-weight:700;white-space:nowrap}
+    .topbar-sep{color:rgba(255,255,255,0.15);font-size:14px}
+    .topbar-badge{font-size:9px;font-weight:700;letter-spacing:1.5px;background:rgba(96,192,240,0.12);border:1px solid rgba(96,192,240,0.3);color:var(--blue);padding:2px 8px;border-radius:3px;text-transform:uppercase;white-space:nowrap}
+    .topbar-nav{display:flex;align-items:center;gap:2px;flex:1;overflow-x:auto;scrollbar-width:none}
+    .topbar-nav::-webkit-scrollbar{display:none}
+    .topbar-nav a{font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;padding:6px 14px;border-radius:6px;transition:all .15s;white-space:nowrap;border:1px solid transparent}
+    .topbar-nav a:hover:not(.soon){color:var(--text);background:rgba(255,255,255,0.06)}
+    .topbar-nav a.active{color:var(--blue);background:rgba(96,192,240,0.08);border-color:rgba(96,192,240,0.25)}
+    .topbar-nav a.soon{opacity:.35;cursor:not-allowed;pointer-events:none}
+    .topbar-home{font-size:11px;font-weight:600;color:rgba(200,169,110,0.6);text-decoration:none;white-space:nowrap;flex-shrink:0;padding:6px 10px;border-radius:6px;border:1px solid rgba(200,169,110,0.2);transition:all .2s}
+    .topbar-home:hover{color:var(--gold);background:rgba(200,169,110,0.06)}
+
+    /* MAIN */
+    main{position:relative;z-index:1;max-width:1400px;margin:auto;padding:68px 28px 60px}
+
+    /* PAGE HEADER */
+    .page-header{padding:28px 0 24px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    .page-eyebrow{font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px}
+    .page-title{font-family:var(--serif);font-size:clamp(28px,3.5vw,46px);line-height:1.1}
+    .page-title em{font-style:italic;color:var(--gold2)}
+    .page-sub{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.6}
+
+    /* CONTROL PANEL */
+    .control-panel{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+
+    .universe-group{display:flex;flex-direction:column;gap:8px}
+    .group-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+    .universe-pills{display:flex;gap:6px}
+    .upill{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:7px 16px;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s}
+    .upill:hover{color:var(--text);border-color:var(--border2)}
+    .upill.active{background:rgba(96,192,240,0.08);border-color:rgba(96,192,240,0.3);color:var(--blue)}
+
+    .divider{width:1px;height:48px;background:var(--border);flex-shrink:0}
+
+    .autorefresh-group{display:flex;flex-direction:column;gap:8px}
+    .toggle-row{display:flex;align-items:center;gap:10px}
+    .toggle{position:relative;width:40px;height:22px;cursor:pointer}
+    .toggle input{opacity:0;width:0;height:0;position:absolute}
+    .toggle-slider{position:absolute;inset:0;background:rgba(255,255,255,.1);border-radius:11px;transition:.3s;border:1px solid var(--border2)}
+    .toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:2px;top:2px;background:var(--muted);border-radius:50%;transition:.3s}
+    .toggle input:checked + .toggle-slider{background:rgba(46,204,138,.2);border-color:rgba(46,204,138,.4)}
+    .toggle input:checked + .toggle-slider::before{transform:translateX(18px);background:var(--green)}
+    .toggle-label{font-size:12px;font-weight:600;color:var(--muted)}
+    .refresh-interval{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px}
+
+    .scan-btn-wrap{margin-left:auto;display:flex;gap:10px;align-items:center}
+    .btn-scan{background:linear-gradient(135deg,#60c0f0,#3a9fd4);color:#040c14;font-family:var(--font);font-weight:800;font-size:14px;padding:12px 28px;border-radius:8px;border:none;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px}
+    .btn-scan:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(96,192,240,.3)}
+    .btn-scan:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .btn-stop{background:rgba(224,90,90,.15);color:var(--red);border:1px solid rgba(224,90,90,.3);font-family:var(--font);font-weight:700;font-size:13px;padding:12px 20px;border-radius:8px;cursor:pointer;transition:all .2s;display:none}
+    .btn-stop:hover{background:rgba(224,90,90,.25)}
+
+    /* PROGRESS */
+    .progress-wrap{margin-bottom:20px;display:none}
+    .progress-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .progress-label{font-family:var(--mono);font-size:12px;color:var(--muted)}
+    .progress-count{font-family:var(--mono);font-size:12px;color:var(--blue);font-weight:700}
+    .progress-bar-bg{height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+    .progress-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--blue),#a0d8f0);transition:width .3s ease;width:0%}
+    .progress-sym{font-family:var(--mono);font-size:10px;color:rgba(232,228,220,.3);margin-top:6px}
+
+    /* SUMMARY CARDS */
+    .summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+    .sum-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px 20px;display:flex;align-items:center;gap:14px}
+    .sum-icon{font-size:28px}
+    .sum-val{font-family:var(--mono);font-size:28px;font-weight:700;line-height:1}
+    .sum-lbl{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-top:3px}
+    .sum-card.ob-card{border-color:rgba(255,69,96,.2);background:rgba(255,69,96,.04)}
+    .sum-card.os-card{border-color:rgba(46,204,138,.2);background:rgba(46,204,138,.04)}
+
+    /* FILTER BAR */
+    .filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+    .filter-label{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+    .fbtn{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:6px 14px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+    .fbtn:hover{color:var(--text);border-color:var(--border2)}
+    .fbtn.active-all{color:var(--blue);border-color:rgba(96,192,240,.3);background:rgba(96,192,240,.06)}
+    .fbtn.active-ob{color:var(--ob);border-color:rgba(255,69,96,.3);background:rgba(255,69,96,.06)}
+    .fbtn.active-os{color:var(--os);border-color:rgba(46,204,138,.3);background:rgba(46,204,138,.06)}
+    .sort-wrap{margin-left:auto;display:flex;align-items:center;gap:8px}
+    .sort-label{font-size:11px;color:var(--muted)}
+    .sort-sel{background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;color:var(--text);font-family:var(--mono);font-size:11px;outline:none;cursor:pointer}
+
+    /* RESULTS TABLE */
+    .results-wrap{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--bg2)}
+    .results-table{width:100%;border-collapse:collapse;font-size:12px}
+    .results-table thead th{background:rgba(0,0,0,.5);padding:11px 14px;text-align:center;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none;transition:color .15s}
+    .results-table thead th:hover{color:var(--text)}
+    .results-table thead th.sorted-asc::after{content:' ↑';color:var(--blue)}
+    .results-table thead th.sorted-desc::after{content:' ↓';color:var(--blue)}
+    .results-table tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;animation:rowIn .3s ease both}
+    @keyframes rowIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+    .results-table tbody tr:last-child{border-bottom:none}
+    .results-table tbody tr:hover{background:rgba(255,255,255,.03)}
+    .results-table td{padding:11px 14px;text-align:center;white-space:nowrap}
+    .sym-link{color:var(--blue);font-family:var(--mono);font-weight:700;font-size:13px;cursor:pointer;text-decoration:none;transition:color .15s}
+    .sym-link:hover{color:#fff}
+    .cond-pill{display:inline-block;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:.5px}
+    .cond-ob{background:rgba(255,69,96,.15);color:var(--ob);border:1px solid rgba(255,69,96,.3)}
+    .cond-os{background:rgba(46,204,138,.12);color:var(--os);border:1px solid rgba(46,204,138,.25)}
+    .rsi-bar-wrap{display:flex;align-items:center;gap:6px;justify-content:center}
+    .rsi-bar{width:60px;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;display:inline-block}
+    .rsi-fill{height:100%;border-radius:2px}
+    .up{color:var(--green)}.dn{color:var(--red)}.neu{color:var(--muted)}
+
+    /* EMPTY / IDLE */
+    .idle-state{padding:80px 40px;text-align:center}
+    .idle-icon{font-size:48px;margin-bottom:16px;opacity:.5}
+    .idle-title{font-family:var(--serif);font-size:24px;color:var(--muted);margin-bottom:8px}
+    .idle-sub{font-size:13px;color:rgba(232,228,220,.3)}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:24px;right:24px;background:rgba(13,19,24,.97);border:1px solid var(--border2);border-radius:8px;padding:12px 20px;font-size:13px;z-index:9999;display:none;backdrop-filter:blur(10px)}
+
+    /* AUTO REFRESH COUNTDOWN */
+    .ar-badge{font-family:var(--mono);font-size:11px;background:rgba(46,204,138,.1);border:1px solid rgba(46,204,138,.25);color:var(--green);padding:3px 10px;border-radius:4px;display:none}
+
+    @media(max-width:900px){
+      main{padding:68px 16px 40px}
+      .summary-row{grid-template-columns:repeat(2,1fr)}
+      .control-panel{flex-direction:column;align-items:flex-start}
+      .scan-btn-wrap{width:100%;justify-content:flex-start}
+      .divider{display:none}
+      .topbar-nav a{padding:5px 10px;font-size:11px}
+      .topbar-home{display:none}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="topbar-logo">▲ Cukong Reborn</a>
+      <span class="topbar-sep">|</span>
+      <span class="topbar-badge">MARKET SCANNER</span>
+    </div>
+    <nav class="topbar-nav">
+      <a href="screener.html">📊 Screener</a>
+      <a href="sr.html">📉 S&R Finder</a>
+      <a href="volume.html">🔥 Volume Anomaly</a>
+      <a href="scanner.html" class="active">🔭 Market Scanner</a>
+      <a href="#" class="soon">📈 Trend Dashboard</a>
+      <a href="#" class="soon">🕯 Candlestick</a>
+    </nav>
+    <a href="index.html" class="topbar-home">← Beranda</a>
+  </div>
+
+  <main>
+    <!-- Header -->
+    <div class="page-header">
+      <div>
+        <div class="page-eyebrow">🔭 Market Scanner</div>
+        <h1 class="page-title">Scan Seluruh Emiten IDX<br><em>Overbought & Oversold</em></h1>
+        <p class="page-sub">Deteksi otomatis semua saham dengan RSI ekstrem · Hasil muncul real-time saat scanning</p>
+      </div>
+      <div class="ar-badge" id="arBadge">⏱ Auto refresh: <span id="arCountdown">30:00</span></div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+      <div class="universe-group">
+        <div class="group-label">Universe</div>
+        <div class="universe-pills">
+          <button class="upill" onclick="setUniverse('idx30',this)">IDX30 <span style="color:var(--muted);font-weight:400">(30)</span></button>
+          <button class="upill" onclick="setUniverse('lq45',this)">LQ45 <span style="color:var(--muted);font-weight:400">(52)</span></button>
+          <button class="upill active" onclick="setUniverse('all',this)">Semua IDX <span style="color:var(--muted);font-weight:400">(~270)</span></button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="autorefresh-group">
+        <div class="group-label">Auto Refresh</div>
+        <div class="toggle-row">
+          <label class="toggle">
+            <input type="checkbox" id="arToggle" onchange="toggleAutoRefresh()">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label">Aktif saat market buka (09:00–16:00 WIB)</span>
+        </div>
+        <div class="refresh-interval">Interval: setiap 30 menit</div>
+      </div>
+
+      <div class="scan-btn-wrap">
+        <button class="btn-scan" id="btnScan" onclick="startScan()">
+          <span>🔭</span> Mulai Scan
+        </button>
+        <button class="btn-stop" id="btnStop" onclick="stopScan()">⏹ Stop</button>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-meta">
+        <span class="progress-label" id="progressLabel">Memulai scan...</span>
+        <span class="progress-count" id="progressCount">0 / 0</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-sym" id="progressSym">Menghubungi server...</div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-row" id="summaryRow" style="display:none">
+      <div class="sum-card">
+        <div class="sum-icon">🔭</div>
+        <div>
+          <div class="sum-val" id="sumTotal" style="color:var(--gold2)">0</div>
+          <div class="sum-lbl">Emiten Dipindai</div>
+        </div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-icon">📊</div>
+        <div>
+          <div class="sum-val" id="sumFound" style="color:var(--blue)">0</div>
+          <div class="sum-lbl">Sinyal Ditemukan</div>
+        </div>
+      </div>
+      <div class="sum-card ob-card">
+        <div class="sum-icon">🔴</div>
+        <div>
+          <div class="sum-val" id="sumOB" style="color:var(--ob)">0</div>
+          <div class="sum-lbl">Overbought (RSI ≥70)</div>
+        </div>
+      </div>
+      <div class="sum-card os-card">
+        <div class="sum-icon">🟢</div>
+        <div>
+          <div class="sum-val" id="sumOS" style="color:var(--os)">0</div>
+          <div class="sum-lbl">Oversold (RSI ≤30)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar" id="filterBar" style="display:none">
+      <span class="filter-label">Filter:</span>
+      <button class="fbtn active-all" onclick="setFilter('all',this)">Semua</button>
+      <button class="fbtn" onclick="setFilter('overbought',this)">🔴 Overbought</button>
+      <button class="fbtn" onclick="setFilter('oversold',this)">🟢 Oversold</button>
+      <div class="sort-wrap">
+        <span class="sort-label">Urutkan:</span>
+        <select class="sort-sel" id="sortSel" onchange="applySort()">
+          <option value="rsi-desc">RSI Tertinggi</option>
+          <option value="rsi-asc">RSI Terendah</option>
+          <option value="change-desc">Perubahan ↑</option>
+          <option value="change-asc">Perubahan ↓</option>
+          <option value="vol-desc">Volume Ratio ↓</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="results-wrap" id="resultsWrap">
+      <div class="idle-state" id="idleState">
+        <div class="idle-icon">🔭</div>
+        <div class="idle-title">Siap untuk Scan</div>
+        <div class="idle-sub">Pilih universe emiten dan klik "Mulai Scan" untuk memulai</div>
+      </div>
+      <table class="results-table" id="resultsTable" style="display:none">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th onclick="sortBy('sym')">Emiten</th>
+            <th onclick="sortBy('condition')">Kondisi</th>
+            <th onclick="sortBy('rsi')">RSI</th>
+            <th onclick="sortBy('price')">Harga</th>
+            <th onclick="sortBy('change_pct')">Perubahan</th>
+            <th onclick="sortBy('vol_ratio')">Vol Ratio</th>
+            <th onclick="sortBy('ma20')">MA20</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:5000' : '';
+
+    let universe      = 'all';
+    let activeFilter  = 'all';
+    let sortKey       = 'rsi';
+    let sortDir       = 'desc';
+    let allResults    = [];
+    let evtSource     = null;
+    let arInterval    = null;
+    let arCountdown   = null;
+    let scanning      = false;
+
+    // ===== UNIVERSE =====
+    function setUniverse(u, btn) {
+      universe = u;
+      document.querySelectorAll('.upill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // ===== SCAN (Batch Polling — Vercel compatible) =====
+    function startScan() {
+      if (scanning) return;
+      scanning   = true;
+      allResults = [];
+      let totalScanned = 0;
+      let foundOB = 0, foundOS = 0;
+
+      document.getElementById('idleState').style.display    = 'none';
+      document.getElementById('resultsTable').style.display = 'none';
+      document.getElementById('resultsBody').innerHTML      = '';
+      document.getElementById('progressWrap').style.display = 'block';
+      document.getElementById('summaryRow').style.display   = 'none';
+      document.getElementById('filterBar').style.display    = 'none';
+      document.getElementById('btnScan').disabled           = true;
+      document.getElementById('btnStop').style.display      = 'block';
+      document.getElementById('progressLabel').textContent  = 'Memulai scan...';
+      document.getElementById('progressSym').textContent    = 'Menghubungi server...';
+      updateSummary(0, 0, 0);
+
+      fetchChunk(0);
+
+      async function fetchChunk(chunk) {
+        if (!scanning) return;
+        try {
+          const res = await fetch(`${API}/market-scan?universe=${universe}&chunk=${chunk}&size=20`);
+          if (!res.ok) throw new Error('Server error ' + res.status);
+          const d = await res.json();
+
+          totalScanned = d.scanned;
+          const pct = Math.round((d.scanned / d.total) * 100);
+
+          document.getElementById('progressFill').style.width  = pct + '%';
+          document.getElementById('progressCount').textContent = `${d.scanned} / ${d.total}`;
+          document.getElementById('progressLabel').textContent = `Scanning ${d.total} emiten... ${pct}%`;
+          document.getElementById('progressSym').textContent   = `Chunk ${chunk+1} selesai · ${d.results.length} sinyal ditemukan`;
+
+          // Tambahkan hasil ke tabel
+          d.results.forEach(r => {
+            allResults.push(r);
+            if (r.condition_cls === 'overbought') foundOB++;
+            else foundOS++;
+            updateSummary(totalScanned, foundOB, foundOS);
+            if (allResults.length === 1) {
+              document.getElementById('summaryRow').style.display   = 'grid';
+              document.getElementById('filterBar').style.display    = 'flex';
+              document.getElementById('resultsTable').style.display = 'table';
+            }
+            appendRow(r);
+          });
+
+          if (!d.is_last && scanning) {
+            // Lanjut chunk berikutnya setelah delay kecil
+            setTimeout(() => fetchChunk(d.next_chunk), 300);
+          } else {
+            // Selesai
+            scanning = false;
+            document.getElementById('btnScan').disabled  = false;
+            document.getElementById('btnStop').style.display = 'none';
+            document.getElementById('progressFill').style.width = '100%';
+            document.getElementById('progressLabel').textContent = `✅ Scan selesai — ${totalScanned} emiten dipindai`;
+            document.getElementById('progressSym').textContent  = `Ditemukan: ${foundOB} Overbought + ${foundOS} Oversold`;
+            toast(`✅ Scan selesai! ${foundOB + foundOS} sinyal dari ${totalScanned} emiten.`);
+          }
+
+        } catch(e) {
+          toast('❌ Error: ' + e.message + '. Pastikan Flask berjalan.');
+          stopScan();
+        }
+      }
+    }
+
+    function stopScan() {
+      scanning = false;
+      document.getElementById('btnScan').disabled           = false;
+      document.getElementById('btnStop').style.display      = 'none';
+      document.getElementById('progressLabel').textContent  = '⏹ Scan dihentikan';
+    }
+
+    // ===== RENDER ROW =====
+    function appendRow(d) {
+      if (activeFilter !== 'all' && d.condition_cls !== activeFilter) return;
+
+      const tbody   = document.getElementById('resultsBody');
+      const rowNum  = tbody.querySelectorAll('tr').length + 1;
+      const chgCls  = d.change_pct >= 0 ? 'up' : 'dn';
+      const chgSign = d.change_pct >= 0 ? '+' : '';
+      const condCls = d.condition_cls === 'overbought' ? 'cond-ob' : 'cond-os';
+      const rsiColor= d.condition_cls === 'overbought' ? 'var(--ob)' : 'var(--os)';
+      const rsiFill = (d.rsi / 100 * 100).toFixed(0);
+      const rsiFillColor = d.rsi >= 70 ? 'var(--ob)' : d.rsi <= 30 ? 'var(--os)' : 'var(--blue)';
+      const volColor= d.vol_ratio >= 2 ? 'var(--warn)' : d.vol_ratio >= 1.3 ? '#f0c060' : 'var(--muted)';
+      const aboveMA = d.price > d.ma20;
+
+      const tr = document.createElement('tr');
+      tr.dataset.sym       = d.sym;
+      tr.dataset.condition = d.condition_cls;
+      tr.dataset.rsi       = d.rsi;
+      tr.dataset.change    = d.change_pct;
+      tr.dataset.vol       = d.vol_ratio;
+      tr.dataset.price     = d.price;
+      tr.dataset.ma20      = d.ma20;
+
+      tr.innerHTML = `
+        <td style="color:var(--muted);font-family:var(--mono)">${rowNum}</td>
+        <td><a class="sym-link" href="screener.html?sym=${d.sym}" onclick="goScreener('${d.sym}',event)">${d.sym}</a></td>
+        <td><span class="cond-pill ${condCls}">${d.condition}</span></td>
+        <td>
+          <div class="rsi-bar-wrap">
+            <span style="font-family:var(--mono);font-weight:700;color:${rsiColor};min-width:36px">${d.rsi}</span>
+            <div class="rsi-bar"><div class="rsi-fill" style="width:${rsiFill}%;background:${rsiFillColor}"></div></div>
+          </div>
+        </td>
+        <td style="font-family:var(--mono)">${rp(d.price)}</td>
+        <td class="${chgCls}" style="font-family:var(--mono)">${chgSign}${d.change_pct}%</td>
+        <td style="font-family:var(--mono);color:${volColor}">${d.vol_ratio}×</td>
+        <td style="font-family:var(--mono);color:${aboveMA?'var(--green)':'var(--red)'}">${rp(d.ma20)} ${aboveMA?'↑':'↓'}</td>
+        <td>
+          <button onclick="goScreener('${d.sym}')" style="background:rgba(96,192,240,.1);border:1px solid rgba(96,192,240,.25);color:var(--blue);font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;font-family:var(--font);font-weight:600">Analisis →</button>
+        </td>`;
+      tbody.appendChild(tr);
+    }
+
+    // ===== GO TO SCREENER =====
+    function goScreener(sym, e) {
+      if (e) e.preventDefault();
+      // Simpan sym ke sessionStorage, buka screener
+      sessionStorage.setItem('scanner_sym', sym);
+      window.location.href = 'screener.html';
+    }
+
+    // ===== FILTER =====
+    function setFilter(f, btn) {
+      activeFilter = f;
+      document.querySelectorAll('.fbtn').forEach(b => {
+        b.className = 'fbtn';
+      });
+      btn.classList.add(f === 'all' ? 'active-all' : f === 'overbought' ? 'active-ob' : 'active-os');
+      rerenderTable();
+    }
+
+    // ===== SORT =====
+    function sortBy(key) {
+      if (sortKey === key) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+      else { sortKey = key; sortDir = 'desc'; }
+      document.querySelectorAll('.results-table thead th').forEach(th => {
+        th.classList.remove('sorted-asc','sorted-desc');
+      });
+      const thIdx = ['','sym','condition','rsi','price','change_pct','vol_ratio','ma20',''].indexOf(key);
+      if (thIdx > 0) {
+        const ths = document.querySelectorAll('.results-table thead th');
+        ths[thIdx].classList.add(sortDir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+      }
+      rerenderTable();
+    }
+
+    function applySort() {
+      const val = document.getElementById('sortSel').value;
+      const [k, d] = val.split('-');
+      sortKey = k === 'vol' ? 'vol_ratio' : k;
+      sortDir = d;
+      rerenderTable();
+    }
+
+    function rerenderTable() {
+      let filtered = allResults.filter(r =>
+        activeFilter === 'all' || r.condition_cls === activeFilter
+      );
+
+      const keyMap = { sym:'sym', condition:'condition_cls', rsi:'rsi',
+                       price:'price', change_pct:'change_pct', vol_ratio:'vol_ratio', ma20:'ma20' };
+      const k = keyMap[sortKey] || 'rsi';
+      filtered.sort((a, b) => {
+        const av = typeof a[k] === 'string' ? a[k].localeCompare(b[k]) : a[k] - b[k];
+        return sortDir === 'asc' ? av : -av;
+      });
+
+      const tbody = document.getElementById('resultsBody');
+      tbody.innerHTML = '';
+      filtered.forEach((d, i) => {
+        const chgCls  = d.change_pct >= 0 ? 'up' : 'dn';
+        const chgSign = d.change_pct >= 0 ? '+' : '';
+        const condCls = d.condition_cls === 'overbought' ? 'cond-ob' : 'cond-os';
+        const rsiColor= d.condition_cls === 'overbought' ? 'var(--ob)' : 'var(--os)';
+        const rsiFill = (d.rsi / 100 * 100).toFixed(0);
+        const rsiFillColor = d.rsi >= 70 ? 'var(--ob)' : 'var(--os)';
+        const volColor= d.vol_ratio >= 2 ? 'var(--warn)' : d.vol_ratio >= 1.3 ? '#f0c060' : 'var(--muted)';
+        const aboveMA = d.price > d.ma20;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="color:var(--muted);font-family:var(--mono)">${i+1}</td>
+          <td><a class="sym-link" href="#" onclick="goScreener('${d.sym}',event)">${d.sym}</a></td>
+          <td><span class="cond-pill ${condCls}">${d.condition}</span></td>
+          <td><div class="rsi-bar-wrap"><span style="font-family:var(--mono);font-weight:700;color:${rsiColor};min-width:36px">${d.rsi}</span><div class="rsi-bar"><div class="rsi-fill" style="width:${rsiFill}%;background:${rsiFillColor}"></div></div></div></td>
+          <td style="font-family:var(--mono)">${rp(d.price)}</td>
+          <td class="${chgCls}" style="font-family:var(--mono)">${chgSign}${d.change_pct}%</td>
+          <td style="font-family:var(--mono);color:${volColor}">${d.vol_ratio}×</td>
+          <td style="font-family:var(--mono);color:${aboveMA?'var(--green)':'var(--red)'}">${rp(d.ma20)} ${aboveMA?'↑':'↓'}</td>
+          <td><button onclick="goScreener('${d.sym}')" style="background:rgba(96,192,240,.1);border:1px solid rgba(96,192,240,.25);color:var(--blue);font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;font-family:var(--font);font-weight:600">Analisis →</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateSummary(total, ob, os) {
+      document.getElementById('sumTotal').textContent = total;
+      document.getElementById('sumFound').textContent = ob + os;
+      document.getElementById('sumOB').textContent    = ob;
+      document.getElementById('sumOS').textContent    = os;
+    }
+
+    // ===== AUTO REFRESH =====
+    function toggleAutoRefresh() {
+      const on = document.getElementById('arToggle').checked;
+      if (on) {
+        startAutoRefresh();
+      } else {
+        clearAutoRefresh();
+        document.getElementById('arBadge').style.display = 'none';
+      }
+    }
+
+    function startAutoRefresh() {
+      clearAutoRefresh();
+      document.getElementById('arBadge').style.display = 'inline-block';
+      scheduleNext();
+    }
+
+    function scheduleNext() {
+      let remaining = 30 * 60; // 30 menit dalam detik
+      document.getElementById('arCountdown').textContent = formatTime(remaining);
+
+      arCountdown = setInterval(() => {
+        remaining--;
+        document.getElementById('arCountdown').textContent = formatTime(remaining);
+        if (remaining <= 0) {
+          clearInterval(arCountdown);
+          // Cek apakah market buka (09:00-16:00 WIB = UTC+7)
+          const now = new Date();
+          const wib = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+          const h = wib.getUTCHours(), m = wib.getUTCMinutes();
+          const marketOpen = (h > 9 || (h === 9 && m >= 0)) && h < 16;
+          if (marketOpen && !scanning) {
+            startScan();
+          }
+          scheduleNext();
+        }
+      }, 1000);
+    }
+
+    function clearAutoRefresh() {
+      if (arInterval)  { clearInterval(arInterval);  arInterval  = null; }
+      if (arCountdown) { clearInterval(arCountdown); arCountdown = null; }
+    }
+
+    function formatTime(s) {
+      const m = Math.floor(s / 60), sec = s % 60;
+      return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+    }
+
+    // ===== HELPERS =====
+    function rp(x){ return 'Rp ' + Math.round(Number(x)).toLocaleString('id-ID'); }
+    function toast(msg){
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.style.display = 'block';
+      setTimeout(() => t.style.display = 'none', 4000);
+    }
+  </script>
+</body>
+</html>

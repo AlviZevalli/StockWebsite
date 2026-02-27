@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cukong Reborn — Platform Analisis Saham IDX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#080c10;--bg2:#0d1318;--surface:rgba(255,255,255,0.04);
+      --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+      --gold:#c8a96e;--gold2:#e8c98a;--goldglow:rgba(200,169,110,0.18);
+      --text:#e8e4dc;--muted:rgba(232,228,220,0.45);
+      --green:#2ecc8a;--red:#e05a5a;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;cursor:none}
+
+    .cursor{position:fixed;width:10px;height:10px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .2s,height .2s}
+    .cursor-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(200,169,110,0.5);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:all .12s ease}
+
+    body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.5}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:20px 60px;display:flex;align-items:center;justify-content:space-between;transition:background .4s,padding .3s}
+    nav.scrolled{background:rgba(8,12,16,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:14px 60px}
+    .nav-logo{font-family:'DM Serif Display',serif;font-size:22px;color:var(--gold2);text-decoration:none}
+    .nav-logo span{color:var(--muted);font-style:italic;font-size:14px;margin-left:6px}
+    .nav-links{display:flex;align-items:center;gap:36px;list-style:none}
+    .nav-links a{font-size:13px;font-weight:600;color:var(--muted);text-decoration:none;letter-spacing:.5px;text-transform:uppercase;transition:color .2s;position:relative}
+    .nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--gold);transition:width .25s}
+    .nav-links a:hover{color:var(--text)}
+    .nav-links a:hover::after,.nav-links a.active::after{width:100%}
+    .nav-links a.active{color:var(--gold)}
+    .nav-cta{background:transparent!important;border:1px solid var(--gold);color:var(--gold)!important;padding:8px 20px;border-radius:4px}
+    .nav-cta:hover{background:var(--goldglow)!important}
+    .nav-cta::after{display:none!important}
+
+    /* HERO */
+    .hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden}
+    .parallax-bg{position:absolute;inset:-20%;background:radial-gradient(ellipse 80% 60% at 70% 50%,rgba(200,169,110,0.06) 0%,transparent 60%),radial-gradient(ellipse 50% 80% at 20% 80%,rgba(46,204,138,0.04) 0%,transparent 50%);will-change:transform}
+    .parallax-grid{position:absolute;inset:-20%;background-image:linear-gradient(rgba(200,169,110,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(200,169,110,0.04) 1px,transparent 1px);background-size:60px 60px;will-change:transform}
+
+    .ticker-container{position:absolute;bottom:30%;left:0;right:0;overflow:hidden;opacity:.07;pointer-events:none;transform:rotate(-3deg)}
+    .ticker-track{display:flex;gap:40px;animation:ticker 32s linear infinite;white-space:nowrap}
+    .ticker-item{font-family:'DM Mono',monospace;font-size:72px;font-weight:500;color:var(--gold);letter-spacing:2px}
+    @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+    .chart-deco{position:absolute;right:0;top:50%;transform:translateY(-50%);width:55%;height:70%;opacity:.15;will-change:transform}
+
+    .hero-content{position:relative;z-index:10;padding:0 60px;max-width:680px;will-change:transform}
+    .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;padding:6px 14px;border:1px solid rgba(200,169,110,0.3);border-radius:2px;background:rgba(200,169,110,0.05);animation:fadeUp .8s ease both}
+    .hero-eyebrow::before{content:'';width:6px;height:6px;background:var(--gold);border-radius:50%;animation:blink 1.5s ease-in-out infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+    .hero-title{font-family:'DM Serif Display',serif;font-size:clamp(52px,6vw,84px);line-height:1.05;letter-spacing:-1px;margin-bottom:24px;animation:fadeUp .8s .1s ease both}
+    .hero-title em{font-style:italic;color:var(--gold2);display:block}
+    .hero-desc{font-size:16px;font-weight:400;color:var(--muted);line-height:1.7;max-width:480px;margin-bottom:40px;animation:fadeUp .8s .2s ease both}
+    .hero-actions{display:flex;align-items:center;gap:16px;animation:fadeUp .8s .3s ease both}
+    .btn-primary{display:inline-flex;align-items:center;gap:10px;background:var(--gold);color:#080c10;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;padding:14px 28px;border-radius:4px;text-decoration:none;letter-spacing:.3px;transition:all .2s;border:none;cursor:none}
+    .btn-primary:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 12px 40px rgba(200,169,110,.3)}
+    .btn-primary svg{transition:transform .2s}
+    .btn-primary:hover svg{transform:translateX(4px)}
+    .btn-ghost{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:14px;font-weight:600;text-decoration:none;padding:14px 4px;border-bottom:1px solid var(--border2);transition:color .2s,border-color .2s;cursor:none}
+    .btn-ghost:hover{color:var(--text);border-color:var(--text)}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+    .scroll-hint{position:absolute;bottom:36px;left:60px;display:flex;align-items:center;gap:12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;animation:fadeUp .8s .6s ease both}
+    .scroll-line{width:40px;height:1px;background:var(--border2);position:relative;overflow:hidden}
+    .scroll-line::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:var(--gold);animation:scrollLine 2s ease-in-out infinite}
+    @keyframes scrollLine{0%{left:-100%}50%{left:0%}100%{left:100%}}
+
+    /* STATS */
+    .stats-section{position:relative;padding:100px 60px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden}
+    .stats-section::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:1px;height:100%;background:var(--border)}
+    .stats-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:3px;text-transform:uppercase;text-align:center;margin-bottom:60px}
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+    .stat-item{padding:40px;border-right:1px solid var(--border);opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+    .stat-item:last-child{border-right:none}
+    .stat-item.visible{opacity:1;transform:translateY(0)}
+    .stat-num{font-family:'DM Serif Display',serif;font-size:56px;color:var(--gold2);line-height:1;margin-bottom:8px}
+    .stat-unit{font-size:20px;color:var(--gold);vertical-align:super}
+    .stat-label{font-size:13px;color:var(--muted);font-weight:400;line-height:1.5}
+    .stat-change{display:inline-flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;font-size:11px;margin-top:8px;color:var(--green)}
+
+    /* PREVIEW */
+    .preview-section{padding:120px 60px;position:relative;overflow:hidden}
+    .section-header{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end;margin-bottom:60px}
+    .section-eyebrow{font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px}
+    .section-title{font-family:'DM Serif Display',serif;font-size:clamp(32px,3.5vw,48px);line-height:1.1;letter-spacing:-.5px}
+    .section-title em{font-style:italic;color:var(--gold2)}
+    .section-desc{font-size:14px;color:var(--muted);line-height:1.8;align-self:end}
+
+    .screener-preview{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,.6),0 0 0 1px rgba(200,169,110,.05);opacity:0;transform:translateY(40px);transition:opacity .8s ease,transform .8s ease}
+    .screener-preview.visible{opacity:1;transform:translateY(0)}
+    .preview-topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:rgba(0,0,0,.3);border-bottom:1px solid var(--border)}
+    .preview-dots{display:flex;gap:6px}
+    .preview-dots span{width:10px;height:10px;border-radius:50%}
+    .preview-dots span:nth-child(1){background:#ff5f57}
+    .preview-dots span:nth-child(2){background:#ffbd2e}
+    .preview-dots span:nth-child(3){background:#28ca41}
+    .preview-url{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:rgba(255,255,255,.04);padding:5px 16px;border-radius:4px;border:1px solid var(--border)}
+    .preview-body{padding:20px}
+    .preview-header-row{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+    .preview-logo{font-family:'DM Serif Display',serif;font-size:18px;color:var(--gold2)}
+    .preview-badge{background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.3);color:var(--gold);font-family:'DM Mono',monospace;font-size:9px;padding:2px 8px;border-radius:3px;letter-spacing:1px}
+    .preview-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+    .preview-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;padding:10px 12px}
+    .pc-val{font-family:'DM Mono',monospace;font-size:20px;font-weight:500}
+    .pc-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+    .pc-green .pc-val{color:var(--green)}
+    .pc-gold .pc-val{color:var(--gold)}
+    .preview-table{width:100%;border-collapse:collapse;font-size:11px}
+    .preview-table th{text-align:left;padding:7px 10px;color:var(--muted);font-weight:600;font-size:9px;letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--border)}
+    .preview-table td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.03);font-family:'DM Mono',monospace}
+    .preview-table tr:last-child td{border-bottom:none}
+    .pt-sym{color:#60c0f0;font-weight:500;font-size:12px}
+    .pt-strong{color:var(--green);font-size:9px;font-weight:700;background:rgba(46,204,138,.1);padding:2px 7px;border-radius:10px}
+    .pt-valid{color:#f5c518;font-size:9px;font-weight:700;background:rgba(245,197,24,.1);padding:2px 7px;border-radius:10px}
+    .pt-skip{color:var(--red);font-size:9px;font-weight:700;background:rgba(224,90,90,.1);padding:2px 7px;border-radius:10px}
+    .pt-bar{display:inline-flex;align-items:center;gap:5px}
+    .pt-fill{height:3px;border-radius:2px}
+
+    /* MENU */
+    .menu-section{padding:80px 60px 120px;border-top:1px solid var(--border)}
+    .menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+    .menu-card{background:var(--bg);padding:40px;text-decoration:none;color:var(--text);display:block;transition:background .25s;position:relative;overflow:hidden}
+    .menu-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent);transform:scaleX(0);transform-origin:left;transition:transform .3s ease}
+    .menu-card:hover{background:var(--bg2)}
+    .menu-card:hover::before{transform:scaleX(1)}
+    .menu-card:hover .menu-arrow{transform:translate(4px,-4px)}
+    .menu-card.available{cursor:none}
+    .menu-card.coming-soon{cursor:default;opacity:.5}
+    .menu-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:2px;margin-bottom:20px}
+    .menu-icon{font-size:28px;margin-bottom:14px}
+    .menu-title{font-family:'DM Serif Display',serif;font-size:24px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+    .menu-arrow{font-size:18px;color:var(--gold);transition:transform .2s}
+    .menu-desc{font-size:13px;color:var(--muted);line-height:1.6}
+    .menu-tag{display:inline-block;margin-top:16px;font-family:'DM Mono',monospace;font-size:9px;padding:3px 10px;border-radius:2px;letter-spacing:1px;text-transform:uppercase}
+    .tag-live{background:rgba(46,204,138,.1);color:var(--green);border:1px solid rgba(46,204,138,.2)}
+    .tag-soon{background:rgba(200,169,110,.08);color:var(--gold);border:1px solid rgba(200,169,110,.15)}
+
+    /* FOOTER */
+    footer{padding:40px 60px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .footer-logo{font-family:'DM Serif Display',serif;font-size:18px;color:var(--gold2)}
+    .footer-copy{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
+    .footer-disc{font-size:11px;color:var(--muted);max-width:340px;text-align:right;line-height:1.6}
+
+    @media(max-width:900px){
+      nav{padding:16px 24px}
+      nav.scrolled{padding:12px 24px}
+      .nav-links{display:none}
+      .hero-content{padding:0 24px}
+      .chart-deco,.ticker-container{display:none}
+      .stats-section,.preview-section{padding:60px 24px}
+      .stats-grid{grid-template-columns:repeat(2,1fr)}
+      .stat-item{border-bottom:1px solid var(--border)}
+      .section-header{grid-template-columns:1fr}
+      .menu-section{padding:60px 24px 80px}
+      .menu-grid{grid-template-columns:1fr}
+      .preview-cards{grid-template-columns:repeat(2,1fr)}
+      footer{padding:30px 24px;flex-direction:column;gap:16px;text-align:center}
+      .footer-disc{text-align:center}
+      .scroll-hint{left:24px}
+    }
+  </style>
+</head>
+<body>
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <nav id="navbar">
+    <a href="index.html" class="nav-logo">Cukong Reborn <span>by AlviZevalli</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Beranda</a></li>
+      <li><a href="screener.html">Screener</a></li>
+      <li><a href="sr.html">S&amp;R Finder</a></li>
+      <li><a href="volume.html">Volume Anomaly</a></li>
+      <li><a href="scanner.html">Market Scanner</a></li>
+      <li><a href="#">Portofolio</a></li>
+      <li><a href="screener.html" class="nav-cta">Mulai Gratis →</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero">
+    <div class="parallax-bg" id="paraBg"></div>
+    <div class="parallax-grid" id="paraGrid"></div>
+    <div class="ticker-container">
+      <div class="ticker-track">
+        <span class="ticker-item">BBRI</span><span class="ticker-item">TLKM</span>
+        <span class="ticker-item">BMRI</span><span class="ticker-item">ASII</span>
+        <span class="ticker-item">BBCA</span><span class="ticker-item">GOTO</span>
+        <span class="ticker-item">ANTM</span><span class="ticker-item">ITMG</span>
+        <span class="ticker-item">BBRI</span><span class="ticker-item">TLKM</span>
+        <span class="ticker-item">BMRI</span><span class="ticker-item">ASII</span>
+        <span class="ticker-item">BBCA</span><span class="ticker-item">GOTO</span>
+        <span class="ticker-item">ANTM</span><span class="ticker-item">ITMG</span>
+      </div>
+    </div>
+    <svg class="chart-deco" id="chartDeco" viewBox="0 0 600 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polyline points="0,350 60,300 120,320 180,240 240,260 300,180 360,200 420,120 480,80 600,40" stroke="rgba(200,169,110,0.4)" stroke-width="2" fill="none"/>
+      <polyline points="0,350 60,300 120,320 180,240 240,260 300,180 360,200 420,120 480,80 600,40" stroke="rgba(200,169,110,0.08)" stroke-width="40" fill="none"/>
+      <polyline points="0,380 60,360 120,370 180,340 240,350 300,300 360,310 420,270 480,240 600,200" stroke="rgba(46,204,138,0.2)" stroke-width="1.5" fill="none" stroke-dasharray="4 8"/>
+      <line x1="120" y1="0" x2="120" y2="400" stroke="rgba(200,169,110,0.06)" stroke-width="1"/>
+      <line x1="240" y1="0" x2="240" y2="400" stroke="rgba(200,169,110,0.06)" stroke-width="1"/>
+      <line x1="360" y1="0" x2="360" y2="400" stroke="rgba(200,169,110,0.06)" stroke-width="1"/>
+      <line x1="480" y1="0" x2="480" y2="400" stroke="rgba(200,169,110,0.06)" stroke-width="1"/>
+      <circle cx="480" cy="80" r="6" fill="rgba(200,169,110,0.6)"/>
+      <circle cx="480" cy="80" r="14" stroke="rgba(200,169,110,0.2)" stroke-width="1" fill="none"/>
+    </svg>
+    <div class="hero-content" id="heroContent">
+      <div class="hero-eyebrow">Platform Analisis Saham IDX</div>
+      <h1 class="hero-title">Baca Pasar.<br><em>Bergerak Lebih Cepat.</em></h1>
+      <p class="hero-desc">Cukong Reborn adalah platform screening dan analisis saham IDX berbasis data real-time. Temukan sinyal kuat sebelum market bergerak.</p>
+      <div class="hero-actions">
+        <a href="screener.html" class="btn-primary">
+          Buka Screener
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="#preview" class="btn-ghost">Lihat Demo ↓</a>
+      </div>
+    </div>
+    <div class="scroll-hint"><div class="scroll-line"></div>Scroll</div>
+  </section>
+
+  <section class="stats-section">
+    <div class="stats-label">Data & Performa Platform</div>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-num"><span class="counter" data-target="700">0</span><span class="stat-unit">+</span></div>
+        <div class="stat-label">Emiten IDX yang dapat dianalisis real-time</div>
+        <div class="stat-change">↑ Selalu update</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num"><span class="counter" data-target="5">0</span><span class="stat-unit"> ind</span></div>
+        <div class="stat-label">Indikator teknikal dalam satu tampilan</div>
+        <div class="stat-change">↑ MA5, RSI, Volume, Gap, Body</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num"><span class="counter" data-target="120">0</span><span class="stat-unit">H</span></div>
+        <div class="stat-label">Data historis untuk backtest sinyal</div>
+        <div class="stat-change">↑ Win rate per saham</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num"><span class="stat-unit" style="font-size:40px;vertical-align:middle">Rp</span> 0</div>
+        <div class="stat-label">Gratis selamanya, tanpa biaya berlangganan</div>
+        <div class="stat-change">↑ Open platform</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="preview-section" id="preview">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">BSJP Screener</div>
+        <h2 class="section-title">Screening Saham<br><em>Dalam Hitungan Detik</em></h2>
+      </div>
+      <p class="section-desc">Masukkan kode emiten, sistem langsung menganalisis trend, momentum, volume, dan kekuatan candle — menghasilkan skor dari 0–140 beserta rekomendasi TP dan Cut Loss otomatis.</p>
+    </div>
+    <div class="screener-preview" id="screenerPreview">
+      <div class="preview-topbar">
+        <div class="preview-dots"><span></span><span></span><span></span></div>
+        <div class="preview-url">cukong-reborn.vercel.app/screener</div>
+        <div style="width:60px"></div>
+      </div>
+      <div class="preview-body">
+        <div class="preview-header-row">
+          <div class="preview-logo">▲ Cukong Reborn</div>
+          <div class="preview-badge">BSJP SCREENER PRO</div>
+        </div>
+        <div class="preview-cards">
+          <div class="preview-card pc-gold"><div class="pc-val">4</div><div class="pc-lbl">Total Saham</div></div>
+          <div class="preview-card pc-green"><div class="pc-val">2</div><div class="pc-lbl">STRONG 🔥</div></div>
+          <div class="preview-card" style="border-color:rgba(245,197,24,.2)"><div class="pc-val" style="color:#f5c518">1</div><div class="pc-lbl">VALID ✅</div></div>
+          <div class="preview-card" style="border-color:rgba(224,90,90,.2)"><div class="pc-val" style="color:var(--red)">1</div><div class="pc-lbl">SKIP ⛔</div></div>
+        </div>
+        <table class="preview-table">
+          <thead><tr><th>Emiten</th><th>Harga</th><th>Vol Ratio</th><th>Score</th><th>Status</th><th>TP</th><th>CL</th></tr></thead>
+          <tbody>
+            <tr><td class="pt-sym">BBRI</td><td>Rp 4.820</td><td style="color:var(--green)">187%</td><td><div class="pt-bar"><span style="color:var(--green);font-weight:700">110</span><div style="width:50px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden"><div class="pt-fill" style="width:78%;background:var(--green)"></div></div></div></td><td><span class="pt-strong">STRONG</span></td><td style="color:var(--green)">Rp 4.965</td><td style="color:var(--red)">Rp 4.675</td></tr>
+            <tr><td class="pt-sym">BMRI</td><td>Rp 6.150</td><td style="color:var(--green)">152%</td><td><div class="pt-bar"><span style="color:var(--green);font-weight:700">90</span><div style="width:50px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden"><div class="pt-fill" style="width:64%;background:var(--green)"></div></div></div></td><td><span class="pt-strong">STRONG</span></td><td style="color:var(--green)">Rp 6.335</td><td style="color:var(--red)">Rp 5.966</td></tr>
+            <tr><td class="pt-sym">TLKM</td><td>Rp 3.240</td><td style="color:#f5c518">98%</td><td><div class="pt-bar"><span style="color:#f5c518;font-weight:700">70</span><div style="width:50px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden"><div class="pt-fill" style="width:50%;background:#f5c518"></div></div></div></td><td><span class="pt-valid">VALID</span></td><td style="color:var(--green)">Rp 3.337</td><td style="color:var(--red)">Rp 3.143</td></tr>
+            <tr><td class="pt-sym">GOTO</td><td>Rp 68</td><td style="color:var(--muted)">61%</td><td><div class="pt-bar"><span style="color:var(--red);font-weight:700">30</span><div style="width:50px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden"><div class="pt-fill" style="width:21%;background:var(--red)"></div></div></div></td><td><span class="pt-skip">SKIP</span></td><td style="color:var(--green)">Rp 70</td><td style="color:var(--red)">Rp 66</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="menu-section">
+    <div class="section-header" style="margin-bottom:40px">
+      <div>
+        <div class="section-eyebrow">Platform Tools</div>
+        <h2 class="section-title">Semua yang Kamu<br><em>Butuhkan</em></h2>
+      </div>
+      <p class="section-desc">Ekosistem lengkap untuk trader IDX — dari screening hingga manajemen portofolio.</p>
+    </div>
+    <div class="menu-grid">
+      <a href="screener.html" class="menu-card available">
+        <div class="menu-num">01</div>
+        <div class="menu-icon">📊</div>
+        <div class="menu-title">BSJP Screener <span class="menu-arrow">↗</span></div>
+        <p class="menu-desc">Analisis teknikal real-time untuk emiten IDX. Scoring otomatis, TP/CL, backtest historis, dan TradingView chart terintegrasi.</p>
+        <div class="menu-tag tag-live">● Live</div>
+      </a>
+      <a href="sr.html" class="menu-card available">
+        <div class="menu-num">02</div>
+        <div class="menu-icon">📉</div>
+        <div class="menu-title">S&amp;R Finder <span class="menu-arrow">↗</span></div>
+        <p class="menu-desc">Deteksi otomatis level Support &amp; Resistance dari data 6 bulan. Lengkap dengan Fibonacci Retracement, strength indicator, dan sinyal posisi.</p>
+        <div class="menu-tag tag-live">● Live</div>
+      </a>
+      <a href="volume.html" class="menu-card available">
+        <div class="menu-num">03</div>
+        <div class="menu-icon">🔥</div>
+        <div class="menu-title">Volume Anomaly <span class="menu-arrow">↗</span></div>
+        <p class="menu-desc">Deteksi lonjakan volume tidak normal per saham maupun scan seluruh sektor. Identifikasi akumulasi &amp; distribusi dengan alert Extreme / High / Moderate.</p>
+        <div class="menu-tag tag-live">● Live</div>
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-logo">Cukong Reborn</div>
+    <div class="footer-copy">© 2025 AlviZevalli · IDX Market Tools</div>
+    <div class="footer-disc">Data bersumber dari Yahoo Finance. Bukan merupakan rekomendasi investasi. Lakukan riset mandiri sebelum mengambil keputusan.</div>
+  </footer>
+
+  <script>
+    // CURSOR
+    const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+    let mx=0,my=0,rx=0,ry=0;
+    document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px'});
+    (function animRing(){rx+=(mx-rx)*.15;ry+=(my-ry)*.15;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing)})();
+    document.querySelectorAll('a,button,.menu-card.available').forEach(el=>{
+      el.addEventListener('mouseenter',()=>{cursor.style.width='16px';cursor.style.height='16px';ring.style.width='50px';ring.style.height='50px';ring.style.borderColor='rgba(200,169,110,0.8)'});
+      el.addEventListener('mouseleave',()=>{cursor.style.width='10px';cursor.style.height='10px';ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='rgba(200,169,110,0.5)'});
+    });
+
+    // NAVBAR
+    const navbar=document.getElementById('navbar');
+    window.addEventListener('scroll',()=>navbar.classList.toggle('scrolled',window.scrollY>60));
+
+    // PARALLAX
+    const paraBg=document.getElementById('paraBg'),paraGrid=document.getElementById('paraGrid'),heroCont=document.getElementById('heroContent'),chartDec=document.getElementById('chartDeco');
+    window.addEventListener('scroll',()=>{
+      const y=window.scrollY;
+      paraBg.style.transform=`translateY(${y*.4}px)`;
+      paraGrid.style.transform=`translateY(${y*.25}px)`;
+      heroCont.style.transform=`translateY(${y*.2}px)`;
+      heroCont.style.opacity=1-y/500;
+      if(chartDec)chartDec.style.transform=`translateY(calc(-50% + ${y*.15}px))`;
+    });
+
+    // SCROLL REVEAL
+    const obs=new IntersectionObserver(entries=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){
+          e.target.classList.add('visible');
+          if(e.target.classList.contains('stat-item')){
+            const idx=[...document.querySelectorAll('.stat-item')].indexOf(e.target);
+            e.target.style.transitionDelay=(idx*.12)+'s';
+          }
+        }
+      });
+    },{threshold:.15});
+    document.querySelectorAll('.stat-item,.screener-preview').forEach(el=>obs.observe(el));
+
+    // COUNTER
+    const cObs=new IntersectionObserver(entries=>{
+      entries.forEach(e=>{if(e.isIntersecting){animCounter(e.target);cObs.unobserve(e.target)}});
+    },{threshold:.5});
+    document.querySelectorAll('.counter').forEach(el=>cObs.observe(el));
+    function animCounter(el){
+      const target=parseInt(el.dataset.target),dur=1800,start=performance.now();
+      (function upd(now){const p=Math.min((now-start)/dur,1),ease=1-Math.pow(1-p,3);el.textContent=Math.round(ease*target);if(p<1)requestAnimationFrame(upd)})(start);
+    }
+  </script>
+</body>
+</html>
