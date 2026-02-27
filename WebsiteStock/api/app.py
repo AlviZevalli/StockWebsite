@@ -4,9 +4,29 @@ import pandas as pd
 import numpy as np
 from flask_cors import CORS
 import time
+import requests
 
 app = Flask(__name__)
 CORS(app, origins="*")
+
+# ================================================================
+# Custom session — wajib ada agar Yahoo Finance tidak reject request
+# dari serverless environment seperti Vercel
+# ================================================================
+def make_session():
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/120.0.0.0 Safari/537.36"
+        ),
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Connection": "keep-alive",
+    })
+    return session
 
 # ================================================================
 # DATA: Emiten IDX
@@ -74,17 +94,17 @@ def fetch_history(ticker_symbol, period, interval, retries=3):
     """Fetch yfinance history dengan retry otomatis jika gagal."""
     for attempt in range(retries):
         try:
-            s    = yf.Ticker(ticker_symbol)
+            session = make_session()
+            s    = yf.Ticker(ticker_symbol, session=session)
             hist = s.history(period=period, interval=interval)
             if not hist.empty:
                 return hist
-            # Jika data kosong, tunggu sebentar sebelum retry
             if attempt < retries - 1:
-                time.sleep(0.5)
+                time.sleep(0.8)
         except Exception:
             if attempt < retries - 1:
-                time.sleep(0.5)
-    return pd.DataFrame()  # Return DataFrame kosong jika semua retry gagal
+                time.sleep(0.8)
+    return pd.DataFrame()
 
 def find_pivots(highs, lows, order=3):
     pivot_highs, pivot_lows = [], []
