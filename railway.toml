@@ -1,0 +1,6 @@
+[build]
+builder = "RAILPACK"
+rootDirectory = "WebsiteStock"
+
+[deploy]
+startCommand = "gunicorn api.app:app"
