@@ -1,0 +1,15 @@
+[33m937d1c3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m feat: upgrade screener — RSI, MACD, Stochastic, BB, sinyal lengkap
+[33md50c74e[m feat: update sektor BEI lengkap dari data resmi + fix nama sektor
+[33mb9efb82[m fix: tambah route config.js di vercel.json
+[33ma3aa5ec[m fix: tambah rootDirectory di railway.toml
+[33m3ebe11b[m fix: hapus sisa syntax error pada scanner.html dan tambah https:// pada Railway URL
+[33m24487f4[m fix: pindahkan config.js ke head agar API_BASE terdefinisi sebelum script
+[33ma5496b5[m feat: sambungkan frontend ke backend Railway
+[33m8bded51[m fix: update dependency versions untuk Python 3.13
+[33m5cc4b5f[m feat: pindah backend ke Railway, pisah frontend-backend
+[33mf059771[m fix: tambah User-Agent session dan downgrade yfinance
+[33mb41de78[m fix: tambah routing untuk URL .html pada navbar
+[33maf5e4be[m fix: perbaiki routing static files dari folder public
+[33mb9b8bb7[m fix: perbaiki error handling dan kompatibilitas Vercel
+[33madf35c0[m Deploy Website
+[33m65f9027[m first commit

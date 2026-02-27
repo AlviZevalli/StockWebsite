@@ -2,7 +2,7 @@
 // BSJP SCREENER PRO — Enhanced Script
 // ============================================================
 
-// API_BASE di-load dari config.js
+const API_BASE = "http://localhost:5000"; // Flask backend
 
 let stockData = []; // {symbol, data, score, status, inWatchlist}
 let watchlist = JSON.parse(localStorage.getItem("bsjp_watchlist") || "[]");
