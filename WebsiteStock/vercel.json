@@ -14,19 +14,24 @@
     }
   ],
   "routes": [
-    { "src": "/stock/(.*)",       "dest": "api/app.py" },
-    { "src": "/backtest/(.*)",    "dest": "api/app.py" },
-    { "src": "/sr/(.*)",          "dest": "api/app.py" },
-    { "src": "/volume/(.*)",      "dest": "api/app.py" },
-    { "src": "/scan/(.*)",        "dest": "api/app.py" },
-    { "src": "/market-scan",      "dest": "api/app.py" },
-    { "src": "/sectors",          "dest": "api/app.py" },
-    { "src": "/scanner",          "dest": "public/scanner.html" },
-    { "src": "/screener",         "dest": "public/screener.html" },
-    { "src": "/sr",               "dest": "public/sr.html" },
-    { "src": "/volume",           "dest": "public/volume.html" },
-    { "src": "/style.css",        "dest": "public/style.css" },
-    { "src": "/script.js",        "dest": "public/script.js" },
-    { "src": "/",                 "dest": "public/index.html" }
+    { "src": "/stock/(.*)",         "dest": "api/app.py" },
+    { "src": "/backtest/(.*)",      "dest": "api/app.py" },
+    { "src": "/sr/(.+)",            "dest": "api/app.py" },
+    { "src": "/volume/(.+)",        "dest": "api/app.py" },
+    { "src": "/scan/(.*)",          "dest": "api/app.py" },
+    { "src": "/market-scan",        "dest": "api/app.py" },
+    { "src": "/sectors",            "dest": "api/app.py" },
+    { "src": "/screener.html",      "dest": "public/screener.html" },
+    { "src": "/screener",           "dest": "public/screener.html" },
+    { "src": "/scanner.html",       "dest": "public/scanner.html" },
+    { "src": "/scanner",            "dest": "public/scanner.html" },
+    { "src": "/sr.html",            "dest": "public/sr.html" },
+    { "src": "/sr",                 "dest": "public/sr.html" },
+    { "src": "/volume.html",        "dest": "public/volume.html" },
+    { "src": "/volume",             "dest": "public/volume.html" },
+    { "src": "/style.css",          "dest": "public/style.css" },
+    { "src": "/script.js",          "dest": "public/script.js" },
+    { "src": "/index.html",         "dest": "public/index.html" },
+    { "src": "/",                   "dest": "public/index.html" }
   ]
 }
