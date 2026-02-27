@@ -634,9 +634,9 @@
     if (d.body_ratio > 0.7) signals.push({ icon: "&#128170;", label: "Candle sangat kuat (>0.7)", ok: true });
     if (chgPct > 3) signals.push({ icon: "&#128640;", label: "Kenaikan kuat +"+chgPct+"%", ok: true });
     if (chgPct < -3) signals.push({ icon: "&#129656;", label: "Penurunan besar "+chgPct+"%", ok: false });
-    document.getElementById("signalItems").innerHTML = signals.length ? signals.map(s =>
-      `<div class="signal-item ${s.ok?"s-ok":"s-bad}">${s.icon} ${s.label}</div>`
-    ).join("") : `<div class="signal-item s-ok" style="border-left-color:var(--muted)">Tidak ada sinyal signifikan</div>`;
+    document.getElementById("signalItems").innerHTML = signals.length
+      ? signals.map(s => '<div class="signal-item ' + (s.ok ? 's-ok' : 's-bad') + '">' + s.icon + ' ' + s.label + '</div>').join("")
+      : '<div class="signal-item s-ok" style="border-left-color:var(--muted)">Tidak ada sinyal signifikan</div>';
 
     let recClass, recTitle, recText;
     if (score >= 90) {
