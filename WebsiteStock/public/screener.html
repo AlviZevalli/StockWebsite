@@ -446,7 +446,7 @@
     const day = wib.getDay(), h = wib.getHours(), m = wib.getMinutes(), time = h * 100 + m;
     const el = document.getElementById("marketStatus");
     if (day === 0 || day === 6) el.innerHTML = '<span class="dot"></span> Market Tutup (Akhir Pekan)';
-    else if (time >= 900 && time < 1600) el.innerHTML = '<span class="dot open"></span> Market Buka (09:00â16:00)';
+    else if (time >= 900 && time < 1600) el.innerHTML = '<span class="dot open"></span> Market Buka (09:00-16:00)';
     else el.innerHTML = '<span class="dot"></span> Market Tutup';
   }
 
@@ -607,10 +607,10 @@
 
     const criteria = [
       { label: "Harga > MA5 (Trend naik)", ok: d.price > d.ma5, pts: 30 },
-      { label: "Dekat High harian (<2%) — "+(nearHigh||"-")+"%", ok: nearHigh && parseFloat(nearHigh) < 2, pts: 30 },
-      { label: "Volume > 130% rata-rata — "+volRatio+"%", ok: parseFloat(volRatio) > 130, pts: 40 },
-      { label: "Body Ratio > 0.6 — "+d.body_ratio, ok: d.body_ratio > 0.6, pts: 20 },
-      { label: "Gap naik dari Open — "+d.gap+"%", ok: d.gap > 1, pts: 20 },
+      { label: "Dekat High harian (<2%)  -  "+(nearHigh||"-")+"%", ok: nearHigh && parseFloat(nearHigh) < 2, pts: 30 },
+      { label: "Volume > 130% rata-rata  -  "+volRatio+"%", ok: parseFloat(volRatio) > 130, pts: 40 },
+      { label: "Body Ratio > 0.6  -  "+d.body_ratio, ok: d.body_ratio > 0.6, pts: 20 },
+      { label: "Gap naik dari Open  -  "+d.gap+"%", ok: d.gap > 1, pts: 20 },
     ];
     document.getElementById("bsjpChecks").innerHTML = criteria.map(c =>
       `<div class="bsjp-row"><span>${c.label}</span><span>${c.ok?"&#9989;":"&#10060;"} <span style="font-size:11px;color:var(--muted)">+${c.pts}</span></span></div>`
@@ -626,7 +626,7 @@
     if (d.price > d.ma5) signals.push({ icon: "&#128200;", label: "Harga di atas MA5", ok: true });
     if (d.price > (d.ma20||0)) signals.push({ icon: "&#128202;", label: "Harga di atas MA20", ok: true });
     else signals.push({ icon: "&#128201;", label: "Harga di bawah MA20", ok: false });
-    if (rsi <= 30) signals.push({ icon: "&#128142;", label: "RSI Oversold ("+rsi+") — Potensi pantul", ok: true });
+    if (rsi <= 30) signals.push({ icon: "&#128142;", label: "RSI Oversold ("+rsi+")  -  Potensi pantul", ok: true });
     if (rsi >= 70) signals.push({ icon: "&#9888;&#65039;", label: "RSI Overbought ("+rsi+")", ok: false });
     if (parseFloat(volRatio) > 200) signals.push({ icon: "&#128293;", label: "Volume Ekstrem "+volRatio+"%", ok: true });
     if (d.gap > 1) signals.push({ icon: "&#8593;", label: "Gap naik "+d.gap+"%", ok: true });
@@ -640,10 +640,10 @@
 
     let recClass, recTitle, recText;
     if (score >= 90) {
-      recClass = "rec-buy"; recTitle = "&#9989; MASUK / BUY — Kondisi Ideal";
+      recClass = "rec-buy"; recTitle = "&#9989; MASUK / BUY  -  Kondisi Ideal";
       recText = sym+" memenuhi hampir semua kriteria BSJP dengan score "+score+"/140. Tren naik, volume mendukung, candle kuat. Entry di "+rupiah(d.price)+" dengan TP "+rupiah(tp3)+"&ndash;"+rupiah(tp5)+" dan cut loss di "+rupiah(cl3)+". Risk/Reward &asymp; 1:1 hingga 1:1.7.";
     } else if (score >= 70) {
-      recClass = "rec-wait"; recTitle = "&#9203; WAIT &amp; SEE — Konfirmasi Dulu";
+      recClass = "rec-wait"; recTitle = "&#9203; WAIT &amp; SEE  -  Konfirmasi Dulu";
       recText = sym+" punya potensi (score "+score+"/140) tapi belum semua kriteria terpenuhi. Tunggu konfirmasi: volume > 130%, candle hijau kuat, atau breakout dari high. Jika terkonfirmasi, entry dengan TP "+rupiah(tp3)+" dan CL "+rupiah(cl3)+".";
     } else {
       recClass = "rec-avoid"; recTitle = "&#9940; HINDARI / SKIP";
@@ -689,7 +689,7 @@
     if (watchlist.length === 0) { grid.innerHTML = '<div class="wl-empty">Belum ada saham di watchlist.</div>'; return; }
     grid.innerHTML = watchlist.map(sym => {
       const entry = stockData.find(e => e.symbol === sym);
-      const price = entry ? rupiah(entry.data.price) : "–";
+      const price = entry ? rupiah(entry.data.price) : "-";
       const status = entry ? `<span class="badge badge-${entry.cls}">${entry.status}</span>` : "";
       const score = entry ? "Score: "+entry.score : "Belum dianalisis";
       return `<div class="wl-card" onclick="showChart('${sym}')"><div class="wl-card-top"><div class="wl-symbol">${sym}</div><div>${status}</div></div><div class="wl-price">${price}</div><div class="wl-meta"><span>${score}</span><span onclick="event.stopPropagation();toggleWatchlist('${sym}')" style="cursor:pointer;color:var(--danger)">Hapus &#10005;</span></div></div>`;

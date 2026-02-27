@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Signal — Cukong Reborn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    main { max-width: 1100px; margin: auto; padding: 28px 24px 80px; position: relative; z-index: 1; }
+
+    /* Hero */
+    .ai-hero { margin-bottom: 32px; display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
+    .ai-hero-text h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+    .ai-hero-text p { color: var(--muted); font-size: 14px; max-width: 580px; line-height: 1.6; }
+    .ai-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,229,160,0.07);
+      border: 1px solid rgba(0,229,160,0.2);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      align-self: flex-start;
+      margin-top: 4px;
+    }
+    .ai-badge-dot { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; animation: blink 1.5s ease-in-out infinite; }
+
+    /* Input */
+    .ai-input-box {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .ai-input-label { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .ai-input-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .ai-sym-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 0 16px;
+      flex: 1;
+      min-width: 160px;
+    }
+    .ai-sym-wrap input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 700;
+      padding: 13px 0;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .ai-sym-wrap input::placeholder { font-size: 13px; letter-spacing: 0; font-weight: 400; font-family: var(--font); text-transform: none; color: var(--muted); }
+    .ai-analyze-btn {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      color: #060c14;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 32px;
+      font-weight: 800;
+      font-size: 14px;
+      font-family: var(--font);
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .ai-analyze-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,229,160,0.25); }
+    .ai-analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* Quick picks */
+    .ai-quick { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+    .ai-quick-label { font-size: 12px; color: var(--muted); }
+    .ai-quick button {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      border-radius: 7px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.15s;
+    }
+    .ai-quick button:hover { background: rgba(0,229,160,0.1); border-color: rgba(0,229,160,0.4); color: var(--accent); }
+
+    /* Thinking state */
+    .ai-thinking {
+      display: none;
+      align-items: center;
+      gap: 16px;
+      padding: 24px;
+      background: rgba(0,229,160,0.04);
+      border: 1px solid rgba(0,229,160,0.12);
+      border-radius: 14px;
+      margin-bottom: 24px;
+    }
+    .ai-thinking.active { display: flex; }
+    .ai-think-icon { font-size: 28px; animation: spin 2s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .ai-think-text { font-size: 14px; color: var(--muted); }
+    .ai-think-step { font-size: 13px; color: var(--accent); font-family: var(--font-mono); margin-top: 4px; }
+
+    /* Result panel */
+    .ai-result { display: none; }
+    .ai-result.visible { display: block; }
+
+    /* Verdict banner */
+    .verdict-banner {
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .verdict-banner::after {
+      content: "";
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: 40%;
+      opacity: 0.07;
+      font-size: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 20px;
+    }
+    .verdict-long { background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.3); }
+    .verdict-short { background: rgba(255,69,96,0.08); border: 1px solid rgba(255,69,96,0.3); }
+    .verdict-wait { background: rgba(245,197,24,0.08); border: 1px solid rgba(245,197,24,0.3); }
+    .verdict-skip { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); }
+    .verdict-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .verdict-title { font-size: 26px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .verdict-long .verdict-title { color: var(--accent); }
+    .verdict-short .verdict-title { color: var(--danger); }
+    .verdict-wait .verdict-title { color: var(--warn); }
+    .verdict-skip .verdict-title { color: var(--muted); }
+    .verdict-sub { font-size: 14px; color: var(--muted); line-height: 1.6; max-width: 600px; }
+    .verdict-meta { display: flex; gap: 20px; margin-top: 14px; flex-wrap: wrap; }
+    .verdict-meta-item { font-size: 12px; }
+    .verdict-meta-label { color: var(--muted); margin-bottom: 2px; }
+    .verdict-meta-val { font-family: var(--font-mono); font-weight: 700; font-size: 14px; }
+
+    /* Step cards */
+    .steps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    @media (max-width: 700px) { .steps-grid { grid-template-columns: 1fr; } }
+    .step-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+    }
+    .step-num { font-size: 10px; font-weight: 700; color: var(--accent2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .step-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .step-title-icon { font-size: 18px; }
+    .step-items { display: flex; flex-direction: column; gap: 6px; }
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.03);
+      line-height: 1.4;
+    }
+    .step-item.ok { border-left: 3px solid var(--accent); }
+    .step-item.warn { border-left: 3px solid var(--warn); }
+    .step-item.bad { border-left: 3px solid var(--danger); }
+    .step-item.info { border-left: 3px solid var(--accent2); }
+    .step-icon { flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+
+    /* Entry/SL/TP box */
+    .trade-levels {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .tl-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .tl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+    .tl-card {
+      border-radius: 12px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .tl-card.entry { background: rgba(0,184,240,0.08); border: 1px solid rgba(0,184,240,0.25); }
+    .tl-card.sl { background: rgba(255,69,96,0.08); border: 1px solid rgba(255,69,96,0.25); }
+    .tl-card.tp1 { background: rgba(0,229,160,0.06); border: 1px solid rgba(0,229,160,0.2); }
+    .tl-card.tp2 { background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.3); }
+    .tl-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .tl-price { font-size: 18px; font-weight: 800; font-family: var(--font-mono); }
+    .tl-card.entry .tl-price { color: var(--accent2); }
+    .tl-card.sl .tl-price { color: var(--danger); }
+    .tl-card.tp1 .tl-price { color: var(--accent); }
+    .tl-card.tp2 .tl-price { color: var(--accent); }
+    .tl-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* Validation checklist */
+    .validation-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .val-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+    .val-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+    .val-row:last-child { border-bottom: none; }
+    .val-check { font-size: 16px; }
+    .val-score-bar { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+    .val-score-track { flex: 1; height: 8px; background: rgba(255,255,255,0.07); border-radius: 999px; overflow: hidden; }
+    .val-score-fill { height: 100%; border-radius: 999px; background: var(--accent); transition: width 1s ease; }
+    .val-score-label { font-size: 12px; font-family: var(--font-mono); font-weight: 700; }
+
+    /* Narrative */
+    .narrative-box {
+      background: rgba(0,184,240,0.04);
+      border: 1px solid rgba(0,184,240,0.15);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .narr-title { font-size: 13px; font-weight: 700; color: var(--accent2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+    .narr-body { font-size: 14px; line-height: 1.8; color: var(--text); }
+    .narr-body strong { color: var(--accent); }
+    .narr-body em { color: var(--warn); font-style: normal; }
+
+    /* RR badge */
+    .rr-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 15px;
+      margin-top: 12px;
+    }
+    .rr-good { background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.3); color: var(--accent); }
+    .rr-ok { background: rgba(245,197,24,0.1); border: 1px solid rgba(245,197,24,0.3); color: var(--warn); }
+    .rr-bad { background: rgba(255,69,96,0.1); border: 1px solid rgba(255,69,96,0.3); color: var(--danger); }
+
+    /* Empty */
+    .ai-empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+    .ai-empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.6; }
+    .ai-empty-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .ai-empty-sub { font-size: 13px; line-height: 1.7; max-width: 440px; margin: auto; }
+    .ai-empty-rules { text-align: left; margin-top: 24px; max-width: 440px; margin: 24px auto 0; }
+    .ai-empty-rule { display: flex; gap: 10px; font-size: 12px; color: var(--muted); padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .ai-empty-rule:last-child { border-bottom: none; }
+    .ai-empty-rule-icon { font-size: 14px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+  <div class="topbar" id="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="topbar-logo">&#9650; Cukong Reborn</a>
+      <span class="topbar-sep">|</span>
+      <span class="topbar-badge">AI SIGNAL</span>
+    </div>
+    <nav class="topbar-nav">
+      <a href="screener.html">&#128202; Screener</a>
+      <a href="sr.html">&#128201; S&amp;R Finder</a>
+      <a href="volume.html">&#128293; Volume Anomaly</a>
+      <a href="scanner.html">&#128301; Market Scanner</a>
+      <a href="foreign.html">&#127758; Foreign Flow</a>
+      <a href="ai-signal.html" class="active">&#129504; AI Signal</a>
+    </nav>
+    <a href="index.html" class="topbar-home">&larr; Beranda</a>
+  </div>
+  <div class="bg-grid"></div>
+  <div class="bg-glow glow-1"></div>
+  <div class="bg-glow glow-2"></div>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">&#9650;</span>
+        <div>
+          <div class="logo-title">AI Signal <span class="logo-pro">ENGINE</span></div>
+          <div class="logo-sub">by AlviZevalli &middot; IDX Market</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="market-status" id="marketStatus"><span class="dot"></span> Market Loading...</div>
+        <div class="clock" id="clock"></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="ai-hero">
+      <div class="ai-hero-text">
+        <h1>&#129504; AI Signal <span style="color:var(--accent)">Engine</span></h1>
+        <p>Masukkan kode emiten, AI akan menganalisis struktur market, momentum, volume, dan menentukan apakah ada sinyal entry yang valid berdasarkan framework struktur &mdash; bukan tebakan.</p>
+      </div>
+      <div class="ai-badge">
+        <div class="ai-badge-dot"></div>
+        Structure-Based Trading
+      </div>
+    </div>
+
+    <div class="ai-input-box">
+      <div class="ai-input-label">&#128301; Analisis Emiten</div>
+      <div class="ai-input-row">
+        <div class="ai-sym-wrap">
+          <span style="color:var(--accent2);font-size:18px">&#9650;</span>
+          <input id="aiSym" placeholder="Kode emiten (contoh: BBRI)" autocomplete="off" spellcheck="false" maxlength="6">
+        </div>
+        <button class="ai-analyze-btn" id="analyzeBtn" onclick="runAnalysis()">&#129504; Analisa Sekarang</button>
+      </div>
+      <div class="ai-quick">
+        <span class="ai-quick-label">Cepat:</span>
+        <button onclick="quickAI('BBRI')">BBRI</button>
+        <button onclick="quickAI('BBCA')">BBCA</button>
+        <button onclick="quickAI('BMRI')">BMRI</button>
+        <button onclick="quickAI('TLKM')">TLKM</button>
+        <button onclick="quickAI('ASII')">ASII</button>
+        <button onclick="quickAI('ANTM')">ANTM</button>
+        <button onclick="quickAI('GOTO')">GOTO</button>
+        <button onclick="quickAI('ITMG')">ITMG</button>
+      </div>
+    </div>
+
+    <!-- Thinking state -->
+    <div class="ai-thinking" id="aiThinking">
+      <div class="ai-think-icon">&#9881;&#65039;</div>
+      <div>
+        <div class="ai-think-text">AI sedang menganalisis...</div>
+        <div class="ai-think-step" id="thinkStep">Membaca struktur market...</div>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="ai-result" id="aiResult"></div>
+
+    <!-- Empty state -->
+    <div id="aiEmpty">
+      <div class="ai-empty">
+        <div class="ai-empty-icon">&#129504;</div>
+        <div class="ai-empty-title">AI Signal Engine</div>
+        <div class="ai-empty-sub">AI akan menganalisis emiten IDX menggunakan framework trading struktur: market structure, value area, momentum confirmation, dan risk/reward calculation.</div>
+        <div class="ai-empty-rules">
+          <div class="ai-empty-rule"><span class="ai-empty-rule-icon">&#49;&#65039;&#8419;</span><span>Baca struktur market &mdash; HH/HL, BOS, CHOCH</span></div>
+          <div class="ai-empty-rule"><span class="ai-empty-rule-icon">&#50;&#65039;&#8419;</span><span>Identifikasi value area &mdash; S/R, EMA, Fibonacci</span></div>
+          <div class="ai-empty-rule"><span class="ai-empty-rule-icon">&#51;&#65039;&#8419;</span><span>Konfirmasi momentum &mdash; volume, RSI, candle</span></div>
+          <div class="ai-empty-rule"><span class="ai-empty-rule-icon">&#52;&#65039;&#8419;</span><span>Hitung entry, SL di bawah swing low, TP 1:2 minimum</span></div>
+          <div class="ai-empty-rule"><span class="ai-empty-rule-icon">&#53;&#65039;&#8419;</span><span>Validasi 4 dari 6 kriteria wajib terpenuhi</span></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast" class="toast"></div>
+  <div id="loading" class="loading-overlay" style="display:none">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">Mengambil data...</div>
+  </div>
+
+  <script>
+  const API_BASE = (() => {
+    const RAILWAY = "https://stockwebsite-production.up.railway.app";
+    const h = window.location.hostname;
+    return (h === "localhost" || h === "127.0.0.1") ? "http://localhost:5000" : RAILWAY;
+  })();
+
+  document.addEventListener("DOMContentLoaded", () => {
+    updateClock();
+    setInterval(updateClock, 1000);
+    document.getElementById("aiSym").addEventListener("keydown", e => {
+      if (e.key === "Enter") runAnalysis();
+    });
+  });
+
+  function updateClock() {
+    const now = new Date();
+    const wib = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
+    document.getElementById("clock").textContent =
+      wib.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) + " WIB";
+    const day = wib.getDay(), h = wib.getHours(), m = wib.getMinutes(), time = h * 100 + m;
+    const el = document.getElementById("marketStatus");
+    if (day === 0 || day === 6) el.innerHTML = '<span class="dot"></span> Market Tutup (Akhir Pekan)';
+    else if (time >= 900 && time < 1600) el.innerHTML = '<span class="dot open"></span> Market Buka (09:00-16:00)';
+    else el.innerHTML = '<span class="dot"></span> Market Tutup';
+  }
+
+  function quickAI(sym) {
+    document.getElementById("aiSym").value = sym;
+    runAnalysis();
+  }
+
+  const THINK_STEPS = [
+    "Membaca struktur market (HH/HL/BOS/CHOCH)...",
+    "Mengidentifikasi value area (S/R, EMA, Fibo)...",
+    "Memeriksa konfirmasi momentum...",
+    "Menghitung level Entry, SL, dan TP...",
+    "Memvalidasi risk/reward ratio...",
+    "Menyusun insight analisa..."
+  ];
+
+  async function runAnalysis() {
+    const sym = document.getElementById("aiSym").value.trim().toUpperCase();
+    if (!sym) { showToast("Masukkan kode emiten!"); return; }
+
+    document.getElementById("aiEmpty").style.display = "none";
+    document.getElementById("aiResult").classList.remove("visible");
+    document.getElementById("aiThinking").classList.add("active");
+    document.getElementById("analyzeBtn").disabled = true;
+
+    // Animate thinking steps
+    let stepIdx = 0;
+    const stepInterval = setInterval(() => {
+      document.getElementById("thinkStep").textContent = THINK_STEPS[stepIdx % THINK_STEPS.length];
+      stepIdx++;
+    }, 600);
+
+    try {
+      const [stockRes, srRes, volRes] = await Promise.all([
+        fetch(API_BASE + "/stock/" + sym),
+        fetch(API_BASE + "/sr/" + sym),
+        fetch(API_BASE + "/volume/" + sym)
+      ]);
+
+      if (!stockRes.ok) throw new Error("Emiten " + sym + " tidak ditemukan");
+      const stock = await stockRes.json();
+      if (stock.error) throw new Error(stock.error);
+
+      const sr = srRes.ok ? await srRes.json() : null;
+      const vol = volRes.ok ? await volRes.json() : null;
+
+      // Simulate a brief thinking delay for UX
+      await new Promise(r => setTimeout(r, 800));
+
+      clearInterval(stepInterval);
+      document.getElementById("aiThinking").classList.remove("active");
+
+      renderAISignal(sym, stock, sr, vol);
+    } catch (err) {
+      clearInterval(stepInterval);
+      document.getElementById("aiThinking").classList.remove("active");
+      showToast("Error: " + err.message);
+      document.getElementById("aiEmpty").style.display = "block";
+    } finally {
+      document.getElementById("analyzeBtn").disabled = false;
+    }
+  }
+
+  function renderAISignal(sym, stock, sr, vol) {
+    // ============================================================
+    // STEP 1: Market Structure
+    // ============================================================
+    const price = stock.price;
+    const ma5 = stock.ma5, ma20 = stock.ma20 || ma5 * 0.98;
+    const rsi = stock.rsi || 50;
+    const chgPct = stock.change_pct || 0;
+    const volRatio = stock.avg_volume > 0 ? (stock.volume / stock.avg_volume * 100) : 100;
+    const bodyRatio = stock.body_ratio || 0;
+    const gap = stock.gap || 0;
+
+    // Determine structure
+    const isBullish = ma5 > ma20 && price > ma5;
+    const isBearish = ma5 < ma20 && price < ma5;
+    const isTrending = Math.abs(ma5 - ma20) / ma20 > 0.01;
+    const isPullback = isBullish && price < ma5 * 1.005;
+    const isConsolidating = !isTrending;
+
+    const structureLabel = isBullish ? "BULLISH (HH-HL)" : isBearish ? "BEARISH (LL-LH)" : "KONSOLIDASI / CHOP";
+    const structureOk = isBullish || isBearish;
+    const bos = chgPct > 1.5 && volRatio > 120; // Breakout of structure indicator
+
+    // ============================================================
+    // STEP 2: Value Area
+    // ============================================================
+    const nearestSup = sr && sr.supports && sr.supports[0] ? sr.supports[0].price : price * 0.97;
+    const nearestRes = sr && sr.resistances && sr.resistances[0] ? sr.resistances[0].price : price * 1.05;
+    const fib618 = sr ? (sr.period_low + 0.618 * (sr.period_high - sr.period_low)) : price * 0.985;
+    const fib50  = sr ? (sr.period_low + 0.5   * (sr.period_high - sr.period_low)) : price * 0.99;
+    const nearEMA = Math.abs(price - ma20) / ma20 < 0.015;
+    const nearFib = Math.abs(price - fib618) / fib618 < 0.02 || Math.abs(price - fib50) / fib50 < 0.02;
+    const nearSupport = Math.abs(price - nearestSup) / nearestSup < 0.025;
+    const valueAreaOk = nearEMA || nearFib || nearSupport;
+
+    // ============================================================
+    // STEP 3: Momentum Confirmation
+    // ============================================================
+    const volSpike = volRatio > 130;
+    const rsiOversold = rsi < 40;
+    const rsiBullish = rsi > 50 && rsi < 70;
+    const candleStrong = bodyRatio > 0.55;
+    const maGolden = ma5 > ma20;
+    const gapUp = gap > 0.5;
+    const momentumCount = [volSpike, candleStrong, maGolden, gapUp, rsiBullish || rsiOversold].filter(Boolean).length;
+    const momentumOk = momentumCount >= 2;
+
+    // ============================================================
+    // STEP 4: Entry / SL / TP calculation
+    // ============================================================
+    const entryPrice = price;
+    const slPrice = nearestSup ? Math.min(nearestSup * 0.995, price * 0.97) : price * 0.97;
+    const risk = entryPrice - slPrice;
+    const tp1Price = entryPrice + risk * 2;    // 1:2
+    const tp2Price = entryPrice + risk * 3.5;  // 1:3.5
+    const rr = risk > 0 ? (tp1Price - entryPrice) / risk : 0;
+    const rrOk = rr >= 1.8;
+
+    // ============================================================
+    // STEP 5: Validation Score (6 criteria)
+    // ============================================================
+    const criteria = [
+      { label: "Multi-timeframe searah (MA5 > MA20)", ok: maGolden, icon: maGolden ? "checkmark" : "cross" },
+      { label: "Struktur valid (" + structureLabel + ")", ok: structureOk, icon: structureOk ? "checkmark" : "cross" },
+      { label: "Volume mendukung (" + volRatio.toFixed(0) + "%)", ok: volSpike, icon: volSpike ? "checkmark" : "cross" },
+      { label: "Konfirmasi candle (body ratio " + bodyRatio + ")", ok: candleStrong, icon: candleStrong ? "checkmark" : "cross" },
+      { label: "Risk reward sehat (RR " + rr.toFixed(2) + ":1)", ok: rrOk, icon: rrOk ? "checkmark" : "cross" },
+      { label: "Tidak di area chop/low liquidity", ok: isTrending, icon: isTrending ? "checkmark" : "cross" },
+    ];
+    const validCount = criteria.filter(c => c.ok).length;
+    const validPct = (validCount / 6) * 100;
+
+    // ============================================================
+    // STEP 6: Final Verdict
+    // ============================================================
+    let verdictClass, verdictTitle, verdictSub;
+    if (validCount >= 4 && isBullish && rrOk) {
+      verdictClass = "verdict-long";
+      verdictTitle = "&#128200; LONG / BUY SIGNAL";
+      verdictSub = "Struktur bullish terkonfirmasi dengan " + validCount + "/6 kriteria terpenuhi. Setup memiliki R:R yang sehat. Entry di area saat ini dengan target terukur.";
+    } else if (validCount >= 4 && isBearish && rrOk) {
+      verdictClass = "verdict-short";
+      verdictTitle = "&#128201; SHORT / SELL BIAS";
+      verdictSub = "Struktur bearish terdeteksi dengan " + validCount + "/6 kriteria terpenuhi. Waspadai tekanan jual lebih lanjut. Hindari long di kondisi ini.";
+    } else if (validCount >= 3) {
+      verdictClass = "verdict-wait";
+      verdictTitle = "&#9203; WAIT - BELUM KONFIRMASI";
+      verdictSub = "Ada potensi setup (" + validCount + "/6 kriteria) namun belum cukup konfirmasi. Tunggu volume spike atau candle konfirmasi sebelum entry.";
+    } else {
+      verdictClass = "verdict-skip";
+      verdictTitle = "&#9940; SKIP - NO TRADE";
+      verdictSub = "Hanya " + validCount + "/6 kriteria terpenuhi. Probabilitas tidak condong ke satu arah. Disiplin lebih penting dari frekuensi. Tidak ada setup hari ini.";
+    }
+
+    // ============================================================
+    // NARRATIVE
+    // ============================================================
+    const narrative = buildNarrative(sym, stock, structureLabel, isBullish, isBearish, bos, nearEMA, nearFib, nearSupport, volSpike, rsi, candleStrong, maGolden, validCount, rrOk, entryPrice, slPrice, tp1Price, tp2Price, rr);
+
+    // ============================================================
+    // RENDER
+    // ============================================================
+    const html =
+      '<div class="verdict-banner ' + verdictClass + '">' +
+        '<div class="verdict-label">Analisis ' + sym + ' &middot; Berdasarkan Framework Struktur</div>' +
+        '<div class="verdict-title">' + verdictTitle + '</div>' +
+        '<div class="verdict-sub">' + verdictSub + '</div>' +
+        '<div class="verdict-meta">' +
+          '<div class="verdict-meta-item"><div class="verdict-meta-label">Harga Saat Ini</div><div class="verdict-meta-val">Rp ' + Math.round(price).toLocaleString("id-ID") + '</div></div>' +
+          '<div class="verdict-meta-item"><div class="verdict-meta-label">Kriteria Valid</div><div class="verdict-meta-val" style="color:' + (validCount>=4?"var(--accent)":validCount>=3?"var(--warn)":"var(--danger)") + '">' + validCount + '/6</div></div>' +
+          '<div class="verdict-meta-item"><div class="verdict-meta-label">Risk/Reward</div><div class="verdict-meta-val" style="color:' + (rrOk?"var(--accent)":"var(--danger)") + '">1:' + rr.toFixed(1) + '</div></div>' +
+          '<div class="verdict-meta-item"><div class="verdict-meta-label">RSI</div><div class="verdict-meta-val" style="color:' + (rsi>=70?"var(--danger)":rsi<=30?"var(--accent)":"var(--text)") + '">' + rsi + '</div></div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="steps-grid">' +
+        buildStepCard("1", "&#128301;", "Market Structure", [
+          { ok: structureOk, icon: "&#128202;", text: "Struktur: <strong>" + structureLabel + "</strong>" },
+          { ok: isTrending, icon: "&#128200;", text: "Tren: " + (isTrending ? (isBullish ? "Uptrend" : "Downtrend") : "Konsolidasi / Chop") },
+          { ok: bos, icon: "&#128293;", text: "BOS: " + (bos ? "Breakout terdeteksi" : "Tidak ada breakout"), type: bos?"ok":"info" },
+          { ok: isPullback, icon: "&#128257;", text: "Fase: " + (isPullback ? "Pullback (Bagus!)" : isConsolidating ? "Konsolidasi" : "Trending"), type: isPullback?"ok":"info" },
+        ]) +
+        buildStepCard("2", "&#127919;", "Value Area", [
+          { ok: nearEMA, icon: "&#128200;", text: "EMA retest: " + (nearEMA ? "Dekat EMA20 (area bagus)" : "Jauh dari EMA20") },
+          { ok: nearFib, icon: "&#11015;&#65039;", text: "Fibonacci: " + (nearFib ? "Di zona 50-61.8% (high probability)" : "Di luar zona Fibonacci") },
+          { ok: nearSupport, icon: "&#128204;", text: "Support: " + (nearSupport ? "Dekat level support (" + Math.round(nearestSup).toLocaleString("id-ID") + ")" : "Jauh dari support terdekat") },
+          { ok: true, icon: "&#128201;", text: "Resistance terdekat: Rp " + Math.round(nearestRes).toLocaleString("id-ID"), type: "info" },
+        ]) +
+        buildStepCard("3", "&#9889;", "Momentum Confirmation", [
+          { ok: volSpike, icon: "&#128293;", text: "Volume: " + volRatio.toFixed(0) + "% rata-rata " + (volSpike ? "(Spike!)" : "(Rendah)") },
+          { ok: candleStrong, icon: "&#128170;", text: "Candle body ratio: " + bodyRatio + " " + (candleStrong ? "(Kuat)" : "(Lemah)") },
+          { ok: maGolden, icon: "&#10024;", text: "MA cross: " + (maGolden ? "Golden (MA5 > MA20)" : "Death (MA5 < MA20)") },
+          { ok: rsiBullish || rsiOversold, icon: "&#128200;", text: "RSI: " + rsi + " " + (rsiOversold ? "(Oversold - Pantul!)" : rsiBullish ? "(Zona beli)" : rsi >= 70 ? "(Overbought!)" : "(Netral)") },
+        ]) +
+        buildStepCard("4", "&#9881;&#65039;", "Risk Management", [
+          { ok: rrOk, icon: "&#9878;&#65039;", text: "Risk/Reward: 1:" + rr.toFixed(2) + " " + (rrOk ? "(Layak)" : "(Di bawah 1:2 - Skip)") },
+          { ok: true, icon: "&#128204;", text: "Entry zona: Rp " + Math.round(entryPrice).toLocaleString("id-ID"), type: "info" },
+          { ok: true, icon: "&#128721;", text: "SL di bawah swing low: Rp " + Math.round(slPrice).toLocaleString("id-ID"), type: "info" },
+          { ok: validCount >= 4, icon: "&#128202;", text: "Validasi: " + validCount + "/6 kriteria " + (validCount >= 4 ? "(Entry valid)" : validCount >= 3 ? "(Tunggu konfirmasi)" : "(No trade)") },
+        ]) +
+      '</div>' +
+
+      '<div class="trade-levels">' +
+        '<div class="tl-title">&#127759; Level Trading Rekomendasi</div>' +
+        '<div class="tl-grid">' +
+          '<div class="tl-card entry"><div class="tl-label">Entry Zone</div><div class="tl-price">Rp ' + Math.round(entryPrice).toLocaleString("id-ID") + '</div><div class="tl-sub">Harga saat ini</div></div>' +
+          '<div class="tl-card sl"><div class="tl-label">Stop Loss</div><div class="tl-price">Rp ' + Math.round(slPrice).toLocaleString("id-ID") + '</div><div class="tl-sub">Bawah swing low / support</div></div>' +
+          '<div class="tl-card tp1"><div class="tl-label">TP1 (1:2)</div><div class="tl-price">Rp ' + Math.round(tp1Price).toLocaleString("id-ID") + '</div><div class="tl-sub">Target konservatif</div></div>' +
+          '<div class="tl-card tp2"><div class="tl-label">TP2 (1:3.5)</div><div class="tl-price">Rp ' + Math.round(tp2Price).toLocaleString("id-ID") + '</div><div class="tl-sub">Target agresif</div></div>' +
+        '</div>' +
+        '<div class="rr-badge ' + (rrOk ? "rr-good" : rr >= 1.5 ? "rr-ok" : "rr-bad") + '">' +
+          '&#9878;&#65039; Risk/Reward = 1:' + rr.toFixed(2) + ' ' + (rrOk ? "(Layak dieksekusi)" : rr >= 1.5 ? "(Minimum borderline)" : "(Di bawah standar 1:2 - Skip)") +
+        '</div>' +
+      '</div>' +
+
+      '<div class="validation-box">' +
+        '<div class="val-title">&#9989; Sistem Validasi (4/6 wajib terpenuhi)</div>' +
+        criteria.map(c =>
+          '<div class="val-row"><span>' + c.label + '</span><span class="val-check">' + (c.ok ? "&#9989;" : "&#10060;") + '</span></div>'
+        ).join("") +
+        '<div class="val-score-bar"><div class="val-score-track"><div class="val-score-fill" style="width:' + validPct + '%;background:' + (validCount>=4?"var(--accent)":validCount>=3?"var(--warn)":"var(--danger)") + '"></div></div><span class="val-score-label" style="color:' + (validCount>=4?"var(--accent)":validCount>=3?"var(--warn)":"var(--danger)") + '">' + validCount + '/6</span></div>' +
+      '</div>' +
+
+      '<div class="narrative-box">' +
+        '<div class="narr-title">&#129504; Analisa Naratif AI</div>' +
+        '<div class="narr-body">' + narrative + '</div>' +
+      '</div>';
+
+    const result = document.getElementById("aiResult");
+    result.innerHTML = html;
+    result.classList.add("visible");
+    result.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function buildStepCard(num, icon, title, items) {
+    return '<div class="step-card">' +
+      '<div class="step-num">STEP ' + num + '</div>' +
+      '<div class="step-title"><span class="step-title-icon">' + icon + '</span> ' + title + '</div>' +
+      '<div class="step-items">' +
+      items.map(item => {
+        const cls = item.type === "info" ? "info" : item.ok ? "ok" : "bad";
+        const itemIcon = item.type === "info" ? "&#8505;&#65039;" : item.ok ? "&#9989;" : "&#10060;";
+        return '<div class="step-item ' + cls + '"><span class="step-icon">' + itemIcon + '</span><span>' + item.text + '</span></div>';
+      }).join("") +
+      '</div></div>';
+  }
+
+  function buildNarrative(sym, stock, structureLabel, isBullish, isBearish, bos, nearEMA, nearFib, nearSupport, volSpike, rsi, candleStrong, maGolden, validCount, rrOk, entry, sl, tp1, tp2, rr) {
+    const trend = isBullish ? "bullish" : isBearish ? "bearish" : "sideways";
+    const entryStr = "Rp " + Math.round(entry).toLocaleString("id-ID");
+    const slStr = "Rp " + Math.round(sl).toLocaleString("id-ID");
+    const tp1Str = "Rp " + Math.round(tp1).toLocaleString("id-ID");
+    const rrStr = rr.toFixed(2);
+    const valueArea = nearEMA ? "dekat EMA20" : nearFib ? "di zona Fibonacci 50-61.8%" : nearSupport ? "dekat level support" : "di tengah range";
+
+    let opening = "";
+    if (isBullish) opening = "Struktur market <strong>" + sym + "</strong> saat ini menunjukkan pola <strong>bullish</strong> dengan MA5 di atas MA20. ";
+    else if (isBearish) opening = "Struktur market <strong>" + sym + "</strong> mengindikasikan tekanan <strong>bearish</strong> dengan MA5 di bawah MA20. ";
+    else opening = "<strong>" + sym + "</strong> sedang berada dalam fase konsolidasi. Struktur belum menunjukkan arah yang jelas. ";
+
+    let valueNote = "Harga saat ini berada " + valueArea + ". ";
+    if (!nearEMA && !nearFib && !nearSupport) valueNote += "Entry di zona ini memiliki alasan struktural yang kurang kuat. ";
+
+    let momentumNote = "";
+    if (volSpike && candleStrong) momentumNote = "Volume spike disertai candle kuat memberikan konfirmasi momentum yang solid. ";
+    else if (volSpike) momentumNote = "Volume di atas rata-rata terdeteksi, namun candle belum cukup kuat untuk konfirmasi penuh. ";
+    else if (candleStrong) momentumNote = "Formasi candle cukup kuat, namun perlu dikonfirmasi dengan peningkatan volume. ";
+    else momentumNote = "Momentum saat ini belum cukup kuat &mdash; volume masih rendah dan candle tidak signifikan. ";
+
+    let rsiNote = rsi <= 30 ? "<em>RSI " + rsi + " berada di zona oversold</em> &mdash; potensi technical bounce meningkat. " :
+                  rsi >= 70 ? "<em>RSI " + rsi + " overbought</em> &mdash; hati-hati dengan potensi koreksi. " :
+                  "RSI di " + rsi + " berada di zona netral. ";
+
+    let verdict = "";
+    if (validCount >= 4 && rrOk) {
+      verdict = "Dengan <strong>" + validCount + "/6 kriteria terpenuhi</strong> dan risk/reward <strong>1:" + rrStr + "</strong>, setup ini <strong>layak untuk dieksekusi</strong>. " +
+               "Entry di " + entryStr + " dengan stop loss di " + slStr + " (bawah swing low) dan target pertama di " + tp1Str + ".";
+    } else if (validCount >= 3) {
+      verdict = "Dengan " + validCount + "/6 kriteria, setup ini <em>belum cukup untuk entry</em>. " +
+               "Tunggu konfirmasi tambahan: volume spike, candle bullish kuat, atau breakout dari level resistance terdekat sebelum mengambil posisi.";
+    } else {
+      verdict = "Hanya " + validCount + "/6 kriteria yang terpenuhi. <em>Tidak ada setup yang valid hari ini</em>. " +
+               "Ingat: disiplin lebih penting dari frekuensi. Tidak trade adalah keputusan terbaik ketika kondisi tidak mendukung.";
+    }
+
+    return opening + valueNote + momentumNote + rsiNote + verdict;
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.style.display = "block";
+    setTimeout(() => t.style.display = "none", 3000);
+  }
+  function showLoading(msg) {
+    document.getElementById("loadingText").textContent = msg || "Memuat...";
+    document.getElementById("loading").style.display = "flex";
+  }
+  function hideLoading() { document.getElementById("loading").style.display = "none"; }
+  </script>
+</body>
+</html>
