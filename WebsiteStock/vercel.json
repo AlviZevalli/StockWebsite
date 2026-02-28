@@ -3,35 +3,40 @@
   "builds": [
     {
       "src": "api/app.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb"
+      }
     },
     {
       "src": "public/**",
-      "use": "@vercel/static",
-      "config": {
-        "outputDirectory": "public"
-      }
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
-      "src": "/stock/(.*)",
+      "src": "/api/(.*)",
+      "dest": "api/app.py"
+    },
+
+    {
+      "src": "/stock/([^/]+)",
       "dest": "api/app.py"
     },
     {
-      "src": "/backtest/(.*)",
+      "src": "/backtest/([^/]+)",
       "dest": "api/app.py"
     },
     {
-      "src": "/sr/(.+)",
+      "src": "/sr/([^/]+)",
       "dest": "api/app.py"
     },
     {
-      "src": "/volume/(.+)",
+      "src": "/volume/([^/]+)",
       "dest": "api/app.py"
     },
     {
-      "src": "/scan/(.*)",
+      "src": "/scan/([^/]*)",
       "dest": "api/app.py"
     },
     {
@@ -42,8 +47,22 @@
       "src": "/sectors",
       "dest": "api/app.py"
     },
+
     {
-      "src": "/screener.html",
+      "src": "/style\\.css",
+      "dest": "public/style.css"
+    },
+    {
+      "src": "/script\\.js",
+      "dest": "public/script.js"
+    },
+    {
+      "src": "/config\\.js",
+      "dest": "public/config.js"
+    },
+
+    {
+      "src": "/screener\\.html",
       "dest": "public/screener.html"
     },
     {
@@ -51,7 +70,7 @@
       "dest": "public/screener.html"
     },
     {
-      "src": "/scanner.html",
+      "src": "/scanner\\.html",
       "dest": "public/scanner.html"
     },
     {
@@ -59,7 +78,7 @@
       "dest": "public/scanner.html"
     },
     {
-      "src": "/sr.html",
+      "src": "/sr\\.html",
       "dest": "public/sr.html"
     },
     {
@@ -67,7 +86,7 @@
       "dest": "public/sr.html"
     },
     {
-      "src": "/volume.html",
+      "src": "/volume\\.html",
       "dest": "public/volume.html"
     },
     {
@@ -75,19 +94,7 @@
       "dest": "public/volume.html"
     },
     {
-      "src": "/style.css",
-      "dest": "public/style.css"
-    },
-    {
-      "src": "/script.js",
-      "dest": "public/script.js"
-    },
-    {
-      "src": "/config.js",
-      "dest": "public/config.js"
-    },
-    {
-      "src": "/foreign.html",
+      "src": "/foreign\\.html",
       "dest": "public/foreign.html"
     },
     {
@@ -95,7 +102,7 @@
       "dest": "public/foreign.html"
     },
     {
-      "src": "/ai-signal.html",
+      "src": "/ai-signal\\.html",
       "dest": "public/ai-signal.html"
     },
     {
@@ -103,11 +110,32 @@
       "dest": "public/ai-signal.html"
     },
     {
-      "src": "/index.html",
+      "src": "/news\\.html",
+      "dest": "public/news.html"
+    },
+    {
+      "src": "/news",
+      "dest": "public/news.html"
+    },
+    {
+      "src": "/kalender\\.html",
+      "dest": "public/kalender.html"
+    },
+    {
+      "src": "/kalender",
+      "dest": "public/kalender.html"
+    },
+    {
+      "src": "/index\\.html",
       "dest": "public/index.html"
     },
     {
       "src": "/",
+      "dest": "public/index.html"
+    },
+
+    {
+      "src": "/(.*)",
       "dest": "public/index.html"
     }
   ]
