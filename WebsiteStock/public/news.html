@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market News — Cukong Reborn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ===== NEWS PAGE SPECIFIC ===== */
+    .news-hero {
+      padding: 24px 0 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      margin-bottom: 24px;
+    }
+    .news-hero-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .news-title-group { display: flex; align-items: center; gap: 14px; }
+    .news-live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,69,96,0.12);
+      border: 1px solid rgba(255,69,96,0.3);
+      color: #ff4560;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      padding: 3px 10px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      font-family: 'Space Mono', monospace;
+    }
+    .news-live-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #ff4560;
+      animation: blink 1.2s ease-in-out infinite;
+    }
+    .news-h1 {
+      font-size: clamp(22px, 3vw, 32px);
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+    .news-h1 span { color: var(--accent); }
+    .news-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      margin-top: 4px;
+    }
+    .news-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .last-update {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+    }
+    .btn-refresh {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0,229,160,0.08);
+      border: 1px solid rgba(0,229,160,0.2);
+      color: var(--accent);
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Outfit', sans-serif;
+    }
+    .btn-refresh:hover { background: rgba(0,229,160,0.15); }
+    .btn-refresh.loading .refresh-icon { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Ticker tape */
+    .ticker-wrap {
+      overflow: hidden;
+      background: rgba(0,229,160,0.04);
+      border: 1px solid rgba(0,229,160,0.1);
+      border-radius: 8px;
+      padding: 0;
+      height: 36px;
+      display: flex;
+      align-items: center;
+    }
+    .ticker-label {
+      flex-shrink: 0;
+      background: var(--accent);
+      color: #060c14;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      padding: 0 12px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      font-family: 'Space Mono', monospace;
+    }
+    .ticker-scroll-container {
+      overflow: hidden;
+      flex: 1;
+      height: 100%;
+      mask-image: linear-gradient(90deg, transparent, black 3%, black 97%, transparent);
+    }
+    .ticker-inner {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      gap: 0;
+      animation: tickerMove 60s linear infinite;
+      white-space: nowrap;
+    }
+    .ticker-inner:hover { animation-play-state: paused; }
+    @keyframes tickerMove { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 20px;
+      font-size: 12px;
+      font-family: 'Space Mono', monospace;
+      color: rgba(232,240,254,0.7);
+      border-right: 1px solid rgba(255,255,255,0.06);
+    }
+    .ticker-item .ti-src {
+      font-size: 9px;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+      font-weight: 700;
+    }
+    .ticker-item .ti-dot { color: rgba(255,255,255,0.15); }
+
+    /* Filter tabs */
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .filter-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: transparent;
+      color: var(--muted);
+      transition: all 0.15s;
+      font-family: 'Outfit', sans-serif;
+    }
+    .filter-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+    .filter-btn.active { background: rgba(0,229,160,0.1); border-color: rgba(0,229,160,0.3); color: var(--accent); }
+    .filter-btn.cat-lokal.active { background: rgba(0,184,240,0.1); border-color: rgba(0,184,240,0.3); color: var(--accent2); }
+    .filter-btn.cat-global.active { background: rgba(245,197,24,0.1); border-color: rgba(245,197,24,0.3); color: var(--warn); }
+    .filter-btn.cat-geo.active { background: rgba(255,69,96,0.1); border-color: rgba(255,69,96,0.3); color: var(--danger); }
+    .filter-btn.sent-pos.active { background: rgba(0,229,160,0.1); border-color: rgba(0,229,160,0.3); color: var(--accent); }
+    .filter-btn.sent-neg.active { background: rgba(255,69,96,0.1); border-color: rgba(255,69,96,0.3); color: var(--danger); }
+    .filter-btn.sent-neu.active { background: rgba(232,240,254,0.07); border-color: rgba(232,240,254,0.2); color: var(--text); }
+    .filter-sep { width: 1px; height: 20px; background: rgba(255,255,255,0.1); }
+
+    /* News layout */
+    .news-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* News feed */
+    .news-feed { display: flex; flex-direction: column; gap: 12px; }
+
+    .news-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 16px 18px;
+      transition: all 0.2s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      animation: fadeSlideIn 0.4s ease both;
+    }
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .news-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      border-radius: 3px 0 0 3px;
+    }
+    .news-card.pos::before { background: var(--accent); }
+    .news-card.neg::before { background: var(--danger); }
+    .news-card.neu::before { background: rgba(255,255,255,0.2); }
+    .news-card:hover {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.12);
+      transform: translateY(-1px);
+    }
+    .news-card.featured {
+      background: rgba(0,229,160,0.04);
+      border-color: rgba(0,229,160,0.15);
+      padding: 20px 22px;
+    }
+    .news-card.featured .nc-title { font-size: 17px; }
+
+    .nc-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .nc-source {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-family: 'Space Mono', monospace;
+      padding: 2px 8px;
+      border-radius: 3px;
+    }
+    .nc-source.src-lokal { background: rgba(0,184,240,0.12); color: var(--accent2); }
+    .nc-source.src-global { background: rgba(245,197,24,0.1); color: var(--warn); }
+    .nc-source.src-geo { background: rgba(255,69,96,0.1); color: var(--danger); }
+    .nc-cat {
+      font-size: 10px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+    }
+    .nc-time {
+      font-size: 10px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      margin-left: auto;
+    }
+    .nc-title {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.45;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .nc-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 10px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .nc-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .sentiment-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-family: 'Space Mono', monospace;
+    }
+    .sent-pos-badge { background: rgba(0,229,160,0.12); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); }
+    .sent-neg-badge { background: rgba(255,69,96,0.12); color: var(--danger); border: 1px solid rgba(255,69,96,0.2); }
+    .sent-neu-badge { background: rgba(232,240,254,0.06); color: rgba(232,240,254,0.5); border: 1px solid rgba(232,240,254,0.1); }
+    .sent-score {
+      font-size: 10px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+    }
+    .nc-link {
+      font-size: 11px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .nc-link:hover { opacity: 1; }
+
+    /* Sentiment bar */
+    .sent-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .sent-bar {
+      flex: 1;
+      height: 3px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+    .sent-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 1s ease;
+    }
+
+    /* Sidebar */
+    .news-sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+    .sidebar-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 16px 18px;
+    }
+    .sidebar-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sidebar-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.06);
+    }
+
+    /* Sentiment summary */
+    .sent-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .sent-summ-item {
+      text-align: center;
+      padding: 10px 6px;
+      border-radius: 10px;
+    }
+    .sent-summ-item.pos { background: rgba(0,229,160,0.07); }
+    .sent-summ-item.neg { background: rgba(255,69,96,0.07); }
+    .sent-summ-item.neu { background: rgba(255,255,255,0.04); }
+    .sent-summ-val {
+      font-size: 22px;
+      font-weight: 900;
+      font-family: 'Space Mono', monospace;
+      line-height: 1;
+    }
+    .sent-summ-item.pos .sent-summ-val { color: var(--accent); }
+    .sent-summ-item.neg .sent-summ-val { color: var(--danger); }
+    .sent-summ-item.neu .sent-summ-val { color: var(--muted); }
+    .sent-summ-label { font-size: 10px; color: var(--muted); margin-top: 3px; }
+    .overall-sent-bar {
+      height: 8px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+      display: flex;
+    }
+    .osb-pos { background: var(--accent); transition: width 1s ease; }
+    .osb-neu { background: rgba(232,240,254,0.2); transition: width 1s ease; }
+    .osb-neg { background: var(--danger); transition: width 1s ease; }
+    .osb-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 10px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* Top movers sidebar */
+    .mover-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .mover-item:last-child { border-bottom: none; }
+    .mover-left { display: flex; align-items: center; gap: 10px; }
+    .mover-ticker {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'Space Mono', monospace;
+      color: var(--text);
+    }
+    .mover-name { font-size: 11px; color: var(--muted); }
+    .mover-change {
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'Space Mono', monospace;
+    }
+    .mover-change.up { color: var(--accent); }
+    .mover-change.dn { color: var(--danger); }
+
+    /* Hot topics */
+    .topic-cloud { display: flex; flex-wrap: wrap; gap: 6px; }
+    .topic-tag {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Outfit', sans-serif;
+    }
+    .topic-tag:hover { background: rgba(255,255,255,0.09); color: var(--text); }
+    .topic-tag.hot { background: rgba(0,229,160,0.08); border-color: rgba(0,229,160,0.2); color: var(--accent); }
+    .topic-tag .t-count { font-size: 9px; opacity: 0.6; margin-left: 3px; }
+
+    /* Loading skeleton */
+    .skeleton-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 16px 18px;
+    }
+    .skel {
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      animation: shimmer 1.5s infinite;
+      background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+    .empty-state .es-icon { font-size: 36px; margin-bottom: 12px; }
+    .empty-state .es-text { font-size: 14px; }
+
+    /* Load more */
+    .btn-load-more {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Outfit', sans-serif;
+      margin-top: 4px;
+    }
+    .btn-load-more:hover { background: rgba(255,255,255,0.07); color: var(--text); }
+
+    @media (max-width: 900px) {
+      .news-layout { grid-template-columns: 1fr; }
+      .news-sidebar { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    }
+    @media (max-width: 600px) {
+      .news-sidebar { grid-template-columns: 1fr; }
+      .sent-summary-grid { grid-template-columns: repeat(3, 1fr); }
+      .filter-row { gap: 6px; }
+      .filter-btn { font-size: 11px; padding: 5px 10px; }
+    }
+
+    /* main top padding for pages with topbar + header */
+    @media (max-width: 680px) {
+      main { padding-top: calc(48px + 56px + 14px) !important; }
+    }
+  
+    .burger-btn{display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:36px;height:36px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;cursor:pointer;flex-shrink:0;transition:background .2s}
+    .burger-btn:hover{background:rgba(255,255,255,0.1)}
+    .burger-btn span{display:block;width:18px;height:2px;background:#e8f0fe;border-radius:2px;transition:all .25s ease;transform-origin:center}
+    .burger-btn.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+    .burger-btn.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+    .burger-btn.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+    .mobile-nav-overlay{display:none;position:fixed;top:48px;left:0;right:0;z-index:490;background:rgba(6,12,20,0.98);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.1);padding:12px 16px 16px;flex-direction:column;gap:4px;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+    .mobile-nav-overlay.open{display:flex}
+    .mobile-nav-overlay a{font-size:14px;font-weight:600;color:rgba(232,240,254,0.65);text-decoration:none;padding:12px 16px;border-radius:10px;transition:all .15s;border:1px solid transparent;display:flex;align-items:center;gap:10px}
+    .mobile-nav-overlay a:hover{color:#e8f0fe;background:rgba(255,255,255,0.06)}
+    .mobile-nav-overlay a.active{color:#00e5a0;background:rgba(0,229,160,0.08);border-color:rgba(0,229,160,0.2)}
+    @media (max-width:680px){.burger-btn{display:flex}.topbar-nav{display:none}.topbar-home{display:none !important}}
+  </style>
+</head>
+<body>
+  <div class="topbar" id="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="topbar-logo">&#9650; Cukong Reborn</a>
+      <span class="topbar-sep">|</span>
+      <span class="topbar-badge">NEWS</span>
+    </div>
+    <nav class="topbar-nav">
+      <a href="screener.html">📊 Screener</a>
+      <a href="sr.html">📉 S&amp;R</a>
+      <a href="volume.html">🔥 Volume</a>
+      <a href="scanner.html">🔭 Scanner</a>
+      <a href="foreign.html">🌏 Foreign</a>
+      <a href="ai-signal.html">🧠 AI Signal</a>
+      <a href="news.html" class="active">📰 News</a>
+      <a href="kalender.html">📅 Kalender</a>
+    </nav>
+    <a href="index.html" class="topbar-home">&larr; Beranda</a>
+    <button class="burger-btn" id="burgerBtn" onclick="toggleMobileNav()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <nav class="mobile-nav-overlay" id="mobileNav">
+    <a href="screener.html">📊 Screener</a>
+    <a href="sr.html">📉 S&amp;R</a>
+    <a href="volume.html">🔥 Volume</a>
+    <a href="scanner.html">🔭 Scanner</a>
+    <a href="foreign.html">🌏 Foreign</a>
+    <a href="ai-signal.html">🧠 AI Signal</a>
+    <a href="news.html" class="active">📰 News</a>
+    <a href="kalender.html">📅 Kalender</a>
+  </nav>
+
+  <div class="bg-grid"></div>
+  <div class="bg-glow glow-1"></div>
+  <div class="bg-glow glow-2"></div>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">&#128240;</span>
+        <div>
+          <div class="logo-title">Market News <span class="logo-pro">LIVE</span></div>
+          <div class="logo-sub">Berita Pasar · AI Sentiment · IDX & Global</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="market-status" id="marketStatus">
+          <span class="dot"></span> Market Loading...
+        </div>
+        <div class="clock" id="clock"></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <div class="news-hero">
+      <div class="news-hero-top">
+        <div class="news-title-group">
+          <div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+              <span class="news-h1">Mini <span>Bloomberg</span></span>
+              <span class="news-live-badge">Live</span>
+            </div>
+            <div class="news-subtitle">Berita pasar lokal & global · Analisis sentimen AI otomatis</div>
+          </div>
+        </div>
+        <div class="news-controls">
+          <span id="feedStatus" style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;display:flex;gap:6px;align-items:center;flex-wrap:wrap"></span>
+          <span class="last-update" id="lastUpdate">–</span>
+          <button class="btn-refresh" id="btnRefresh" onclick="fetchAllNews()">
+            <span class="refresh-icon">&#8635;</span> Refresh
+          </button>
+        </div>
+      </div>
+      <!-- Ticker tape -->
+      <div class="ticker-wrap">
+        <div class="ticker-label">HEADLINES</div>
+        <div class="ticker-scroll-container">
+          <div class="ticker-inner" id="tickerInner">
+            <span class="ticker-item"><span class="ti-src">LOADING</span><span class="ti-dot">·</span>Memuat berita terbaru...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter row -->
+    <div class="filter-row">
+      <span style="font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-right:2px">SUMBER:</span>
+      <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">Semua</button>
+      <button class="filter-btn cat-lokal" data-filter="lokal" onclick="setFilter('lokal', this)">&#127470;&#127465; Lokal</button>
+      <button class="filter-btn cat-global" data-filter="global" onclick="setFilter('global', this)">&#127758; Global</button>
+      <button class="filter-btn cat-geo" data-filter="geo" onclick="setFilter('geo', this)">&#128308; Geopolitik</button>
+      <button class="filter-btn fj-filter" data-filter="fj" onclick="setFilter('fj', this)" style="border-color:rgba(245,197,24,0.25);color:rgba(245,197,24,0.7)">&#9889; FJ</button>
+      <div class="filter-sep"></div>
+      <span style="font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-right:2px">SENTIMEN:</span>
+      <button class="filter-btn sent-pos" data-sent="pos" onclick="setSentFilter('pos', this)">&#128994; Positif</button>
+      <button class="filter-btn sent-neg" data-sent="neg" onclick="setSentFilter('neg', this)">&#128308; Negatif</button>
+      <button class="filter-btn sent-neu" data-sent="neu" onclick="setSentFilter('neu', this)">&#9898; Netral</button>
+      <div class="filter-sep"></div>
+      <button class="filter-btn" style="border-color:rgba(245,197,24,0.2);color:rgba(245,197,24,0.8)" onclick="toggleFJLive()">&#9889; FJ Live</button>
+    </div>
+
+    <!-- FinancialJuice Live Panel (main area, collapsible) -->
+    <div id="fjMainPanel" style="display:none;margin-bottom:20px">
+      <div style="background:rgba(245,197,24,0.04);border:1px solid rgba(245,197,24,0.2);border-radius:14px;overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(245,197,24,0.12);flex-wrap:wrap;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:22px">&#9889;</span>
+            <div>
+              <div style="font-size:15px;font-weight:800;color:var(--warn)">FinancialJuice Live Feed</div>
+              <div style="font-size:11px;color:var(--muted);font-family:'Space Mono',monospace">Real-time global market squawk &middot; Login untuk fitur penuh</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-size:9px;background:rgba(255,69,96,0.15);color:#ff4560;border:1px solid rgba(255,69,96,0.3);padding:2px 8px;border-radius:3px;font-family:'Space Mono',monospace;font-weight:700">LIVE</span>
+            <a href="https://www.financialjuice.com/home" target="_blank" rel="noopener" style="font-size:12px;color:var(--warn);text-decoration:none;font-weight:600;padding:6px 12px;border:1px solid rgba(245,197,24,0.3);border-radius:8px;background:rgba(245,197,24,0.06)">Buka di Tab Baru &#8599;</a>
+            <button onclick="toggleFJLive()" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--muted);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px">&#10005; Tutup</button>
+          </div>
+        </div>
+        <div style="position:relative;width:100%;height:520px;overflow:hidden">
+          <iframe 
+            src="https://www.financialjuice.com/home" 
+            title="FinancialJuice Live News Feed"
+            style="width:100%;height:100%;border:none;"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation-by-user-activation"
+            loading="lazy"
+            id="fjMainIframe"
+            onload="checkFJLoad(this)">
+          </iframe>
+          <div id="fjBlockedMsg" style="display:none;position:absolute;inset:0;background:rgba(6,12,20,0.97);flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:30px">
+            <span style="font-size:48px">&#9889;</span>
+            <div style="font-size:16px;font-weight:700;color:var(--warn)">FinancialJuice</div>
+            <p style="font-size:13px;color:var(--muted);max-width:400px;line-height:1.7">
+              FinancialJuice memblokir embedding dari luar (X-Frame-Options). 
+              Klik tombol di bawah untuk membuka langsung di tab baru.
+            </p>
+            <a href="https://www.financialjuice.com/home" target="_blank" rel="noopener" 
+               style="display:inline-flex;align-items:center;gap:8px;background:rgba(245,197,24,0.12);border:1px solid rgba(245,197,24,0.3);color:var(--warn);padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px">
+              &#9889; Buka FinancialJuice &#8599;
+            </a>
+            <p style="font-size:11px;color:var(--muted);margin-top:8px">Berita dari FJ tetap tampil di feed utama jika scraping berhasil.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main layout -->
+    <div class="news-layout">
+      <!-- Feed -->
+      <div>
+        <div class="news-feed" id="newsFeed">
+          <!-- Skeleton loaders -->
+          ${[1,2,3,4,5].map(() => `
+          <div class="skeleton-card">
+            <div style="display:flex;gap:8px;margin-bottom:10px">
+              <div class="skel" style="width:60px;height:16px;border-radius:3px"></div>
+              <div class="skel" style="width:80px;height:16px;border-radius:3px"></div>
+              <div class="skel" style="width:50px;height:16px;border-radius:3px;margin-left:auto"></div>
+            </div>
+            <div class="skel" style="height:18px;border-radius:4px;margin-bottom:6px"></div>
+            <div class="skel" style="height:14px;border-radius:4px;width:85%;margin-bottom:10px"></div>
+            <div class="skel" style="height:24px;border-radius:12px;width:100px"></div>
+          </div>`).join('')}
+        </div>
+        <button class="btn-load-more" id="btnLoadMore" onclick="loadMore()" style="display:none">
+          &#43; Muat Lebih Banyak
+        </button>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="news-sidebar">
+        <!-- Sentiment Summary -->
+        <div class="sidebar-card">
+          <div class="sidebar-title">&#129302; Sentimen Pasar</div>
+          <div class="sent-summary-grid">
+            <div class="sent-summ-item pos">
+              <div class="sent-summ-val" id="cntPos">–</div>
+              <div class="sent-summ-label">Positif</div>
+            </div>
+            <div class="sent-summ-item neu">
+              <div class="sent-summ-val" id="cntNeu">–</div>
+              <div class="sent-summ-label">Netral</div>
+            </div>
+            <div class="sent-summ-item neg">
+              <div class="sent-summ-val" id="cntNeg">–</div>
+              <div class="sent-summ-label">Negatif</div>
+            </div>
+          </div>
+          <div class="overall-sent-bar">
+            <div class="osb-pos" id="osbPos" style="width:33%"></div>
+            <div class="osb-neu" id="osbNeu" style="width:34%"></div>
+            <div class="osb-neg" id="osbNeg" style="width:33%"></div>
+          </div>
+          <div class="osb-labels">
+            <span id="lblPos">–%</span>
+            <span id="lblNeu">–%</span>
+            <span id="lblNeg">–%</span>
+          </div>
+          <div style="margin-top:12px;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.06)">
+            <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:4px">MOOD PASAR</div>
+            <div id="marketMood" style="font-size:14px;font-weight:700">–</div>
+          </div>
+        </div>
+
+        <!-- Hot Topics -->
+        <div class="sidebar-card">
+          <div class="sidebar-title">&#128293; Topik Trending</div>
+          <div class="topic-cloud" id="topicCloud">
+            <div class="skel" style="width:60px;height:24px;border-radius:12px"></div>
+            <div class="skel" style="width:80px;height:24px;border-radius:12px"></div>
+            <div class="skel" style="width:50px;height:24px;border-radius:12px"></div>
+            <div class="skel" style="width:70px;height:24px;border-radius:12px"></div>
+            <div class="skel" style="width:90px;height:24px;border-radius:12px"></div>
+          </div>
+        </div>
+
+        <!-- Sources -->
+        <div class="sidebar-card">
+          <div class="sidebar-title">&#128240; Sumber Berita</div>
+          <div style="display:flex;flex-direction:column;gap:8px" id="sourceList">
+            <div class="mover-item">
+              <div class="mover-left"><div><div class="mover-ticker" style="font-size:11px">&#127470;&#127465; LOKAL</div></div></div>
+            </div>
+            <div style="font-size:11px;color:var(--muted);line-height:2">
+              Google News Indonesia · Bisnis.com · Kontan · CNBC ID · Antara · Detik Finance <span style="color:rgba(0,229,160,0.5);font-size:9px">(via Google News RSS)</span>
+            </div>
+            <div class="mover-item" style="margin-top:4px">
+              <div class="mover-left"><div><div class="mover-ticker" style="font-size:11px">&#127758; GLOBAL</div></div></div>
+            </div>
+            <div style="font-size:11px;color:var(--muted);line-height:2">
+              Investing.com · ForexLive · MarketWatch · Nasdaq News
+            </div>
+            <div class="mover-item" style="margin-top:6px">
+              <div class="mover-left"><div><div class="mover-ticker" style="font-size:11px;color:var(--danger)">&#128308; GEOPOLITIK</div></div></div>
+            </div>
+            <div style="font-size:11px;color:var(--muted);line-height:2">
+              Reuters World · AP World/Finance · BBC World · BBC Biz · Al Jazeera · Defence Blog
+            </div>
+            <div class="mover-item" style="margin-top:4px">
+              <div class="mover-left">
+                <div>
+                  <div class="mover-ticker" style="font-size:11px;color:var(--warn)">⚡ SQUAWK</div>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(245,197,24,0.05);border:1px solid rgba(245,197,24,0.15);border-radius:8px;margin-top:2px">
+              <span style="font-size:18px">⚡</span>
+              <div>
+                <div style="font-size:12px;font-weight:700;color:var(--warn)">FinancialJuice</div>
+                <div style="font-size:10px;color:var(--muted)">Real-time market squawk · Global</div>
+              </div>
+              <a href="https://www.financialjuice.com" target="_blank" rel="noopener" style="margin-left:auto;font-size:10px;color:var(--warn);text-decoration:none;font-weight:700;opacity:0.8">↗</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- FinancialJuice Live Panel (shown as fallback if scraping fails) -->
+        <div class="sidebar-card" id="fjLivePanel" style="display:none; padding:0; overflow:hidden; border-color:rgba(245,197,24,0.25); background:rgba(245,197,24,0.03);">
+          <div style="padding:12px 16px 10px; border-bottom:1px solid rgba(245,197,24,0.15); display:flex; align-items:center; justify-content:space-between; gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;font-family:'Space Mono',monospace;color:var(--warn);">⚡ FinancialJuice Live</span>
+              <span style="font-size:9px;background:rgba(255,69,96,0.15);color:#ff4560;border:1px solid rgba(255,69,96,0.3);padding:1px 6px;border-radius:2px;font-family:'Space Mono',monospace;font-weight:700">LIVE</span>
+            </div>
+            <a href="https://www.financialjuice.com/home" target="_blank" rel="noopener" style="font-size:10px;color:var(--warn);text-decoration:none;opacity:0.7">Buka ↗</a>
+          </div>
+          <div style="position:relative;width:100%;height:420px;overflow:hidden;">
+            <iframe 
+              src="https://www.financialjuice.com/home" 
+              title="FinancialJuice Live News"
+              style="width:100%;height:700px;border:none;transform:scale(0.65);transform-origin:top left;width:154%;pointer-events:auto;"
+              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+              loading="lazy">
+            </iframe>
+            <div style="position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,rgba(6,12,20,0.95));pointer-events:none;"></div>
+          </div>
+          <div style="padding:10px 14px;border-top:1px solid rgba(255,255,255,0.05)">
+            <a href="https://www.financialjuice.com" target="_blank" rel="noopener" style="font-size:11px;color:var(--warn);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:6px">
+              <span>🌐 Buka FinancialJuice lengkap</span>
+              <span style="opacity:0.5">↗</span>
+            </a>
+          </div>
+        </div>
+        <div class="sidebar-card" style="background:rgba(0,184,240,0.04);border-color:rgba(0,184,240,0.15)">
+          <div class="sidebar-title" style="color:var(--accent2)">&#129504; Cara Kerja AI</div>
+          <p style="font-size:12px;color:var(--muted);line-height:1.7">
+            Setiap berita dianalisis secara otomatis menggunakan <strong style="color:var(--accent2)">Claude AI</strong> 
+            untuk menentukan sentimen: <span style="color:var(--accent)">positif</span>, 
+            <span style="color:var(--danger)">negatif</span>, atau 
+            <span style="color:rgba(232,240,254,0.5)">netral</span> terhadap pasar saham IDX.
+          </p>
+          <div style="margin-top:10px;padding:8px 12px;background:rgba(0,184,240,0.06);border-radius:8px;font-size:11px;font-family:'Space Mono',monospace;color:var(--accent2)">
+            Model: claude-sonnet-4-6
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ===== CLOCK & MARKET STATUS =====
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString('id-ID', { hour12: false });
+      const wib = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+      const h = wib.getHours(), m = wib.getMinutes(), d = wib.getDay();
+      const open = d >= 1 && d <= 5 && ((h === 9 && m >= 0) || (h >= 10 && h < 12) || (h === 12 && m === 0) || (h >= 13 && h < 16) || (h === 16 && m === 0));
+      const el = document.getElementById('marketStatus');
+      const dot = el.querySelector('.dot');
+      if (open) {
+        el.innerHTML = '<span class="dot open"></span> IDX Buka';
+        el.querySelector('.dot').className = 'dot open';
+      } else {
+        el.innerHTML = '<span class="dot"></span> IDX Tutup';
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ===== BURGER MENU =====
+    function toggleMobileNav() {
+      document.getElementById('burgerBtn').classList.toggle('open');
+      document.getElementById('mobileNav').classList.toggle('open');
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('#mobileNav a').forEach(a => {
+        a.addEventListener('click', () => {
+          document.getElementById('burgerBtn').classList.remove('open');
+          document.getElementById('mobileNav').classList.remove('open');
+        });
+      });
+    });
+
+    // ===== NEWS DATA =====
+    let allNews = [];
+    let visibleCount = 12;
+    let currentFilter = 'all';
+    let currentSent = 'all';
+
+    // RSS feeds via allorigins proxy (CORS-free)
+    // Sources are grouped: LOKAL (Indonesia), GLOBAL (Finance/Macro), GEO (Geopolitical/World)
+    const RSS_FEEDS = [
+      // ===== LOKAL — via Google News RSS (reliable CORS, aggregates from Bisnis/Kontan/CNBC ID/Antara/etc) =====
+      { name: 'IHSG & Saham',   url: 'https://news.google.com/rss/search?q=IHSG+saham+IDX+indonesia&hl=id&gl=ID&ceid=ID:id',  type: 'lokal', cat: 'IDX' },
+      { name: 'Ekonomi RI',     url: 'https://news.google.com/rss/search?q=ekonomi+indonesia+rupiah&hl=id&gl=ID&ceid=ID:id',  type: 'lokal', cat: 'Makro' },
+      { name: 'Bank Indonesia', url: 'https://news.google.com/rss/search?q=%22Bank+Indonesia%22+suku+bunga&hl=id&gl=ID&ceid=ID:id', type: 'lokal', cat: 'BI Rate' },
+      { name: 'Investasi IDX',  url: 'https://news.google.com/rss/search?q=investasi+saham+emiten+BEI&hl=id&gl=ID&ceid=ID:id', type: 'lokal', cat: 'Investasi' },
+      { name: 'Komoditas RI',   url: 'https://news.google.com/rss/search?q=batu+bara+nikel+CPO+harga+komoditas+indonesia&hl=id&gl=ID&ceid=ID:id', type: 'lokal', cat: 'Komoditas' },
+      { name: 'Makro RI',       url: 'https://news.google.com/rss/search?q=inflasi+indonesia+ekspor+impor+pertumbuhan&hl=id&gl=ID&ceid=ID:id', type: 'lokal', cat: 'Makro' },
+
+      // ===== GLOBAL — Finance & Markets =====
+      { name: 'Investing.com',  url: 'https://www.investing.com/rss/news.rss',                      type: 'global', cat: 'Markets', speed: 'fast' },
+      { name: 'Inv. Economy',   url: 'https://www.investing.com/rss/news_14.rss',                   type: 'global', cat: 'Economy', speed: 'fast' },
+      { name: 'Inv. Forex',     url: 'https://www.investing.com/rss/news_1.rss',                    type: 'global', cat: 'Forex',   speed: 'fast' },
+      { name: 'ForexLive',      url: 'https://forexlive.com/feed',                                  type: 'global', cat: 'Forex ⚡', speed: 'fast' },
+      { name: 'MarketWatch',    url: 'https://feeds.content.dowjones.io/public/rss/mw_topstories', type: 'global', cat: 'US Market' },
+      { name: 'Nasdaq News',    url: 'https://www.nasdaq.com/feed/rssoutbound?category=Articles',   type: 'global', cat: 'Nasdaq' },
+
+      // ===== GEOPOLITIK & WORLD NEWS — breaking news perang, konflik, kebijakan =====
+      { name: 'Reuters World',  url: 'https://feeds.reuters.com/reuters/worldNews',                 type: 'geo', cat: 'World ⚡', speed: 'fast' },
+      { name: 'Reuters Biz',    url: 'https://feeds.reuters.com/reuters/businessNews',              type: 'geo', cat: 'Business' },
+      { name: 'AP Finance',     url: 'https://feeds.apnews.com/apnews/financialnews',               type: 'geo', cat: 'AP News', speed: 'fast' },
+      { name: 'AP World',       url: 'https://feeds.apnews.com/apnews/worldnews',                   type: 'geo', cat: 'World ⚡', speed: 'fast' },
+      { name: 'BBC World',      url: 'https://feeds.bbci.co.uk/news/world/rss.xml',                 type: 'geo', cat: 'BBC ⚡' },
+      { name: 'BBC Business',   url: 'https://feeds.bbci.co.uk/news/business/rss.xml',              type: 'geo', cat: 'BBC Biz' },
+      { name: 'Al Jazeera',     url: 'https://www.aljazeera.com/xml/rss/all.xml',                   type: 'geo', cat: 'Geopolitik' },
+      { name: 'Defence Blog',   url: 'https://defence-blog.com/feed',                               type: 'geo', cat: 'Militer' },
+    ];
+
+    // ===== FINANCIALJUICE SCRAPER =====
+    // FJ uses Cloudflare protection — direct server proxies are blocked.
+    // We fetch client-side using multiple CORS proxy fallbacks.
+    // FJ's homepage lists news items in HTML — we parse them out.
+    async function fetchFinancialJuice() {
+      const FJ_URL = 'https://www.financialjuice.com/home';
+      const proxies = [
+        url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+        url => `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(url)}`,
+      ];
+
+      let html = '';
+      for (const proxy of proxies) {
+        try {
+          const res = await fetch(proxy(FJ_URL), {
+            signal: AbortSignal.timeout(7000),
+            headers: { 'Accept': 'text/html' }
+          });
+          if (res.ok) {
+            html = await res.text();
+            if (html.length > 500) break;
+          }
+        } catch(e) { /* try next */ }
+      }
+
+      if (!html || html.length < 500) {
+        console.warn('FJ: all proxies failed, using iframe panel instead');
+        showFJIframePanel();
+        return [];
+      }
+
+      // Parse FJ news items from HTML
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const articles = [];
+
+      // FJ uses various selectors for news items — try common patterns
+      const selectors = [
+        '.news-item', '.headline-item', '.feed-item', '.story',
+        '[class*="news"]', '[class*="feed"]', '[class*="headline"]',
+        'article', '.item'
+      ];
+
+      let items = [];
+      for (const sel of selectors) {
+        const found = doc.querySelectorAll(sel);
+        if (found.length > 3) { items = [...found]; break; }
+      }
+
+      // Fallback: grab all anchor texts that look like headlines
+      if (items.length === 0) {
+        const links = doc.querySelectorAll('a[href*="/News/"]');
+        links.forEach((a, idx) => {
+          if (idx >= 15) return;
+          const title = a.textContent.trim();
+          if (title.length > 20) {
+            const href = a.href.startsWith('http') ? a.href : 'https://www.financialjuice.com' + a.getAttribute('href');
+            articles.push({
+              id: `fj-${idx}`,
+              title, desc: '',
+              link: href,
+              source: 'FinancialJuice',
+              type: 'global', cat: 'Squawk',
+              sentiment: null, sentScore: null,
+              ts: Date.now() - idx * 120000
+            });
+          }
+        });
+      } else {
+        items.forEach((item, idx) => {
+          if (idx >= 12) return;
+          const title = item.querySelector('h1,h2,h3,h4,.title,a')?.textContent?.trim() || '';
+          const desc = item.querySelector('p,.desc,.summary')?.textContent?.trim() || '';
+          const link = item.querySelector('a')?.href || '#';
+          const timeEl = item.querySelector('time,.time,.date');
+          const ts = timeEl ? new Date(timeEl.getAttribute('datetime') || timeEl.textContent).getTime() : Date.now() - idx * 120000;
+          if (title.length > 15) {
+            articles.push({
+              id: `fj-${idx}`,
+              title, desc: desc.substring(0,200),
+              link: link.startsWith('http') ? link : 'https://www.financialjuice.com' + link,
+              source: 'FinancialJuice',
+              type: 'global', cat: 'Squawk',
+              sentiment: null, sentScore: null,
+              ts: isNaN(ts) ? Date.now() - idx * 120000 : ts
+            });
+          }
+        });
+      }
+
+      if (articles.length > 0) {
+        hideFJIframePanel();
+        return articles;
+      } else {
+        showFJIframePanel();
+        return [];
+      }
+    }
+
+    function showFJIframePanel() {
+      const panel = document.getElementById('fjLivePanel');
+      if (panel) panel.style.display = 'block';
+    }
+
+    function hideFJIframePanel() {
+      const panel = document.getElementById('fjLivePanel');
+      if (panel) panel.style.display = 'none';
+    }
+
+    // Fetch RSS via multiple proxy fallbacks
+    const PROXIES = [
+      url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+      url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+      url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+      url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+    ];
+
+    // For allorigins /get endpoint, extract .contents; for raw/others use text directly
+    async function fetchWithProxies(url, maxMs = 8000) {
+      for (let i = 0; i < PROXIES.length; i++) {
+        try {
+          const proxyUrl = PROXIES[i](url);
+          const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(maxMs) });
+          if (!res.ok) continue;
+          const text = await res.text();
+          if (!text || text.length < 100) continue;
+          // allorigins /get returns JSON wrapper
+          if (proxyUrl.includes('/get?url=')) {
+            try {
+              const json = JSON.parse(text);
+              return json.contents || '';
+            } catch { return text; }
+          }
+          return text;
+        } catch(e) { /* try next proxy */ }
+      }
+      return '';
+    }
+
+    async function fetchRSS(feed) {
+      try {
+        const rawXml = await fetchWithProxies(feed.url);
+        if (!rawXml || rawXml.length < 100) throw new Error('all proxies failed');
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(rawXml, 'text/xml');
+        const items = xml.querySelectorAll('item');
+        const articles = [];
+        items.forEach((item, idx) => {
+          if (idx >= 8) return; // max 8 per feed
+          const title = item.querySelector('title')?.textContent?.replace(/<!\[CDATA\[|\]\]>/g, '').trim() || '';
+          const desc = item.querySelector('description')?.textContent?.replace(/<!\[CDATA\[|\]\]>/g, '').replace(/<[^>]+>/g, '').trim().substring(0, 200) || '';
+          const link = item.querySelector('link')?.textContent?.trim() || '#';
+          const pubDate = item.querySelector('pubDate')?.textContent?.trim() || '';
+          if (!title) return;
+          articles.push({
+            id: `${feed.name}-${idx}-${Date.now()}`,
+            title, desc, link, pubDate,
+            source: feed.name,
+            type: feed.type,
+            cat: feed.cat,
+            sentiment: null, // will be filled by AI
+            sentScore: null,
+            ts: pubDate ? new Date(pubDate).getTime() : Date.now() - idx * 60000
+          });
+        });
+        return articles;
+      } catch (e) {
+        console.warn(`Feed error: ${feed.name}`, e.message);
+        return [];
+      }
+    }
+
+    // AI Sentiment analysis via Claude API
+    // ── PRE-PROCESSING: rule-based sentiment sebelum AI dipanggil ──────────
+    function applyRuleBasedSentiment(art) {
+      const t = (art.title + ' ' + (art.desc || '')).toLowerCase();
+
+      // === KATEGORI TIDAK RELEVAN (olahraga, hiburan) ===
+      const irrelevantKW = [
+        'premier league','liga champions','fa cup','bundesliga','serie a','ligue 1',
+        'football','soccer','arsenal','chelsea','manchester','liverpool','barcelona',
+        'real madrid','tottenham','juventus','psg','bayern','lineup','team news',
+        'kickoff','fixture','match preview','half-time','full-time','goal',
+        'nfl','nba','mlb','nhl','cricket','tennis','rugby','golf','f1','grand prix',
+        'celebrity','recipe','fashion','lifestyle','entertainment','movie','music',
+        'pertandingan','sepak bola','turnamen','piala dunia','olimpiade'
+      ];
+      if (irrelevantKW.some(w => t.includes(w))) {
+        art.irrelevant = true;
+        art.sentiment  = art.sentiment || 'neu';
+        art.sentScore  = 0.1;
+        art.sentReason = 'Tidak relevan ke pasar';
+        return;
+      }
+
+      // === SANGAT NEGATIF — perang, serangan, korban jiwa ===
+      const warKW = [
+        'killed','kills','killing','dead','deaths','casualties','wounded','injured',
+        'airstrike','air strike','strike on','strikes on','strike wave','bomb','bombed','bombing',
+        'missile','missiles','rocket','rockets','explosion','blast','attack','attacked','attacks',
+        'war','warfare','invasion','troops','military operation','offensive',
+        'retaliation','retaliates','launches strikes','broad strike',
+        'shoot down','downed','hit us base','hit the base',
+        'conflict escalat','tension escalat','nuclear threat','military escalat',
+        'tewas','korban jiwa','serangan','ledakan','bom','rudal','pesawat jatuh','crash','crashes',
+        'plane crash','aircraft crash'
+      ];
+      if (warKW.some(w => t.includes(w))) {
+        art.sentiment  = 'neg';
+        art.sentScore  = 0.88;
+        art.sentReason = 'Konflik/korban → risk-off global';
+        return;
+      }
+
+      // === NEGATIF — geopolitik, sanksi, krisis ===
+      const negKW = [
+        'sanction','sanctions','tariff hike','trade war','ban','embargo',
+        'recession','crisis','default','bankruptcy','inflation surge','rate hike',
+        'protest','riot','coup','unrest','shutdown','debt ceiling',
+        'charges','arrest','indicted','convicted',
+        'orders government to stop','standoff','battle over',
+        'dangerous moment','dangerous','vulnerable','economic crisis','aftermath',
+        'crime','crimes','epstein','don lemon','anti-ice','anti-','scandal',
+        'krisis','resesi','inflasi naik','sanksi','demonstrasi'
+      ];
+      if (negKW.some(w => t.includes(w))) {
+        art.sentiment  = 'neg';
+        art.sentScore  = 0.70;
+        art.sentReason = 'Risiko geopolitik/ekonomi';
+        return;
+      }
+
+      // === POSITIF — stimulus, kesepakatan, pemulihan ===
+      const posKW = [
+        'ceasefire','peace deal','peace talks','agreement','deal signed',
+        'stimulus','rate cut','gdp growth','record high','rally','bull',
+        'surplus','profit','naik','laba','pertumbuhan','kesepakatan damai'
+      ];
+      if (posKW.some(w => t.includes(w))) {
+        art.sentiment  = 'pos';
+        art.sentScore  = 0.70;
+        art.sentReason = 'Sentimen positif pasar';
+        return;
+      }
+
+      // Belum bisa ditentukan — biarkan AI yang putuskan
+    }
+
+    async function analyzeSentiment(articles) {
+      if (!articles.length) return articles;
+
+      // STEP 1: Pre-processing rule-based DULU (cepat, akurat untuk berita ekstrem)
+      articles.forEach(art => {
+        if (!art.sentiment) applyRuleBasedSentiment(art);
+      });
+      renderNews();
+
+      // STEP 2: Kirim hanya artikel yang BELUM ada sentimentnya ke AI
+      const needAI = articles.filter(a => !a.sentiment);
+      if (!needAI.length) return articles;
+
+      // Process in batches of 10
+      const batchSize = 10;
+      for (let i = 0; i < needAI.length; i += batchSize) {
+        const batch = needAI.slice(i, i + batchSize);
+        const headlines = batch.map((a, idx) => `${idx + 1}. [${a.type.toUpperCase()}] ${a.title}`).join('\n');
+        try {
+          const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: 'claude-sonnet-4-20250514',
+              max_tokens: 1000,
+              system: `You are a financial market sentiment analyzer for Indonesian stock market (IDX).
+Return ONLY a JSON array. Each item: {"idx": number, "sentiment": "pos"|"neg"|"neu", "score": 0.0-1.0, "reason": "max 8 words Indonesian", "relevant": true|false}
+
+STRICT RULES — follow exactly:
+- sentiment = market impact for IDX investors
+- PERANG/MILITER/KORBAN: WAJIB "neg", score 0.85-0.95 (kills, strike, attack, bomb, missile, crash, casualties)
+- GEOPOLITIK ESKALASI: "neg" 0.65-0.85 (sanctions, tariffs, conflict, unrest, protest, charges)
+- RATE HIKE/INFLASI: "neg". RATE CUT/STIMULUS: "pos"
+- GDP naik/profit/deal: "pos". Resesi/default/krisis: "neg"
+- relevant=false HANYA untuk: olahraga, hiburan, lifestyle, resep
+- relevant=true untuk semua berita ekonomi, politik, geopolitik, korporasi`,
+              messages: [{
+                role: 'user',
+                content: `Analyze these headlines for IDX market sentiment:\n\n${headlines}\n\nReturn ONLY JSON array.`
+              }]
+            })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const text = data.content?.[0]?.text || '';
+            const cleaned = text.replace(/```json[\s\S]*?```|```/g, '').trim();
+            const results = JSON.parse(cleaned);
+            results.forEach(r => {
+              const art = batch[r.idx - 1];
+              if (art) {
+                art.sentiment  = r.sentiment;
+                art.sentScore  = r.score;
+                art.sentReason = r.reason;
+                if (r.relevant === false) art.irrelevant = true;
+              }
+            });
+          }
+        } catch (e) {
+          // Fallback: apply rule-based untuk sisa yang belum ada sentiment
+          batch.forEach(art => {
+            if (!art.sentiment) {
+              applyRuleBasedSentiment(art);
+              // Jika masih belum ada (tidak match rule apapun) → netral
+              if (!art.sentiment) {
+                art.sentiment  = 'neu';
+                art.sentScore  = 0.5;
+                art.sentReason = 'Tidak ada dampak jelas';
+              }
+            }
+          });
+        }
+        // Re-render after each batch
+        renderNews();
+        updateSidebarStats();
+      }
+      return articles;
+    }
+
+    // Main fetch
+    async function fetchAllNews() {
+      const btn = document.getElementById('btnRefresh');
+      btn.classList.add('loading');
+      document.getElementById('lastUpdate').textContent = 'Memuat...';
+
+      // Show skeleton
+      const feed = document.getElementById('newsFeed');
+      feed.innerHTML = [1,2,3,4,5].map(() => `
+        <div class="skeleton-card">
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <div class="skel" style="width:60px;height:16px;border-radius:3px"></div>
+            <div class="skel" style="width:80px;height:16px;border-radius:3px"></div>
+            <div class="skel" style="width:50px;height:16px;border-radius:3px;margin-left:auto"></div>
+          </div>
+          <div class="skel" style="height:18px;border-radius:4px;margin-bottom:6px"></div>
+          <div class="skel" style="height:14px;border-radius:4px;width:85%;margin-bottom:10px"></div>
+          <div class="skel" style="height:24px;border-radius:12px;width:100px"></div>
+        </div>`).join('');
+
+      // Fetch all feeds in parallel (RSS + FinancialJuice)
+      const [results, fjArticles] = await Promise.all([
+        Promise.allSettled(RSS_FEEDS.map(f => fetchRSS(f))),
+        fetchFinancialJuice()
+      ]);
+      let articles = [
+        ...results.flatMap(r => r.status === 'fulfilled' ? r.value : []),
+        ...fjArticles
+      ];
+
+      // Sort by date
+      articles.sort((a, b) => b.ts - a.ts);
+
+      // Deduplicate by similar title
+      const seen = new Set();
+      articles = articles.filter(a => {
+        const key = a.title.toLowerCase().substring(0, 40);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      allNews = articles;
+      visibleCount = 12;
+
+      // Count successful feeds
+      const successCount = results.filter(r => r.status === 'fulfilled' && r.value.length > 0).length;
+      const totalCount = RSS_FEEDS.length;
+      const fjCount = fjArticles.length;
+      
+      // Show feed status in UI
+      const statusEl = document.getElementById('feedStatus');
+      if (statusEl) {
+        const lokalCount = allNews.filter(a => a.type === 'lokal').length;
+        const globalCount = allNews.filter(a => a.type === 'global').length;
+        const geoCount = allNews.filter(a => a.type === 'geo').length;
+        statusEl.innerHTML = `
+          <span style="color:var(--accent)">&#10003; ${lokalCount} lokal</span>
+          <span style="color:var(--muted)">·</span>
+          <span style="color:var(--warn)">&#10003; ${globalCount} global</span>
+          <span style="color:var(--muted)">·</span>
+          <span style="color:var(--danger)">&#10003; ${geoCount} geo</span>
+          <span style="color:var(--muted)">· total ${allNews.length} berita</span>
+        `;
+      }
+
+      // Show articles without sentiment first
+      renderNews();
+      updateTickerTape();
+      updateTopics();
+
+      // Then analyze sentiment in background
+      if (allNews.length > 0) {
+        analyzeSentiment(allNews).then(() => {
+          renderNews();
+          updateSidebarStats();
+          updateTickerTape();
+        });
+      }
+
+      btn.classList.remove('loading');
+      document.getElementById('lastUpdate').textContent = 'Update: ' + new Date().toLocaleTimeString('id-ID');
+
+      // If no data, show fallback demo
+      if (allNews.length === 0) {
+        showFallbackNews();
+      }
+    }
+
+    // Render news cards
+    function renderNews() {
+      const feed = document.getElementById('newsFeed');
+      let filtered = allNews.filter(a => {
+        if (currentFilter === 'fj') {
+          if (a.source !== 'FinancialJuice') return false;
+        } else if (currentFilter !== 'all' && a.type !== currentFilter) return false;
+        if (currentSent !== 'all' && a.sentiment && a.sentiment !== currentSent) return false;
+        return true;
+      });
+      // For geo filter: show geo type articles
+
+      if (filtered.length === 0) {
+        feed.innerHTML = `<div class="empty-state"><div class="es-icon">&#128240;</div><div class="es-text">Tidak ada berita yang cocok dengan filter ini.</div></div>`;
+        document.getElementById('btnLoadMore').style.display = 'none';
+        return;
+      }
+
+      const visible = filtered.slice(0, visibleCount);
+      feed.innerHTML = visible.map((a, idx) => buildCard(a, idx === 0 && currentFilter === 'all')).join('');
+
+      const btnMore = document.getElementById('btnLoadMore');
+      btnMore.style.display = filtered.length > visibleCount ? 'block' : 'none';
+    }
+
+    function buildCard(a, featured = false) {
+      const sent = a.sentiment || 'neu';
+      const score = a.sentScore ? Math.round(a.sentScore * 100) : null;
+      const sentBadge = sent === 'pos' ? `<span class="sentiment-badge sent-pos-badge">▲ Positif${score ? ' '+score+'%' : ''}</span>` :
+                        sent === 'neg' ? `<span class="sentiment-badge sent-neg-badge">▼ Negatif${score ? ' '+score+'%' : ''}</span>` :
+                        `<span class="sentiment-badge sent-neu-badge">● Netral${score ? ' '+score+'%' : ''}</span>`;
+      const timeAgo = getTimeAgo(a.ts);
+      const srcClass = a.type === 'lokal' ? 'src-lokal' : a.type === 'geo' ? 'src-geo' : 'src-global';
+      const flag = a.type === 'lokal' ? '🇮🇩' : a.type === 'geo' ? '⚡' : '🌐';
+
+      return `
+      <div class="news-card ${sent} ${featured ? 'featured' : ''}" style="animation-delay:${Math.random() * 0.2}s">
+        <div class="nc-meta">
+          <span class="nc-source ${srcClass}">${flag} ${a.source}</span>
+          <span class="nc-cat">${a.cat}</span>
+          <span class="nc-time">${timeAgo}</span>
+        </div>
+        <div class="nc-title">${escapeHtml(a.title)}</div>
+        ${a.desc ? `<div class="nc-desc">${escapeHtml(a.desc)}</div>` : ''}
+        <div class="nc-footer">
+          <div style="display:flex;align-items:center;gap:8px">
+            ${sentBadge}
+            ${a.sentReason ? `<span class="sent-score">${escapeHtml(a.sentReason)}</span>` : ''}
+          </div>
+          <a href="${escapeHtml(a.link)}" target="_blank" rel="noopener" class="nc-link">Baca ↗</a>
+        </div>
+        ${a.sentiment ? '' : '<div style="position:absolute;inset:0;background:transparent;pointer-events:none" class="analyzing-overlay"></div>'}
+      </div>`;
+    }
+
+    function updateSidebarStats() {
+      const pos = allNews.filter(a => a.sentiment === 'pos').length;
+      const neg = allNews.filter(a => a.sentiment === 'neg').length;
+      const neu = allNews.filter(a => a.sentiment === 'neu').length;
+      const total = pos + neg + neu;
+      if (!total) return;
+
+      document.getElementById('cntPos').textContent = pos;
+      document.getElementById('cntNeg').textContent = neg;
+      document.getElementById('cntNeu').textContent = neu;
+
+      const pPct = Math.round(pos / total * 100);
+      const nPct = Math.round(neg / total * 100);
+      const neuPct = 100 - pPct - nPct;
+
+      document.getElementById('osbPos').style.width = pPct + '%';
+      document.getElementById('osbNeu').style.width = neuPct + '%';
+      document.getElementById('osbNeg').style.width = nPct + '%';
+      document.getElementById('lblPos').textContent = pPct + '%';
+      document.getElementById('lblNeu').textContent = neuPct + '%';
+      document.getElementById('lblNeg').textContent = nPct + '%';
+
+      const moodEl = document.getElementById('marketMood');
+      if (pPct > 55) {
+        moodEl.innerHTML = '<span style="color:var(--accent)">🟢 Bullish — Pasar cenderung optimis</span>';
+      } else if (nPct > 55) {
+        moodEl.innerHTML = '<span style="color:var(--danger)">🔴 Bearish — Pasar cenderung pesimis</span>';
+      } else if (pPct > nPct) {
+        moodEl.innerHTML = '<span style="color:var(--accent)">🟡 Cenderung Positif</span>';
+      } else if (nPct > pPct) {
+        moodEl.innerHTML = '<span style="color:var(--danger)">🟡 Cenderung Negatif</span>';
+      } else {
+        moodEl.innerHTML = '<span style="color:var(--muted)">⚪ Mixed — Tidak ada arah jelas</span>';
+      }
+    }
+
+    function updateTickerTape() {
+      const top = allNews.slice(0, 20);
+      const items = top.map(a => {
+        const sentIcon = a.sentiment === 'pos' ? '▲' : a.sentiment === 'neg' ? '▼' : '●';
+        return `<span class="ticker-item"><span class="ti-src">${a.source.toUpperCase().substring(0,12)}</span><span class="ti-dot"> ${sentIcon} </span>${escapeHtml(a.title.substring(0, 70))}${a.title.length > 70 ? '…' : ''}</span>`;
+      });
+      // Duplicate for seamless loop
+      const full = [...items, ...items].join('');
+      document.getElementById('tickerInner').innerHTML = full;
+    }
+
+    function updateTopics() {
+      const topicMap = {};
+      const keywords = ['IHSG', 'rupiah', 'inflasi', 'BI Rate', 'Fed', 'saham', 'obligasi', 'komoditas', 'kripto', 'ekspor', 'impor', 'bank', 'energy', 'properti', 'teknologi', 'Dow Jones', 'S&P 500', 'oil', 'gold', 'emas'];
+      allNews.forEach(a => {
+        const text = (a.title + ' ' + a.desc).toLowerCase();
+        keywords.forEach(k => {
+          if (text.includes(k.toLowerCase())) {
+            topicMap[k] = (topicMap[k] || 0) + 1;
+          }
+        });
+      });
+
+      const sorted = Object.entries(topicMap).sort((a, b) => b[1] - a[1]).slice(0, 16);
+      const hot = sorted.slice(0, 4).map(e => e[0]);
+
+      document.getElementById('topicCloud').innerHTML = sorted.map(([k, count]) =>
+        `<span class="topic-tag ${hot.includes(k) ? 'hot' : ''}" onclick="searchTopic('${k}')">${k}<span class="t-count">${count}</span></span>`
+      ).join('') || '<span style="font-size:12px;color:var(--muted)">Memuat topik...</span>';
+    }
+
+    function searchTopic(topic) {
+      // Filter to articles containing this topic
+      const q = topic.toLowerCase();
+      const filtered = allNews.filter(a => (a.title + ' ' + a.desc).toLowerCase().includes(q));
+      if (!filtered.length) return;
+      // Temporarily show filtered - just scroll to feed and highlight
+      document.querySelector('.news-feed').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function loadMore() {
+      visibleCount += 8;
+      renderNews();
+    }
+
+    function setFilter(val, btn) {
+      currentFilter = val;
+      document.querySelectorAll('[data-filter]').forEach(b => {
+        b.classList.remove('active');
+        // Reset FJ filter button style
+        if (b.classList.contains('fj-filter')) {
+          b.style.background = '';
+          b.style.color = 'rgba(245,197,24,0.7)';
+        }
+      });
+      btn.classList.add('active');
+      if (val === 'fj') {
+        btn.style.background = 'rgba(245,197,24,0.1)';
+        btn.style.color = '#f5c518';
+        btn.style.borderColor = 'rgba(245,197,24,0.35)';
+      }
+      visibleCount = 12;
+      renderNews();
+    }
+
+    function toggleFJLive() {
+      const panel = document.getElementById('fjMainPanel');
+      if (!panel) return;
+      const isVisible = panel.style.display !== 'none';
+      panel.style.display = isVisible ? 'none' : 'block';
+      if (!isVisible) {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Lazy-load iframe
+        const iframe = document.getElementById('fjMainIframe');
+        if (iframe && !iframe.getAttribute('data-loaded')) {
+          iframe.setAttribute('data-loaded', '1');
+          // iframe src already set
+        }
+      }
+    }
+
+    function checkFJLoad(iframe) {
+      try {
+        // If FJ blocks framing, contentDocument will throw or be null
+        const doc = iframe.contentDocument;
+        if (!doc || !doc.body || doc.body.innerHTML.trim() === '') {
+          showFJBlockedMsg();
+        }
+      } catch(e) {
+        // Cross-origin error = site loaded but is blocking iframe inspection
+        // This usually means it loaded fine
+      }
+    }
+
+    function showFJBlockedMsg() {
+      const msg = document.getElementById('fjBlockedMsg');
+      if (msg) {
+        msg.style.display = 'flex';
+        const iframe = document.getElementById('fjMainIframe');
+        if (iframe) iframe.style.display = 'none';
+      }
+    }
+
+    function setSentFilter(val, btn) {
+      currentSent = currentSent === val ? 'all' : val;
+      document.querySelectorAll('[data-sent]').forEach(b => b.classList.remove('active'));
+      if (currentSent !== 'all') btn.classList.add('active');
+      visibleCount = 12;
+      renderNews();
+    }
+
+    // Time ago helper
+    function getTimeAgo(ts) {
+      const diff = Date.now() - ts;
+      const m = Math.floor(diff / 60000);
+      const h = Math.floor(diff / 3600000);
+      const d = Math.floor(diff / 86400000);
+      if (m < 2) return 'Baru saja';
+      if (m < 60) return `${m}m lalu`;
+      if (h < 24) return `${h}j lalu`;
+      return `${d}h lalu`;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Fallback demo news if all feeds fail
+    function showFallbackNews() {
+      const demo = [
+        { title: 'IHSG Menguat Didukung Aliran Modal Asing yang Masuk', source: 'IDX News', type: 'lokal', cat: 'IDX', desc: 'IHSG kembali menguat ditopang masuknya investor asing ke pasar modal Indonesia.', sentiment: 'pos', sentScore: 0.82, sentReason: 'Aliran modal positif', link: '#', ts: Date.now() - 1800000 },
+        { title: 'Middle East Tensions Escalate — Iran Issues Formal Warning After Military Strike', source: 'Reuters World', type: 'geo', cat: 'World ⚡', desc: 'Geopolitical tensions in the Middle East surged after Iran issued a formal warning, pushing oil above $95/bbl and triggering risk-off across Asian markets.', sentiment: 'neg', sentScore: 0.92, sentReason: 'Eskalasi → risk-off global', link: '#', ts: Date.now() - 3600000 },
+        { title: 'Bank Indonesia Pertahankan Suku Bunga di Level 5.75%', source: 'Antara Ekonomi', type: 'lokal', cat: 'Makro', desc: 'Rapat Dewan Gubernur Bank Indonesia memutuskan mempertahankan BI Rate untuk menjaga stabilitas rupiah.', sentiment: 'neu', sentScore: 0.6, sentReason: 'Kebijakan stabil, sudah diantisipasi', link: '#', ts: Date.now() - 5400000 },
+        { title: 'Russia-Ukraine Ceasefire Talks Show Progress in Geneva', source: 'BBC World', type: 'geo', cat: 'BBC ⚡', desc: 'Peace negotiations showed signs of progress, triggering a risk-on rally in European and Asian equities, with the euro and commodity currencies strengthening.', sentiment: 'pos', sentScore: 0.85, sentReason: 'Gencatan senjata → risk-on rally', link: '#', ts: Date.now() - 7200000 },
+        { title: 'Fed Signals Rate Cuts Delayed, Dollar Surges', source: 'Investing.com', type: 'global', cat: 'Economy', desc: 'Federal Reserve officials signal higher-for-longer rates amid sticky inflation, pressuring EM currencies including the rupiah.', sentiment: 'neg', sentScore: 0.80, sentReason: 'Cut tertunda → rupiah tertekan', link: '#', ts: Date.now() - 9000000 },
+        { title: 'US Imposes New Trade Sanctions on Key Partners, Markets Rattled', source: 'AP World', type: 'geo', cat: 'World ⚡', desc: 'Washington announced sweeping new trade sanctions, reigniting fears of a global trade war and commodity supply disruptions.', sentiment: 'neg', sentScore: 0.88, sentReason: 'Sanksi dagang → komoditas terganggu', link: '#', ts: Date.now() - 10800000 },
+        { title: 'Harga Emas Tembus Rekor Baru Akibat Ketidakpastian Geopolitik', source: 'Kontan', type: 'lokal', cat: 'Komoditas', desc: 'Harga emas spot dunia menembus rekor baru dipicu ketidakpastian geopolitik global dan melemahnya dolar AS.', sentiment: 'pos', sentScore: 0.74, sentReason: 'Safe haven → emas & ANTM naik', link: '#', ts: Date.now() - 12600000 },
+        { title: 'NATO Defense Spending Surge Boosts Defense Stocks Globally', source: 'Al Jazeera', type: 'geo', cat: 'Geopolitik', desc: 'NATO nations pledged to raise defense budgets significantly in response to ongoing conflicts, boosting defense sector stocks.', sentiment: 'neg', sentScore: 0.65, sentReason: 'Eskalasi militer → ketidakpastian', link: '#', ts: Date.now() - 14400000 },
+        { title: 'China Stimulus Package Announced — Asia Markets Jump 2%', source: 'AP Finance', type: 'geo', cat: 'AP News', desc: 'Beijing unveiled a broad stimulus package worth trillions of yuan, sparking a 2%+ rally across Asian financial markets including Indonesia.', sentiment: 'pos', sentScore: 0.86, sentReason: 'Stimulus China → IHSG ikut naik', link: '#', ts: Date.now() - 18000000 },
+        { title: 'ForexLive: USD Weakens on Soft Jobs Data, IDR and EM Surge', source: 'ForexLive', type: 'global', cat: 'Forex ⚡', desc: 'US dollar fell sharply after weaker-than-expected jobs data, boosting emerging market currencies including the Indonesian rupiah by 0.8%.', sentiment: 'pos', sentScore: 0.71, sentReason: 'USD melemah → IDR dan EM menguat', link: '#', ts: Date.now() - 21600000 },
+        { title: 'Harga Batu Bara Melonjak di Tengah Krisis Energi Eropa', source: 'Bisnis.com', type: 'lokal', cat: 'Komoditas', desc: 'Harga batu bara thermal melonjak 8% menyusul eskalasi krisis energi di Eropa, menguntungkan emiten batu bara IDX.', sentiment: 'pos', sentScore: 0.81, sentReason: 'Harga coal naik → ITMG, PTBA rally', link: '#', ts: Date.now() - 25200000 },
+        { title: 'Israel Launches Airstrikes on Lebanon — Oil Spikes 4%', source: 'Reuters World', type: 'geo', cat: 'World ⚡', desc: 'Israel conducted airstrikes on targets in Lebanon after cross-border attacks, sending oil prices sharply higher and pushing global markets lower.', sentiment: 'neg', sentScore: 0.94, sentReason: 'Konflik Timur Tengah → minyak naik', link: '#', ts: Date.now() - 28800000 },
+      ];
+      demo.forEach((d, i) => { d.id = `demo-${i}`; d.ts = d.ts || Date.now() - i * 3600000; });
+      allNews = demo;
+      renderNews();
+      updateSidebarStats();
+      updateTickerTape();
+      updateTopics();
+      document.getElementById('lastUpdate').textContent = 'Demo mode (RSS tidak tersedia)';
+    }
+
+    // Auto-refresh every 5 minutes
+    setInterval(fetchAllNews, 5 * 60 * 1000);
+
+    // Initial load
+    fetchAllNews();
+  </script>
+</body>
+</html>

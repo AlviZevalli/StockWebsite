@@ -178,6 +178,20 @@
       .mode-toggle{width:100%}
       .page-header{flex-direction:column;align-items:flex-start}
     }
+
+    /* Burger menu */
+    .burger-btn{display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:36px;height:36px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;cursor:pointer;flex-shrink:0;transition:background .2s}
+    .burger-btn:hover{background:rgba(255,255,255,0.1)}
+    .burger-btn span{display:block;width:18px;height:2px;background:#e8f0fe;border-radius:2px;transition:all .25s ease;transform-origin:center}
+    .burger-btn.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+    .burger-btn.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+    .burger-btn.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+    .mobile-nav-overlay{display:none;position:fixed;top:48px;left:0;right:0;z-index:490;background:rgba(6,12,20,0.98);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.1);padding:12px 16px 16px;flex-direction:column;gap:4px;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+    .mobile-nav-overlay.open{display:flex}
+    .mobile-nav-overlay a{font-size:14px;font-weight:600;color:rgba(232,240,254,0.65);text-decoration:none;padding:12px 16px;border-radius:10px;transition:all .15s;border:1px solid transparent;display:flex;align-items:center;gap:10px}
+    .mobile-nav-overlay a:hover{color:#e8f0fe;background:rgba(255,255,255,0.06)}
+    .mobile-nav-overlay a.active{color:#00e5a0;background:rgba(0,229,160,0.08);border-color:rgba(0,229,160,0.2)}
+    @media (max-width:680px){.burger-btn{display:flex}.topbar-nav{display:none}.topbar-home{display:none !important}}
   </style>
   <script src="config.js"></script>
 </head>
@@ -188,19 +202,33 @@
     <div class="topbar-left">
       <a href="index.html" class="topbar-logo">▲ Cukong Reborn</a>
       <span class="topbar-sep">|</span>
-      <span class="topbar-badge">VOLUME ANOMALY</span>
+      <span class="topbar-badge">VOLUME</span>
     </div>
     <nav class="topbar-nav">
       <a href="screener.html">📊 Screener</a>
-      <a href="sr.html">📉 S&R Finder</a>
-      <a href="volume.html" class="active">🔥 Volume Anomaly</a>
-      <a href="scanner.html">🔭 Market Scanner</a>
-      <a href="foreign.html">&#127758; Foreign Flow</a>
-      <a href="ai-signal.html">&#129504; AI Signal</a>>
-      <a href="#" class="soon">⚡ Momentum</a>
+      <a href="sr.html">📉 S&amp;R</a>
+      <a href="volume.html" class="active">🔥 Volume</a>
+      <a href="scanner.html">🔭 Scanner</a>
+      <a href="foreign.html">🌏 Foreign</a>
+      <a href="ai-signal.html">🧠 AI Signal</a>
+      <a href="news.html">📰 News</a>
+      <a href="kalender.html">📅 Kalender</a>
     </nav>
     <a href="index.html" class="topbar-home">← Beranda</a>
+    <button class="burger-btn" id="burgerBtn" onclick="toggleMobileNav()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
+  <nav class="mobile-nav-overlay" id="mobileNav">
+    <a href="screener.html">📊 Screener</a>
+    <a href="sr.html">📉 S&amp;R</a>
+    <a href="volume.html" class="active">🔥 Volume</a>
+    <a href="scanner.html">🔭 Scanner</a>
+    <a href="foreign.html">🌏 Foreign</a>
+    <a href="ai-signal.html">🧠 AI Signal</a>
+    <a href="news.html">📰 News</a>
+    <a href="kalender.html">📅 Kalender</a>
+  </nav>
 
   <main>
 
@@ -621,6 +649,28 @@
     }
     function hideLoading(){ document.getElementById('loading').style.display='none'; }
     function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',3200); }
+  </script>
+
+  <script>
+    function toggleMobileNav() {
+      const btn = document.getElementById('burgerBtn');
+      const nav = document.getElementById('mobileNav');
+      if (btn && nav) {
+        btn.classList.toggle('open');
+        nav.classList.toggle('open');
+      }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      var links = document.querySelectorAll('#mobileNav a');
+      links.forEach(function(a) {
+        a.addEventListener('click', function() {
+          var btn = document.getElementById('burgerBtn');
+          var nav = document.getElementById('mobileNav');
+          if (btn) btn.classList.remove('open');
+          if (nav) nav.classList.remove('open');
+        });
+      });
+    });
   </script>
 </body>
 </html>

@@ -3,13 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BSJP Screener — Cukong Reborn</title>
+  <title>BSJP/BPJS Screener — Cukong Reborn</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
   <script src="https://s3.tradingview.com/tv.js"></script>
   <link rel="stylesheet" href="style.css">
   <style>
     main { max-width: 1400px; margin: auto; padding: 28px 24px 60px; position: relative; z-index: 1; }
+    @media (max-width: 680px) {
+      /* topbar(48px) + sticky header(~50px) + gap */
+      main { padding-top: calc(48px + 56px + 14px) !important; }
+    }
 
     .analysis-panel {
       background: rgba(0,229,160,0.04);
@@ -166,6 +170,169 @@
     }
     .btn-analyze:hover { background: rgba(0,184,240,0.25); }
 
+
+    /* ══ AUTO SCANNER ══════════════════════════════════════════════════════ */
+    .scanner-hero {
+      background: linear-gradient(135deg, rgba(0,184,240,0.06) 0%, rgba(167,139,250,0.06) 100%);
+      border: 1px solid rgba(0,184,240,0.2);
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 24px;
+    }
+    .scanner-hero-title {
+      font-size: 20px; font-weight: 800; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .scanner-hero-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+
+    .scanner-mode-row {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px;
+    }
+    .mode-label { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; }
+    .mode-btn {
+      padding: 8px 18px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04); color: var(--muted);
+      font-size: 13px; font-weight: 700; cursor: pointer; transition: all .15s;
+      font-family: var(--font);
+    }
+    .mode-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+    .mode-btn.active-bsjp { background: rgba(0,229,160,0.12); border-color: rgba(0,229,160,0.4); color: var(--accent); }
+    .mode-btn.active-bpjs { background: rgba(167,139,250,0.12); border-color: rgba(167,139,250,0.4); color: #a78bfa; }
+
+    .universe-row {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .uni-btn {
+      padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.1); background: transparent; color: var(--muted);
+      transition: all .15s; font-family: var(--font);
+    }
+    .uni-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+    .uni-btn.uni-active { background: rgba(0,184,240,0.1); border-color: rgba(0,184,240,0.35); color: var(--accent2); }
+
+    .scan-progress-wrap {
+      display: none; align-items: center; gap: 14px;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 14px 18px; margin-bottom: 16px;
+    }
+    .scan-progress-wrap.visible { display: flex; }
+    .scan-progress-bar { flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; }
+    .scan-progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width .4s ease; }
+    .scan-progress-text { font-size: 12px; color: var(--muted); font-family: var(--font-mono); white-space: nowrap; }
+    .btn-scan-start {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, rgba(0,184,240,0.2), rgba(167,139,250,0.2));
+      border: 1px solid rgba(0,184,240,0.4); color: var(--accent2);
+      padding: 10px 22px; border-radius: 10px; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: all .2s; font-family: var(--font);
+    }
+    .btn-scan-start:hover { background: linear-gradient(135deg, rgba(0,184,240,0.3), rgba(167,139,250,0.3)); }
+    .btn-scan-start:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-scan-stop {
+      display: none; align-items: center; gap: 8px;
+      background: rgba(255,69,96,0.12); border: 1px solid rgba(255,69,96,0.3); color: var(--danger);
+      padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: var(--font);
+    }
+    .btn-scan-stop.visible { display: inline-flex; }
+
+    /* Result cards */
+    .scan-results-header {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px; margin-bottom: 16px;
+    }
+    .scan-results-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .scan-count-badge {
+      font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+      background: rgba(0,229,160,0.12); color: var(--accent); font-family: var(--font-mono);
+    }
+    .scan-filter-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .scan-filter-btn {
+      padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.1); background: transparent; color: var(--muted);
+      cursor: pointer; transition: all .15s; font-family: var(--font);
+    }
+    .scan-filter-btn:hover { color: var(--text); }
+    .scan-filter-btn.sf-active { background: rgba(0,229,160,0.1); border-color: rgba(0,229,160,0.3); color: var(--accent); }
+
+    .scan-cards-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;
+    }
+    .scan-card {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 16px 18px; transition: all .2s; cursor: pointer;
+      position: relative; overflow: hidden;
+    }
+    .scan-card:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.14); transform: translateY(-1px); }
+    .scan-card.card-bsjp { border-left: 3px solid var(--accent); }
+    .scan-card.card-bpjs { border-left: 3px solid #a78bfa; }
+    .scan-card.card-wait { border-left: 3px solid var(--warn); }
+    .scan-card.card-skip { border-left: 3px solid rgba(255,255,255,0.15); }
+
+    .scan-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .scan-card-sym { font-size: 18px; font-weight: 800; letter-spacing: 0.5px; }
+    .scan-card-rec {
+      font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 6px;
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .rec-bsjp { background: rgba(0,229,160,0.15); color: var(--accent); border: 1px solid rgba(0,229,160,0.3); }
+    .rec-bpjs { background: rgba(167,139,250,0.15); color: #a78bfa; border: 1px solid rgba(167,139,250,0.3); }
+    .rec-wait { background: rgba(245,197,24,0.12); color: var(--warn); border: 1px solid rgba(245,197,24,0.25); }
+    .rec-skip { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.1); }
+
+    .scan-card-price { font-size: 15px; font-weight: 700; font-family: var(--font-mono); margin-bottom: 8px; }
+    .scan-card-metrics { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .scan-metric-chip {
+      font-size: 11px; padding: 3px 8px; border-radius: 6px;
+      background: rgba(255,255,255,0.05); color: var(--muted); font-family: var(--font-mono);
+    }
+    .scan-metric-chip.chip-green { background: rgba(0,229,160,0.1); color: var(--accent); }
+    .scan-metric-chip.chip-purple { background: rgba(167,139,250,0.1); color: #a78bfa; }
+    .scan-metric-chip.chip-warn { background: rgba(245,197,24,0.1); color: var(--warn); }
+    .scan-metric-chip.chip-red { background: rgba(255,69,96,0.1); color: var(--danger); }
+
+    .scan-card-reason { font-size: 12px; color: var(--muted); line-height: 1.5; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; }
+    .scan-card-actions { display: flex; gap: 6px; margin-top: 10px; }
+    .btn-add-to-screen {
+      flex: 1; padding: 7px; border-radius: 8px; font-size: 12px; font-weight: 700;
+      background: rgba(0,184,240,0.1); border: 1px solid rgba(0,184,240,0.25); color: var(--accent2);
+      cursor: pointer; transition: all .15s; font-family: var(--font);
+    }
+    .btn-add-to-screen:hover { background: rgba(0,184,240,0.2); }
+
+    /* Pill explanation */
+    .menu-pills {
+      display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px;
+    }
+    .menu-pill {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; padding: 10px 14px;
+    }
+    .pill-badge {
+      font-size: 12px; font-weight: 800; padding: 2px 8px; border-radius: 6px;
+      letter-spacing: 0.5px; white-space: nowrap;
+    }
+    .pill-desc { font-size: 12px; color: var(--muted); line-height: 1.4; }
+
+    /* Empty/Loading scan state */
+    .scan-empty {
+      text-align: center; padding: 60px 20px; color: var(--muted);
+    }
+    .scan-empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .scan-empty-text { font-size: 14px; }
+    .scan-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(0,184,240,0.3); border-top-color: var(--accent2); border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 600px) {
+      .scan-cards-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .scan-card { padding: 12px 14px; }
+      .scanner-hero { padding: 16px; }
+    }
+    @media (max-width: 380px) {
+      .scan-cards-grid { grid-template-columns: 1fr; }
+    }
+
     /* ---- Mobile overrides (screener) ---- */
     @media (max-width: 768px) {
       .analysis-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
@@ -190,7 +357,7 @@
     <div class="topbar-left">
       <a href="index.html" class="topbar-logo">&#9650; Cukong Reborn</a>
       <span class="topbar-sep">|</span>
-      <span class="topbar-badge">BSJP SCREENER</span>
+      <span class="topbar-badge">SCREENER PRO</span>
     </div>
     <nav class="topbar-nav">
       <a href="screener.html" class="active">&#128202; Screener</a>
@@ -199,9 +366,25 @@
       <a href="scanner.html">&#128301; Scanner</a>
       <a href="foreign.html">&#127758; Foreign Flow</a>
       <a href="ai-signal.html">&#129504; AI Signal</a>
+      <a href="news.html">&#128240; News</a>
+      <a href="kalender.html">&#128197; Kalender</a>
     </nav>
     <a href="index.html" class="topbar-home">&larr; Beranda</a>
+    <button class="burger-btn" id="burgerBtn" onclick="toggleMobileNav()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
+  <nav class="mobile-nav-overlay" id="mobileNav">
+    <a href="screener.html" class="active">&#128202; Screener</a>
+    <a href="sr.html">&#128201; S&R</a>
+    <a href="volume.html">&#128293; Volume</a>
+    <a href="scanner.html">&#128301; Scanner</a>
+    <a href="foreign.html">&#127758; Foreign Flow</a>
+    <a href="ai-signal.html">&#129504; AI Signal</a>
+    <a href="news.html">&#128240; News</a>
+    <a href="kalender.html">&#128197; Kalender</a>
+    <a href="index.html">&#8592; Beranda</a>
+  </nav>
   <div class="bg-grid"></div>
   <div class="bg-glow glow-1"></div>
   <div class="bg-glow glow-2"></div>
@@ -211,7 +394,7 @@
       <div class="logo">
         <span class="logo-icon">&#9650;</span>
         <div>
-          <div class="logo-title">BSJP Screener <span class="logo-pro">PRO</span></div>
+          <div class="logo-title">BSJP/BPJS Screener <span class="logo-pro">PRO</span></div>
           <div class="logo-sub">by AlviZevalli &middot; IDX Market</div>
         </div>
       </div>
@@ -247,6 +430,7 @@
     <div class="tabs">
       <button class="tab active" onclick="switchTab('screener', this)">&#128202; Screener</button>
       <button class="tab" onclick="switchTab('watchlist', this)">&#128065; Watchlist</button>
+      <button class="tab" onclick="switchTab('autoscan', this)">&#128301; Auto Scan IHSG</button>
       <button class="tab" onclick="switchTab('backtest', this)">&#128257; Backtest</button>
       <button class="tab" onclick="switchTab('info', this)">&#8505;&#65039; Panduan</button>
       <div class="tab-actions">
@@ -258,7 +442,7 @@
     <div id="tab-screener" class="tab-content active">
       <div class="summary-cards" id="summaryCards" style="display:none">
         <div class="s-card"><div class="s-card-val" id="totalCount">0</div><div class="s-card-label">Total Saham</div></div>
-        <div class="s-card strong-card"><div class="s-card-val" id="strongCount">0</div><div class="s-card-label">STRONG &#128293;</div></div>
+        <div class="s-card strong-card"><div class="s-card-val" id="strongCount">0</div><div class="s-card-label">STRONG 💎</div></div>
         <div class="s-card valid-card"><div class="s-card-val" id="validCount">0</div><div class="s-card-label">VALID &#9989;</div></div>
         <div class="s-card skip-card"><div class="s-card-val" id="skipCount">0</div><div class="s-card-label">SKIP &#9940;</div></div>
       </div>
@@ -284,9 +468,9 @@
           <thead>
             <tr>
               <th>Emiten</th><th>Harga</th><th>% Chg</th><th>High</th><th>Low</th>
-              <th>Volume</th><th>Vol Ratio</th><th>MA5</th><th>RSI</th>
-              <th>Score</th><th>Status</th><th>Risk</th>
-              <th>TP (+3%)</th><th>CL (-3%)</th><th>Aksi</th>
+              <th>Volume</th><th>Vol Ratio</th><th>RSI</th>
+              <th>Score</th><th>Mode</th><th>Status</th><th>Risk</th>
+              <th>Entry Waktu</th><th>Target</th><th>CL</th><th>Aksi</th>
             </tr>
           </thead>
           <tbody id="tableBody">
@@ -314,14 +498,15 @@
         <div class="score-gauge-wrap">
           <div class="score-gauge-num" id="gaugeNum">0</div>
           <div class="score-gauge-info">
-            <div class="score-gauge-label">BSJP Score &mdash; Max 140 poin</div>
+            <div class="score-gauge-label" id="score-gauge-label-text">Score &mdash; Max 130 poin</div>
             <div class="score-gauge-bar">
               <div class="score-gauge-fill" id="gaugeFill" style="width:0%"></div>
             </div>
+            <div class="score-entry-info" id="score-entry-window" style="font-size:11px;color:var(--muted);margin-top:6px;margin-bottom:4px"></div>
             <div class="score-segments">
-              <span class="seg skip" id="segSkip">SKIP &lt;70</span>
-              <span class="seg valid" id="segValid">VALID 70-89</span>
-              <span class="seg strong" id="segStrong">STRONG &ge;90</span>
+              <span class="seg skip" id="segSkip">SKIP &lt;80</span>
+              <span class="seg valid" id="segValid">VALID 80-99</span>
+              <span class="seg strong" id="segStrong">STRONG &ge;100</span>
             </div>
           </div>
         </div>
@@ -329,7 +514,7 @@
         <div class="analysis-grid" id="metricsGrid"></div>
 
         <div class="bsjp-criteria">
-          <div class="bsjp-title">&#128203; Cek Kriteria BSJP</div>
+          <div class="bsjp-title" id="criteriaTitle">&#128203; Cek Kriteria</div>
           <div id="bsjpChecks"></div>
         </div>
 
@@ -367,39 +552,117 @@
     <div id="tab-info" class="tab-content">
       <div class="info-grid">
         <div class="info-card">
-          <div class="info-icon">&#128202;</div>
+          <div class="info-icon">&#128302;</div>
           <h4>Cara Penggunaan</h4>
-          <p>Masukkan kode saham IDX (contoh: BBRI, TLKM) lalu klik <strong>+ Tambah</strong>. Klik tombol <strong>&#128302;</strong> untuk membuka panel analisa mendalam tiap emiten BSJP.</p>
+          <p>Masukkan kode saham IDX lalu klik <strong>+ Tambah</strong>. Screener otomatis menentukan apakah saham cocok untuk strategi <strong>BSJP</strong> atau <strong>BPJS</strong>. Klik &#128302; untuk analisa mendalam.</p>
         </div>
-        <div class="info-card">
-          <div class="info-icon">&#129518;</div>
-          <h4>Sistem Scoring BSJP</h4>
-          <ul>
-            <li><strong>+30</strong> Harga &gt; MA5 (Trend naik)</li>
-            <li><strong>+30</strong> Dekat High harian (&lt;2%)</li>
-            <li><strong>+40</strong> Volume &gt; 130% rata-rata</li>
-            <li><strong>+20</strong> Candle kuat (body ratio &gt;0.6)</li>
-            <li><strong>+20</strong> Gap naik dari open</li>
+        <div class="info-card" style="border-color:rgba(0,229,160,0.2)">
+          <div class="info-icon">&#127761;</div>
+          <h4>BSJP — Beli Sore Jual Pagi</h4>
+          <p><strong>Waktu beli:</strong> 14:00–15:50 WIB · <strong>Waktu jual:</strong> Pagi berikutnya 09:00–10:00 WIB</p>
+          <p style="margin-top:8px;font-size:12px;color:var(--muted)">Strategi overnight: manfaatkan saham yang tertekan sore tapi close kuat, berharap gap up keesokan paginya.</p>
+          <ul style="margin-top:8px">
+            <li><strong>+25</strong> Harga &gt; MA5 (tren naik)</li>
+            <li><strong>+25</strong> Dekat high harian (0.5–3%)</li>
+            <li><strong>+30</strong> Volume &gt; 150% rata-rata</li>
+            <li><strong>+20</strong> Body ratio candle &gt; 0.65</li>
+            <li><strong>+15</strong> RSI di zona 40–65</li>
+            <li><strong>+15</strong> Harga naik 0.5–5% hari ini</li>
+          </ul>
+        </div>
+        <div class="info-card" style="border-color:rgba(167,139,250,0.2)">
+          <div class="info-icon">&#9728;&#65039;</div>
+          <h4>BPJS — Beli Pagi Jual Sore</h4>
+          <p><strong>Waktu beli:</strong> 09:00–10:30 WIB · <strong>Waktu jual:</strong> Sore hari ini 13:30–15:50 WIB</p>
+          <p style="margin-top:8px;font-size:12px;color:var(--muted)">Strategi intraday: manfaatkan gap up + volume meledak di sesi pagi, jual sebelum close. Jangan overnight.</p>
+          <ul style="margin-top:8px">
+            <li><strong>+30</strong> Gap up &gt; 0.5% dari kemarin</li>
+            <li><strong>+30</strong> Volume &gt; 200% rata-rata</li>
+            <li><strong>+20</strong> Body ratio &gt; 0.7</li>
+            <li><strong>+20</strong> Harga &gt; MA5 &amp; MA20</li>
+            <li><strong>+20</strong> Kenaikan kuat &gt; 3%</li>
+            <li><strong>+10</strong> RSI aktif 50–72</li>
           </ul>
         </div>
         <div class="info-card">
           <div class="info-icon">&#127919;</div>
           <h4>Interpretasi Status</h4>
           <ul>
-            <li><span class="badge-strong">STRONG</span> Score &ge; 90 &middot; Entry kuat</li>
-            <li><span class="badge-valid">VALID</span> Score 70-89 &middot; Konfirmasi dulu</li>
-            <li><span class="badge-skip">SKIP</span> Score &lt; 70 &middot; Hindari</li>
+            <li><span class="badge-strong">STRONG</span> Score &ge; 100 &middot; Entry ideal</li>
+            <li><span class="badge-valid">VALID</span> Score 80–99 &middot; Konfirmasi dulu</li>
+            <li><span class="badge-skip">SKIP</span> Score &lt; 80 &middot; Hindari</li>
           </ul>
-        </div>
-        <div class="info-card">
-          <div class="info-icon">&#128302;</div>
-          <h4>Analisa Mendalam BSJP</h4>
-          <p>Panel analisa menampilkan: RSI, MA5 vs MA20, body ratio candle, gap analisis, level TP/SL otomatis (TP3%, TP5%, CL3%), checklist kriteria BSJP, sinyal teknikal, dan rekomendasi aksi.</p>
         </div>
         <div class="info-card">
           <div class="info-icon">&#9888;&#65039;</div>
           <h4>Disclaimer</h4>
           <p>Tools ini bersifat edukatif dan bukan rekomendasi investasi. Selalu riset mandiri dan konsultasikan dengan profesional keuangan sebelum mengambil keputusan.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-autoscan" class="tab-content">
+      <!-- Hero Section -->
+      <div class="scanner-hero">
+        <div class="scanner-hero-title">
+          🔭 Auto Scanner IHSG
+          <span style="font-size:12px;font-weight:600;background:rgba(0,184,240,0.12);border:1px solid rgba(0,184,240,0.3);color:var(--accent2);padding:3px 10px;border-radius:6px;">BETA</span>
+        </div>
+        <div class="scanner-hero-sub">Scan otomatis seluruh emiten IDX dan rekomendasikan menu trading terbaik</div>
+
+        <!-- Penjelasan Menu -->
+        <div class="menu-pills">
+          <div class="menu-pill">
+            <span class="pill-badge" style="background:rgba(0,229,160,0.15);color:var(--accent);border:1px solid rgba(0,229,160,0.3)">BSJP</span>
+            <div class="pill-desc"><strong style="color:var(--text)">🌙 BSJP — Beli Sore, Jual Pagi</strong><br><strong>Entry:</strong> 14:00–15:50 WIB · <strong>Exit:</strong> Pagi besok 09:00–10:00 WIB<br><span style="font-size:11px">Hold overnight. Cari saham close kuat → harap gap up pagi</span></div>
+          </div>
+          <div class="menu-pill">
+            <span class="pill-badge" style="background:rgba(167,139,250,0.15);color:#a78bfa;border:1px solid rgba(167,139,250,0.3)">BPJS</span>
+            <div class="pill-desc"><strong style="color:var(--text)">☀️ BPJS — Beli Pagi, Jual Sore</strong><br><strong>Entry:</strong> 09:00–10:30 WIB · <strong>Exit:</strong> Sore ini 13:30–15:50 WIB<br><span style="font-size:11px">Intraday saja. Gap up + volume meledak → jangan overnight</span></div>
+          </div>
+          <div class="menu-pill">
+            <span class="pill-badge" style="background:rgba(245,197,24,0.12);color:var(--warn);border:1px solid rgba(245,197,24,0.25)">WAIT</span>
+            <div class="pill-desc"><strong style="color:var(--text)">⏳ WAIT — Belum Ada Sinyal</strong><br>Score belum cukup untuk BSJP atau BPJS → Pantau dan tunggu konfirmasi</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mode & Universe Selector -->
+      <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 20px;margin-bottom:16px;">
+        <div class="scanner-mode-row">
+          <span class="mode-label">Tampilkan:</span>
+          <button class="mode-btn active-bsjp" id="modeBsjp" onclick="setScanMode('bsjp')">🟢 BSJP Saja</button>
+          <button class="mode-btn" id="modeBpjs" onclick="setScanMode('bpjs')">🟣 BPJS Saja</button>
+          <button class="mode-btn" id="modeAll" onclick="setScanMode('all')">⚡ Semua Sinyal</button>
+        </div>
+        <div class="universe-row">
+          <span class="mode-label">Universe:</span>
+          <button class="uni-btn uni-active" id="uniLq45" onclick="setUniverse('lq45', this)">LQ45</button>
+          <button class="uni-btn" id="uniIdx30" onclick="setUniverse('idx30', this)">IDX30</button>
+          <button class="uni-btn" id="uniAll" onclick="setUniverse('all', this)">🌐 Semua IHSG (~800 emiten)</button>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-scan-start" id="btnScanStart" onclick="startAutoScan()">
+            🔭 Mulai Scan
+          </button>
+          <button class="btn-scan-stop" id="btnScanStop" onclick="stopScan()">
+            ⏹ Stop
+          </button>
+          <span id="scanEtaText" style="font-size:12px;color:var(--muted);font-family:var(--font-mono);"></span>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="scan-progress-wrap" id="scanProgressWrap">
+        <div class="scan-progress-bar"><div class="scan-progress-fill" id="scanProgressFill" style="width:0%"></div></div>
+        <div class="scan-progress-text" id="scanProgressText">0 / 0</div>
+      </div>
+
+      <!-- Results -->
+      <div id="scanResultsArea">
+        <div class="scan-empty">
+          <div class="scan-empty-icon">🔭</div>
+          <div class="scan-empty-text">Pilih mode dan universe, lalu klik <strong>Mulai Scan</strong> untuk mencari peluang trading</div>
         </div>
       </div>
     </div>
@@ -477,13 +740,13 @@
       if (!res.ok) throw new Error("Emiten tidak ditemukan atau API tidak tersedia");
       const d = await res.json();
       if (d.error) throw new Error(d.error);
-      const score = calcScore(d);
-      const { status, cls, risk } = getStatus(score);
+      const { bsjpScore, bpjsScore, mode, status, cls, risk } = calcDualScore(d);
+      const score = mode === 'BPJS' ? bpjsScore : bsjpScore;
       const inWatchlist = watchlist.includes(sym);
-      stockData.push({ symbol: sym, data: d, score, status, cls, risk, inWatchlist });
+      stockData.push({ symbol: sym, data: d, score, bsjpScore, bpjsScore, mode, status, cls, risk, inWatchlist });
       updateSummary();
       renderTable();
-      showToast("Berhasil ditambahkan! " + sym + " Score: " + score);
+      showToast("Berhasil! " + sym + " → " + mode + " (Score: " + score + ")");
       fetchBacktest(sym);
     } catch (err) {
       showToast("Error: " + err.message);
@@ -494,20 +757,113 @@
 
   function quickAdd(sym) { document.getElementById("sym").value = sym; addStock(); }
 
-  function calcScore(d) {
-    let score = 0;
-    if (d.price > d.ma5) score += 30;
-    if (((d.high - d.price) / d.high) < 0.02) score += 30;
-    if ((d.volume / d.avg_volume) * 100 > 130) score += 40;
-    if (d.body_ratio > 0.6) score += 20;
-    if (d.gap > 1) score += 20;
-    return score;
+  // ── DUAL SCORING ENGINE ──────────────────────────────────────────────────
+  // BSJP = Beli Sore Jual Pagi (overnight trade)
+  //   Sinyal dicari di sesi SORE → hold overnight → jual pagi berikutnya
+  //   Ciri: harga tertekan sore tapi masih kuat di close, volume aktif,
+  //         body candle solid, gap up potensi, tidak overbought
+  //
+  // BPJS = Beli Pagi Jual Sore (intraday trade)
+  //   Sinyal dicari di pagi hari → jual sebelum close sesi sore
+  //   Ciri: gap up open, volume meledak di sesi 1, momentum kuat pagi,
+  //         harga masih bergerak naik, RSI aktif tapi tidak jenuh
+  // ─────────────────────────────────────────────────────────────────────────
+
+  function calcDualScore(d) {
+    const volRatio   = d.avg_volume > 0 ? (d.volume / d.avg_volume) * 100 : 0;
+    const nearHigh   = d.high > 0 ? ((d.high - d.price) / d.high) * 100 : 99;
+    const nearLow    = d.low  > 0 ? ((d.price - d.low)  / d.price) * 100 : 99;
+    const rsi        = d.rsi || 50;
+    const gap        = d.gap  || 0;
+    const bodyRatio  = d.body_ratio || 0;
+    const chgPct     = d.change_pct || 0;
+    const aboveMA5   = d.price > d.ma5;
+    const aboveMA20  = d.ma20 > 0 && d.price > d.ma20;
+
+    // ── BSJP SCORE (max 130) ─────────────────────────────────────────────
+    // Strategi: Beli Sore menjelang close — antisipasi gap up pagi berikutnya
+    let bsjpScore = 0;
+
+    // Harga masih di atas MA5 → tren harian masih naik (+25)
+    if (aboveMA5) bsjpScore += 25;
+
+    // Harga mendekati high harian tapi belum ARA → kekuatan beli masih ada di close (+25)
+    // Sore yang ideal: buyer bertahan, tidak terjadi profit taking besar
+    if (nearHigh >= 0.5 && nearHigh < 3.0) bsjpScore += 25;
+
+    // Volume tinggi di hari ini → ada akumulasi (+30)
+    if (volRatio > 150) bsjpScore += 30;
+    else if (volRatio > 120) bsjpScore += 15;
+
+    // Candle solid → close kuat menjelang sore (+20)
+    if (bodyRatio > 0.65) bsjpScore += 20;
+    else if (bodyRatio > 0.45) bsjpScore += 10;
+
+    // RSI tidak overbought → masih ada ruang naik pagi berikutnya (+15)
+    if (rsi >= 40 && rsi <= 65) bsjpScore += 15;
+    else if (rsi > 65 && rsi < 75) bsjpScore += 5;
+
+    // Harga naik hari ini (tidak tertekan habis) → momentum masih positif (+15)
+    if (chgPct >= 0.5 && chgPct <= 5.0) bsjpScore += 15;
+    else if (chgPct > 0 && chgPct < 0.5) bsjpScore += 7;
+
+    // ── BPJS SCORE (max 130) ─────────────────────────────────────────────
+    // Strategi: Beli Pagi saat open — manfaatkan momentum sesi 1, jual sore
+    let bpjsScore = 0;
+
+    // Gap up dari kemarin → open kuat, momentum pagi terbentuk (+30)
+    if (gap > 1.5) bpjsScore += 30;
+    else if (gap > 0.5) bpjsScore += 15;
+    else if (gap > 0) bpjsScore += 5;
+
+    // Volume meledak → konfirmasi buyer berdatangan pagi hari (+30)
+    if (volRatio > 200) bpjsScore += 30;
+    else if (volRatio > 150) bpjsScore += 20;
+    else if (volRatio > 120) bpjsScore += 10;
+
+    // Candle kuat (body besar) → momentum intraday nyata (+20)
+    if (bodyRatio > 0.7) bpjsScore += 20;
+    else if (bodyRatio > 0.5) bpjsScore += 10;
+
+    // Harga di atas MA5 DAN MA20 → tren mendukung intraday (+20)
+    if (aboveMA5 && aboveMA20) bpjsScore += 20;
+    else if (aboveMA5) bpjsScore += 10;
+
+    // Change pct positif kuat → momentum pagi sedang berjalan (+20)
+    if (chgPct > 3.0) bpjsScore += 20;
+    else if (chgPct > 1.5) bpjsScore += 12;
+    else if (chgPct > 0.5) bpjsScore += 5;
+
+    // RSI aktif tapi belum jenuh → masih bisa lanjut naik (+10)
+    if (rsi > 50 && rsi < 72) bpjsScore += 10;
+
+    // ── PILIH MODE DOMINAN ────────────────────────────────────────────────
+    let mode, status, cls, risk;
+
+    if (bsjpScore >= 80 && bsjpScore >= bpjsScore) {
+      mode = "BSJP";
+      if (bsjpScore >= 100) { status = "STRONG"; cls = "strong"; risk = "LOW"; }
+      else if (bsjpScore >= 80) { status = "VALID"; cls = "valid"; risk = "MEDIUM"; }
+      else { status = "SKIP"; cls = "skip"; risk = "HIGH"; }
+    } else if (bpjsScore >= 80) {
+      mode = "BPJS";
+      if (bpjsScore >= 100) { status = "STRONG"; cls = "strong"; risk = "LOW"; }
+      else if (bpjsScore >= 80) { status = "VALID"; cls = "valid"; risk = "MEDIUM"; }
+      else { status = "SKIP"; cls = "skip"; risk = "HIGH"; }
+    } else {
+      mode = bsjpScore >= bpjsScore ? "BSJP?" : "BPJS?";
+      status = "SKIP"; cls = "skip"; risk = "HIGH";
+    }
+
+    return { bsjpScore, bpjsScore, mode, status, cls, risk };
   }
 
+  // Legacy shim agar backtest tidak error
+  function calcScore(d) { return calcDualScore(d).bsjpScore; }
   function getStatus(score) {
-    if (score >= 90) return { status: "STRONG", cls: "strong", risk: "LOW" };
-    if (score >= 70) return { status: "VALID",  cls: "valid",  risk: "MEDIUM" };
-    return               { status: "SKIP",   cls: "skip",   risk: "HIGH" };
+    if (score >= 100) return { status: "STRONG", cls: "strong", risk: "LOW" };
+    if (score >= 80)  return { status: "VALID",  cls: "valid",  risk: "MEDIUM" };
+    return                  { status: "SKIP",   cls: "skip",   risk: "HIGH" };
   }
 
   function renderTable() {
@@ -515,39 +871,51 @@
     const filtered = activeFilter === "ALL" ? stockData : stockData.filter(e => e.status === activeFilter);
     const sorted = sortData([...filtered]);
     if (sorted.length === 0) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="15"><div class="empty-state"><div class="empty-icon">&#128202;</div><div>Tidak ada saham yang sesuai filter.</div></div></td></tr>';
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="16"><div class="empty-state"><div class="empty-icon">&#128202;</div><div>Tidak ada saham yang sesuai filter.</div></div></td></tr>';
       return;
     }
     tbody.innerHTML = sorted.map(e => {
       const d = e.data;
-      const tp = (d.price * 1.03).toFixed(0), cl = (d.price * 0.97).toFixed(0);
-      const volRatio = (d.volume / d.avg_volume * 100).toFixed(0);
-      const volClass = volRatio > 130 ? "vol-hot" : volRatio > 80 ? "vol-warm" : "vol-cold";
+      const mode      = e.mode || "BSJP";
+      const isBSJP    = mode.startsWith("BSJP");
+      const isBPJS    = mode.startsWith("BPJS");
+      const tpPct     = isBSJP ? 1.03 : 1.025;
+      const clPct     = isBSJP ? 0.975 : 0.98;
+      const tp        = (d.price * tpPct).toFixed(0);
+      const cl        = (d.price * clPct).toFixed(0);
+      const volRatio  = (d.volume / d.avg_volume * 100).toFixed(0);
+      const volClass  = volRatio > 150 ? "vol-hot" : volRatio > 100 ? "vol-warm" : "vol-cold";
       const riskClass = e.risk === "LOW" ? "risk-low" : e.risk === "MEDIUM" ? "risk-med" : "risk-high";
-      const scoreColor = e.score >= 90 ? "#00e5a0" : e.score >= 70 ? "#f5c518" : "#ff4560";
-      const fillPct = Math.min((e.score / 140) * 100, 100);
+      const dispScore = isBSJP ? (e.bsjpScore || e.score) : (e.bpjsScore || e.score);
+      const scoreColor= dispScore >= 100 ? "#00e5a0" : dispScore >= 80 ? "#f5c518" : "#ff4560";
+      const fillPct   = Math.min((dispScore / 130) * 100, 100);
       const starClass = e.inWatchlist ? "btn-wl starred" : "btn-wl";
-      const starIcon = e.inWatchlist ? "&#11088;" : "&#9734;";
-      const chgPct = d.change_pct || 0;
-      const chgColor = chgPct >= 0 ? "var(--accent)" : "var(--danger)";
-      const rsi = d.rsi || 50;
-      const rsiColor = rsi >= 70 ? "var(--danger)" : rsi <= 30 ? "var(--accent)" : "var(--text)";
-      return "<tr id=\"row-" + e.symbol + "\">" +
-        "<td class=\"emiten-cell\" onclick=\"showChart('" + e.symbol + "')\">" + e.symbol + "</td>" +
-        "<td>" + rupiah(d.price) + "</td>" +
-        "<td style=\"color:" + chgColor + ";font-weight:600\">" + (chgPct>=0?"+":"") + chgPct + "%</td>" +
-        "<td>" + rupiah(d.high) + "</td>" +
-        "<td>" + rupiah(d.low) + "</td>" +
-        "<td>" + formatVol(d.volume) + "</td>" +
-        "<td class=\"" + volClass + "\">" + volRatio + "%</td>" +
-        "<td>" + rupiah(d.ma5) + "</td>" +
-        "<td style=\"color:" + rsiColor + ";font-family:var(--font-mono)\">" + rsi + "</td>" +
-        "<td><div class=\"score-bar-wrap\"><span class=\"score-num\" style=\"color:" + scoreColor + "\">" + e.score + "</span><div class=\"score-bar\"><div class=\"score-fill\" style=\"width:" + fillPct + "%;background:" + scoreColor + "\"></div></div></div></td>" +
-        "<td><span class=\"badge badge-" + e.cls + "\">" + e.status + "</span></td>" +
-        "<td class=\"" + riskClass + "\">" + e.risk + "</td>" +
-        "<td style=\"color:var(--accent)\">" + rupiah(tp) + "</td>" +
-        "<td style=\"color:var(--danger)\">" + rupiah(cl) + "</td>" +
-        "<td><button class=\"" + starClass + "\" onclick=\"toggleWatchlist('" + e.symbol + "')\" title=\"Watchlist\">" + starIcon + "</button> <button class=\"btn-del\" onclick=\"removeStock('" + e.symbol + "')\" title=\"Hapus\">&#128465;</button> <button class=\"btn-analyze\" onclick=\"showAnalysis('" + e.symbol + "')\" title=\"Analisa BSJP\">&#128302; Analisa</button></td>" +
+      const starIcon  = e.inWatchlist ? "&#11088;" : "&#9734;";
+      const chgPct    = d.change_pct || 0;
+      const chgColor  = chgPct >= 0 ? "var(--accent)" : "var(--danger)";
+      const rsi       = d.rsi || 50;
+      const rsiColor  = rsi >= 72 ? "var(--danger)" : rsi <= 35 ? "var(--accent)" : "var(--text)";
+      const modeColor = isBSJP ? "#00e5a0" : isBPJS ? "#a78bfa" : "var(--muted)";
+      const modeBg    = isBSJP ? "rgba(0,229,160,0.1)" : isBPJS ? "rgba(167,139,250,0.1)" : "rgba(255,255,255,0.05)";
+      const modeBorder= isBSJP ? "rgba(0,229,160,0.3)" : isBPJS ? "rgba(167,139,250,0.3)" : "rgba(255,255,255,0.1)";
+      const entryTime = isBSJP ? "\uD83C\uDF19 14:00-15:50" : isBPJS ? "\u2600\uFE0F 09:00-10:30" : "-";
+      return "<tr id=\"row-"+e.symbol+"\">"+
+        "<td class=\"emiten-cell\" onclick=\"showChart('"+e.symbol+"')\">"+e.symbol+"</td>"+
+        "<td>"+rupiah(d.price)+"</td>"+
+        "<td style=\"color:"+chgColor+";font-weight:600\">"+(chgPct>=0?"+":"")+chgPct+"%</td>"+
+        "<td>"+rupiah(d.high)+"</td>"+
+        "<td>"+rupiah(d.low)+"</td>"+
+        "<td>"+formatVol(d.volume)+"</td>"+
+        "<td class=\""+volClass+"\">"+volRatio+"%</td>"+
+        "<td style=\"color:"+rsiColor+";font-family:var(--font-mono)\">"+rsi+"</td>"+
+        "<td><div class=\"score-bar-wrap\"><span class=\"score-num\" style=\"color:"+scoreColor+"\">"+dispScore+"</span><div class=\"score-bar\"><div class=\"score-fill\" style=\"width:"+fillPct+"%;background:"+scoreColor+"\"></div></div></div></td>"+
+        "<td><span style=\"font-size:11px;font-weight:800;padding:3px 8px;border-radius:6px;background:"+modeBg+";color:"+modeColor+";border:1px solid "+modeBorder+"\">"+mode+"</span></td>"+
+        "<td><span class=\"badge badge-"+e.cls+"\">"+e.status+"</span></td>"+
+        "<td class=\""+riskClass+"\">"+e.risk+"</td>"+
+        "<td style=\"font-size:11px;color:var(--muted)\">"+entryTime+"</td>"+
+        "<td style=\"color:var(--accent)\">"+rupiah(tp)+"</td>"+
+        "<td style=\"color:var(--danger)\">"+rupiah(cl)+"</td>"+
+        "<td><button class=\""+starClass+"\" onclick=\"toggleWatchlist('"+e.symbol+"')\" title=\"Watchlist\">"+starIcon+"</button> <button class=\"btn-del\" onclick=\"removeStock('"+e.symbol+"')\" title=\"Hapus\">&#128465;</button> <button class=\"btn-analyze\" onclick=\"showAnalysis('"+e.symbol+"')\" title=\"Analisa\">&#128302; Analisa</button></td>"+
         "</tr>";
     }).join("");
   }
@@ -585,85 +953,148 @@
   function showAnalysis(sym) {
     const entry = stockData.find(e => e.symbol === sym);
     if (!entry) return;
-    const d = entry.data, score = entry.score;
-    const panel = document.getElementById("analysisPanel");
+    const d = entry.data;
+    const mode   = entry.mode || "BSJP";
+    const isBSJP = mode.startsWith("BSJP");
+    const isBPJS = mode.startsWith("BPJS");
+    const score  = isBSJP ? (entry.bsjpScore || entry.score) : (entry.bpjsScore || entry.score);
+    const panel  = document.getElementById("analysisPanel");
     panel.classList.add("visible");
     document.getElementById("analysisSym").textContent = sym;
     setTimeout(() => panel.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
 
-    const scoreColor = score >= 90 ? "#00e5a0" : score >= 70 ? "#f5c518" : "#ff4560";
-    const fillPct = Math.min((score / 140) * 100, 100);
+    // Mode indicator di judul panel
+    const modeLabel  = isBSJP ? "🌙 BSJP — Beli Sore Jual Pagi" : isBPJS ? "☀️ BPJS — Beli Pagi Jual Sore" : "⏳ Belum Terkonfirmasi";
+    const modeColor  = isBSJP ? "#00e5a0" : isBPJS ? "#a78bfa" : "var(--warn)";
+    const entryWindow= isBSJP ? "Beli: 14:00–15:50 WIB · Jual: 09:00–10:00 WIB pagi berikutnya" : isBPJS ? "Beli: 09:00–10:30 WIB · Jual: 14:00–15:50 WIB hari ini" : "Tunggu sinyal konfirmasi";
+
+    const scoreColor = score >= 100 ? "#00e5a0" : score >= 80 ? "#f5c518" : "#ff4560";
+    const fillPct    = Math.min((score / 130) * 100, 100);
     document.getElementById("gaugeNum").textContent = score;
     document.getElementById("gaugeNum").style.color = scoreColor;
     document.getElementById("gaugeFill").style.width = fillPct + "%";
     document.getElementById("gaugeFill").style.background = scoreColor;
+    document.getElementById("score-gauge-label-text").innerHTML =
+      `<span style="color:${modeColor};font-weight:800">${modeLabel}</span> &mdash; Max 130 poin`;
+    document.getElementById("score-entry-window").textContent = entryWindow;
     ["segSkip","segValid","segStrong"].forEach(id => document.getElementById(id).classList.remove("active"));
-    if (score >= 90) document.getElementById("segStrong").classList.add("active");
-    else if (score >= 70) document.getElementById("segValid").classList.add("active");
+    if (score >= 100) document.getElementById("segStrong").classList.add("active");
+    else if (score >= 80) document.getElementById("segValid").classList.add("active");
     else document.getElementById("segSkip").classList.add("active");
 
-    const volRatio = d.avg_volume > 0 ? ((d.volume / d.avg_volume) * 100).toFixed(0) : 0;
-    const rsi = d.rsi || 50;
-    const rsiLabel = rsi >= 70 ? "Overbought" : rsi <= 30 ? "Oversold" : "Netral";
-    const rsiColorClass = rsi >= 70 ? "val-red" : rsi <= 30 ? "val-green" : "";
-    const chgPct = d.change_pct || 0;
+    const volRatio  = d.avg_volume > 0 ? ((d.volume / d.avg_volume) * 100).toFixed(0) : 0;
+    const rsi       = d.rsi || 50;
+    const rsiLabel  = rsi >= 72 ? "Overbought" : rsi <= 35 ? "Oversold" : "Netral";
+    const rsiColorCls = rsi >= 72 ? "val-red" : rsi <= 35 ? "val-green" : "";
+    const chgPct    = d.change_pct || 0;
     const ma5vsMA20 = d.ma20 > 0 ? (((d.ma5 - d.ma20) / d.ma20) * 100).toFixed(2) : null;
-    const nearHigh = d.high > 0 ? (((d.high - d.price) / d.high) * 100).toFixed(2) : null;
+    const nearHigh  = d.high > 0 ? (((d.high - d.price) / d.high) * 100).toFixed(2) : null;
+    const gap       = d.gap || 0;
 
     document.getElementById("metricsGrid").innerHTML = [
-      { label: "Harga Terakhir", value: rupiah(d.price), sub: (chgPct>=0?"+":"")+chgPct+"% hari ini", vcls: chgPct>=0?"val-green":"val-red" },
-      { label: "RSI (14)", value: rsi, sub: rsiLabel, vcls: rsiColorClass },
-      { label: "Volume Ratio", value: volRatio+"%", sub: "vs rata-rata 5 hari", vcls: volRatio > 130 ? "val-green" : volRatio < 80 ? "val-red" : "" },
-      { label: "Body Ratio Candle", value: d.body_ratio, sub: d.body_ratio > 0.6 ? "Candle kuat" : "Candle lemah", vcls: d.body_ratio > 0.6 ? "val-green" : "val-red" },
-      { label: "Gap Open", value: d.gap+"%", sub: d.gap > 1 ? "Gap naik" : d.gap < 0 ? "Gap turun" : "Flat", vcls: d.gap > 1 ? "val-green" : d.gap < 0 ? "val-red" : "" },
-      { label: "MA5 vs MA20", value: ma5vsMA20 ? (parseFloat(ma5vsMA20)>=0?"+":"")+ma5vsMA20+"%" : "-", sub: ma5vsMA20 ? (parseFloat(ma5vsMA20)>=0?"Golden cross":"Death cross") : "-", vcls: ma5vsMA20 && parseFloat(ma5vsMA20)>=0 ? "val-green" : "val-red" },
-      { label: "Jarak ke High", value: nearHigh ? nearHigh+"%" : "-", sub: nearHigh && parseFloat(nearHigh) < 2 ? "Dekat high" : "Jauh dari high", vcls: nearHigh && parseFloat(nearHigh) < 2 ? "val-green" : "val-yellow" },
-      { label: "52W High", value: rupiah(d.high_52w || 0), sub: "Low: "+rupiah(d.low_52w || 0), vcls: "val-blue" },
+      { label: "Harga Terakhir",  value: rupiah(d.price),  sub: (chgPct>=0?"+":"")+chgPct+"% hari ini",    vcls: chgPct>=0?"val-green":"val-red" },
+      { label: "RSI (14)",        value: rsi,               sub: rsiLabel,                                  vcls: rsiColorCls },
+      { label: "Volume Ratio",    value: volRatio+"%",      sub: "vs rata-rata 5 hari",                     vcls: volRatio > 150 ? "val-green" : volRatio < 80 ? "val-red" : "" },
+      { label: "Body Ratio",      value: d.body_ratio,      sub: d.body_ratio > 0.6 ? "Candle kuat" : "Candle lemah", vcls: d.body_ratio > 0.6 ? "val-green" : "val-red" },
+      { label: "Gap Open",        value: gap+"%",           sub: gap > 1 ? "Gap naik ✓" : gap < 0 ? "Gap turun" : "Flat", vcls: gap > 1 ? "val-green" : gap < 0 ? "val-red" : "" },
+      { label: "MA5 vs MA20",     value: ma5vsMA20 ? (parseFloat(ma5vsMA20)>=0?"+":"")+ma5vsMA20+"%" : "-", sub: ma5vsMA20 ? (parseFloat(ma5vsMA20)>=0?"Golden cross":"Death cross") : "-", vcls: ma5vsMA20 && parseFloat(ma5vsMA20)>=0 ? "val-green" : "val-red" },
+      { label: "Jarak ke High",   value: nearHigh ? nearHigh+"%" : "-", sub: nearHigh && parseFloat(nearHigh) < 3 ? "Dekat high ✓" : "Jauh dari high", vcls: nearHigh && parseFloat(nearHigh) < 3 ? "val-green" : "val-yellow" },
+      { label: "BSJP Score",      value: entry.bsjpScore || 0, sub: "Score overnight",    vcls: (entry.bsjpScore||0) >= 80 ? "val-green" : "val-red" },
+      { label: "BPJS Score",      value: entry.bpjsScore || 0, sub: "Score intraday",     vcls: (entry.bpjsScore||0) >= 80 ? "val-green" : "val-red" },
     ].map(m => `<div class="a-metric"><div class="a-metric-label">${m.label}</div><div class="a-metric-value ${m.vcls}">${m.value}</div><div class="a-metric-sub">${m.sub}</div></div>`).join("");
 
-    const criteria = [
-      { label: "Harga > MA5 (Trend naik)", ok: d.price > d.ma5, pts: 30 },
-      { label: "Dekat High harian (<2%)  -  "+(nearHigh||"-")+"%", ok: nearHigh && parseFloat(nearHigh) < 2, pts: 30 },
-      { label: "Volume > 130% rata-rata  -  "+volRatio+"%", ok: parseFloat(volRatio) > 130, pts: 40 },
-      { label: "Body Ratio > 0.6  -  "+d.body_ratio, ok: d.body_ratio > 0.6, pts: 20 },
-      { label: "Gap naik dari Open  -  "+d.gap+"%", ok: d.gap > 1, pts: 20 },
+    // ── Kriteria sesuai mode ──────────────────────────────────────────────
+    document.getElementById("criteriaTitle").innerHTML = isBSJP
+      ? "&#128203; Kriteria BSJP — Beli Sore Jual Pagi"
+      : isBPJS
+      ? "&#128203; Kriteria BPJS — Beli Pagi Jual Sore"
+      : "&#128203; Kriteria Teknikal";
+
+    const bsjpCriteria = [
+      { label: "Harga > MA5 (tren harian masih naik)",                ok: d.price > d.ma5,                                            pts: 25 },
+      { label: "Dekat High harian (0.5%–3%): " + (nearHigh||"-")+"%", ok: nearHigh && parseFloat(nearHigh) >= 0.5 && parseFloat(nearHigh) < 3.0, pts: 25 },
+      { label: "Volume > 150% rata-rata: " + volRatio + "%",          ok: parseFloat(volRatio) > 150,                                 pts: 30 },
+      { label: "Body Ratio candle > 0.65: " + d.body_ratio,           ok: d.body_ratio > 0.65,                                        pts: 20 },
+      { label: "RSI di zona 40–65 (ruang naik): " + rsi,              ok: rsi >= 40 && rsi <= 65,                                     pts: 15 },
+      { label: "Harga naik 0.5%–5% hari ini: " + chgPct + "%",       ok: chgPct >= 0.5 && chgPct <= 5.0,                             pts: 15 },
     ];
+    const bpjsCriteria = [
+      { label: "Gap up > 0.5% dari kemarin: " + gap + "%",            ok: gap > 0.5,                                                  pts: 30 },
+      { label: "Volume > 200% (buyer deras pagi): " + volRatio + "%", ok: parseFloat(volRatio) > 200,                                 pts: 30 },
+      { label: "Body Ratio candle > 0.7: " + d.body_ratio,            ok: d.body_ratio > 0.7,                                         pts: 20 },
+      { label: "Harga > MA5 & MA20 (tren kuat)",                      ok: d.price > d.ma5 && d.price > (d.ma20||0),                   pts: 20 },
+      { label: "Kenaikan kuat > 3% hari ini: " + chgPct + "%",       ok: chgPct > 3.0,                                               pts: 20 },
+      { label: "RSI aktif 50–72 (momentum berjalan): " + rsi,         ok: rsi > 50 && rsi < 72,                                       pts: 10 },
+    ];
+    const criteria = isBSJP ? bsjpCriteria : isBPJS ? bpjsCriteria : bsjpCriteria;
     document.getElementById("bsjpChecks").innerHTML = criteria.map(c =>
       `<div class="bsjp-row"><span>${c.label}</span><span>${c.ok?"&#9989;":"&#10060;"} <span style="font-size:11px;color:var(--muted)">+${c.pts}</span></span></div>`
     ).join("");
 
-    const tp3 = (d.price * 1.03).toFixed(0), tp5 = (d.price * 1.05).toFixed(0), cl3 = (d.price * 0.97).toFixed(0);
+    // ── Level TP & CL berbeda per mode ───────────────────────────────────
+    let tp1, tp2, cl, tpLabel1, tpLabel2, clLabel;
+    if (isBSJP) {
+      tp1 = (d.price * 1.02).toFixed(0);  tpLabel1 = "TP Pagi (+2%)";
+      tp2 = (d.price * 1.04).toFixed(0);  tpLabel2 = "TP Agresif (+4%)";
+      cl  = (d.price * 0.975).toFixed(0); clLabel  = "Cut Loss (-2.5%)";
+    } else {
+      tp1 = (d.price * 1.015).toFixed(0); tpLabel1 = "TP Siang (+1.5%)";
+      tp2 = (d.price * 1.03).toFixed(0);  tpLabel2 = "TP Sore (+3%)";
+      cl  = (d.price * 0.98).toFixed(0);  clLabel  = "Cut Loss (-2%)";
+    }
     document.getElementById("levelsRow").innerHTML = `
-      <div class="level-card"><div class="level-label">&#127919; TP Konservatif (+3%)</div><div class="level-price" style="color:var(--accent)">${rupiah(tp3)}</div><div class="level-pct" style="color:var(--accent)">+3% dari ${rupiah(d.price)}</div></div>
-      <div class="level-card"><div class="level-label">&#128640; TP Agresif (+5%)</div><div class="level-price" style="color:var(--accent2)">${rupiah(tp5)}</div><div class="level-pct" style="color:var(--accent2)">+5% dari ${rupiah(d.price)}</div></div>
-      <div class="level-card"><div class="level-label">&#128721; Cut Loss (-3%)</div><div class="level-price" style="color:var(--danger)">${rupiah(cl3)}</div><div class="level-pct" style="color:var(--danger)">-3% dari ${rupiah(d.price)}</div></div>`;
+      <div class="level-card"><div class="level-label">&#127919; ${tpLabel1}</div><div class="level-price" style="color:var(--accent)">${rupiah(tp1)}</div><div class="level-pct" style="color:var(--accent)">${isBSJP?"+2%":"+1.5%"} dari ${rupiah(d.price)}</div></div>
+      <div class="level-card"><div class="level-label">&#128640; ${tpLabel2}</div><div class="level-price" style="color:var(--accent2)">${rupiah(tp2)}</div><div class="level-pct" style="color:var(--accent2)">${isBSJP?"+4%":"+3%"} dari ${rupiah(d.price)}</div></div>
+      <div class="level-card"><div class="level-label">&#128721; ${clLabel}</div><div class="level-price" style="color:var(--danger)">${rupiah(cl)}</div><div class="level-pct" style="color:var(--danger)">${isBSJP?"-2.5%":"-2%"} dari ${rupiah(d.price)}</div></div>`;
 
+    // ── Sinyal teknikal ───────────────────────────────────────────────────
     const signals = [];
     if (d.price > d.ma5) signals.push({ icon: "&#128200;", label: "Harga di atas MA5", ok: true });
     if (d.price > (d.ma20||0)) signals.push({ icon: "&#128202;", label: "Harga di atas MA20", ok: true });
     else signals.push({ icon: "&#128201;", label: "Harga di bawah MA20", ok: false });
-    if (rsi <= 30) signals.push({ icon: "&#128142;", label: "RSI Oversold ("+rsi+")  -  Potensi pantul", ok: true });
-    if (rsi >= 70) signals.push({ icon: "&#9888;&#65039;", label: "RSI Overbought ("+rsi+")", ok: false });
+    if (rsi <= 35) signals.push({ icon: "&#128142;", label: "RSI Oversold ("+rsi+") — Potensi pantul", ok: true });
+    if (rsi >= 72) signals.push({ icon: "&#9888;&#65039;", label: "RSI Overbought ("+rsi+") — Hati-hati", ok: false });
     if (parseFloat(volRatio) > 200) signals.push({ icon: "&#128293;", label: "Volume Ekstrem "+volRatio+"%", ok: true });
-    if (d.gap > 1) signals.push({ icon: "&#8593;", label: "Gap naik "+d.gap+"%", ok: true });
-    if (d.gap < 0) signals.push({ icon: "&#8595;", label: "Gap turun "+d.gap+"%", ok: false });
+    if (gap > 1) signals.push({ icon: "&#8593;", label: "Gap naik "+gap+"% — Momentum pagi kuat", ok: true });
+    if (gap < 0) signals.push({ icon: "&#8595;", label: "Gap turun "+gap+"%", ok: false });
     if (d.body_ratio > 0.7) signals.push({ icon: "&#128170;", label: "Candle sangat kuat (>0.7)", ok: true });
     if (chgPct > 3) signals.push({ icon: "&#128640;", label: "Kenaikan kuat +"+chgPct+"%", ok: true });
     if (chgPct < -3) signals.push({ icon: "&#129656;", label: "Penurunan besar "+chgPct+"%", ok: false });
     document.getElementById("signalItems").innerHTML = signals.length
-      ? signals.map(s => '<div class="signal-item ' + (s.ok ? 's-ok' : 's-bad') + '">' + s.icon + ' ' + s.label + '</div>').join("")
+      ? signals.map(s => '<div class="signal-item '+(s.ok?"s-ok":"s-bad")+'">'+s.icon+' '+s.label+'</div>').join("")
       : '<div class="signal-item s-ok" style="border-left-color:var(--muted)">Tidak ada sinyal signifikan</div>';
 
+    // ── Rekomendasi aksi ──────────────────────────────────────────────────
     let recClass, recTitle, recText;
-    if (score >= 90) {
-      recClass = "rec-buy"; recTitle = "&#9989; MASUK / BUY  -  Kondisi Ideal";
-      recText = sym+" memenuhi hampir semua kriteria BSJP dengan score "+score+"/140. Tren naik, volume mendukung, candle kuat. Entry di "+rupiah(d.price)+" dengan TP "+rupiah(tp3)+"&ndash;"+rupiah(tp5)+" dan cut loss di "+rupiah(cl3)+". Risk/Reward &asymp; 1:1 hingga 1:1.7.";
-    } else if (score >= 70) {
-      recClass = "rec-wait"; recTitle = "&#9203; WAIT &amp; SEE  -  Konfirmasi Dulu";
-      recText = sym+" punya potensi (score "+score+"/140) tapi belum semua kriteria terpenuhi. Tunggu konfirmasi: volume > 130%, candle hijau kuat, atau breakout dari high. Jika terkonfirmasi, entry dengan TP "+rupiah(tp3)+" dan CL "+rupiah(cl3)+".";
+    if (score >= 100 && isBSJP) {
+      recClass = "rec-buy";
+      recTitle = "&#9989; BSJP STRONG — Beli Sore, Jual Pagi";
+      recText  = `<strong>Strategi:</strong> Beli ${sym} di sesi sore hari ini antara pukul <strong>14:00–15:50 WIB</strong> di harga sekitar ${rupiah(d.price)}.<br>
+        <strong>Jual:</strong> Di sesi pre-opening atau pagi hari berikutnya (09:00–10:00 WIB) saat harga berpeluang gap up.<br>
+        TP: ${rupiah(tp1)} (+2%) atau agresif ${rupiah(tp2)} (+4%). Cut loss jika turun ke ${rupiah(cl)} (-2.5%).<br>
+        <em>Score BSJP: ${score}/130 — Semua kriteria overnight terpenuhi.</em>`;
+    } else if (score >= 80 && isBSJP) {
+      recClass = "rec-buy";
+      recTitle = "&#9989; BSJP VALID — Beli Sore Jual Pagi";
+      recText  = `<strong>Strategi:</strong> Setup BSJP valid (score ${score}/130). Beli di sesi sore <strong>14:00–15:50 WIB</strong> jika harga tidak turun signifikan dari level saat ini.<br>
+        Target pagi berikutnya: ${rupiah(tp1)}. Cut loss: ${rupiah(cl)}.`;
+    } else if (score >= 100 && isBPJS) {
+      recClass = "rec-buy";
+      recTitle = "&#9989; BPJS STRONG — Beli Pagi, Jual Sore";
+      recText  = `<strong>Strategi:</strong> Beli ${sym} di sesi pagi <strong>09:00–10:30 WIB</strong> saat open gap up terkonfirmasi dengan volume tinggi.<br>
+        <strong>Jual:</strong> Di sesi sore sebelum close (13:30–15:50 WIB), jangan overnight.<br>
+        TP intraday: ${rupiah(tp1)} (+1.5%) atau ${rupiah(tp2)} (+3%). Cut loss: ${rupiah(cl)} (-2%).<br>
+        <em>Score BPJS: ${score}/130 — Momentum intraday sangat kuat.</em>`;
+    } else if (score >= 80 && isBPJS) {
+      recClass = "rec-buy";
+      recTitle = "&#9989; BPJS VALID — Beli Pagi Jual Sore";
+      recText  = `<strong>Strategi:</strong> BPJS valid (score ${score}/130). Beli di pagi hari <strong>09:00–10:30 WIB</strong> jika volume masih tinggi dan harga di atas open.<br>
+        Jual sebelum close sore. Target: ${rupiah(tp1)}. CL: ${rupiah(cl)}.`;
     } else {
-      recClass = "rec-avoid"; recTitle = "&#9940; HINDARI / SKIP";
-      recText = sym+" tidak memenuhi kriteria BSJP (score "+score+"/140). Kondisi teknikal lemah. Hindari entry sekarang dan pantau kembali jika volume meningkat dan RSI tidak ekstrem.";
+      recClass = "rec-avoid";
+      recTitle = "&#9940; SKIP — Belum Ada Sinyal Jelas";
+      recText  = `${sym} belum memenuhi kriteria BSJP (score: ${entry.bsjpScore||0}/130) maupun BPJS (score: ${entry.bpjsScore||0}/130).<br>
+        Pantau kembali: untuk <strong>BSJP</strong> — cek kondisi sore hari (volume, close dekat high, RSI 40–65). Untuk <strong>BPJS</strong> — cek gap up & volume pagi hari.`;
     }
     document.getElementById("recBox").innerHTML = `<div class="rec-box ${recClass}"><div class="rec-title">${recTitle}</div><div>${recText}</div></div>`;
   }
@@ -772,9 +1203,277 @@
 
   function rupiah(x) { return "Rp " + Math.round(Number(x)).toLocaleString("id-ID"); }
   function formatVol(v) { if (v>=1e9) return (v/1e9).toFixed(1)+"M"; if (v>=1e6) return (v/1e6).toFixed(1)+"jt"; if (v>=1e3) return (v/1e3).toFixed(1)+"rb"; return v; }
+
+
+  // ══════════════════════════════════════════════════════════════════════
+  // AUTO SCANNER — BSJP / BPJS
+  // ══════════════════════════════════════════════════════════════════════
+  let scanMode      = 'bsjp';   // 'bsjp' | 'bpjs' | 'all'
+  let scanUniverse  = 'lq45';
+  let scanRunning   = false;
+  let scanShouldStop = false;
+  let scanResults   = [];
+  let scanFilter    = 'all';    // 'bsjp' | 'bpjs' | 'wait' | 'all'
+
+  const UNIVERSES = {
+    lq45:  ["ADRO","AKRA","AMRT","ANTM","ASII","BBCA","BBNI","BBRI","BBTN","BMRI",
+             "BRPT","BSDE","BUKA","CPIN","CTRA","EMTK","EXCL","GGRM","GOTO","HMSP",
+             "HRUM","ICBP","INCO","INDF","INKP","INTP","ISAT","ITMG","JPFA","JSMR",
+             "KLBF","LSIP","MAPI","MEDC","MIKA","MNCN","MTEL","MYOR","PGAS","PTBA",
+             "PTPP","PWON","SMGR","SMRA","TBIG","TKIM","TLKM","TOWR","TPIA","UNTR","UNVR","WIKA"],
+    idx30: ["ASII","BBCA","BBNI","BBRI","BMRI","BREN","BUKA","CPIN","EXCL","GOTO",
+             "HMSP","ICBP","INCO","INDF","INKP","ISAT","ITMG","KLBF","MAPI","MEDC",
+             "MIKA","MTEL","PGAS","PTBA","SMGR","TBIG","TKIM","TLKM","TOWR","UNVR"],
+    all:   ["AADI","AALI","ABBA","ABDA","ABMM","ACES","ACRO","ACST","ADCP","ADES","ADHI","ADMF","ADMG","ADMR","ADRO","AGII","AGRO","AHAP","AIMS","AISA","AKKU","AKPI","AKRA","AKSI","ALDO","ALKA","ALMI","ALTO","AMAG","AMAN","AMAR","AMFG","AMIN","AMMN","AMMS","AMOR","AMRT","ANDI","ANJT","ANTM","APEX","APIC","APII","APLI","APLN","ARCI","AREA","ARGO","ARII","ARKA","ARKO","ARMY","ARNA","ARTA","ARTI","ARTO","ASBI","ASDM","ASGR","ASHA","ASII","ASJT","ASLC","ASLI","ASMI","ASPI","ASPR","ASRI","ASRM","ASSA","ATAP","ATIC","ATLA","AUTO","AVIA","AWAN","AXIO","AYAM","AYLS","BABP","BABY","BACA","BAIK","BAJA","BALI","BANK","BAPA","BAPI","BATA","BATR","BAUT","BAYU","BBCA","BBHI","BBKP","BBLD","BBMD","BBNI","BBRI","BBRM","BBSI","BBSS","BBTN","BBYB","BCAP","BCIC","BCIP","BDKR","BDMN","BEBS","BEEF","BEER","BEKS","BELI","BELL","BESS","BEST","BFIN","BGTG","BHAT","BHIT","BIKA","BIKE","BIMA","BINA","BINO","BIPI","BIPP","BIRD","BISI","BJBR","BJTM","BKDP","BKSL","BKSW","BLES","BLOG","BLTA","BLTZ","BLUE","BMAS","BMBL","BMHS","BMRI","BMSR","BMTR","BNBA","BNBR","BNGA","BNII","BNLI","BOAT","BOBA","BOGA","BOLA","BOLT","BOSS","BPFI","BPII","BPTR","BRAM","BREN","BRIS","BRMS","BRNA","BRPT","BRRC","BSBK","BSDE","BSIM","BSML","BSSR","BSWD","BTEK","BTEL","BTON","BTPN","BTPS","BUAH","BUDI","BUKA","BUKK","BULL","BUMI","BUVA","BVIC","BWPT","BYAN","CAKK","CAMP","CANI","CARE","CARS","CASA","CASH","CASS","CBDK","CBMF","CBPE","CBRE","CBUT","CCSI","CDIA","CEKA","CENT","CFIN","CGAS","CHEK","CHEM","CHIP","CINT","CITA","CITY","CLAY","CLEO","CLPI","CMNP","CMNT","CMPP","CMRY","CNKO","CNMA","CNTX","COAL","COCO","COIN","COWL","CPIN","CPRI","CPRO","CRAB","CRSN","CSAP","CSIS","CSMI","CSRA","CTBN","CTRA","CTTH","CUAN","CYBR","DAAZ","DADA","DART","DATA","DAYA","DCII","DEAL","DEFI","DEPO","DEWA","DEWI","DFAM","DGIK","DGNS","DGWG","DIGI","DILD","DIVA","DKFT","DKHH","DLTA","DMAS","DMMX","DMND","DNAR","DNET","DOID","DOOH","DOSS","DPNS","DPUM","DRMA","DSFI","DSNG","DSSA","DUCK","DUTI","DVLA","DWGL","DYAN","EAST","ECII","EDGE","EKAD","ELIT","ELPI","ELSA","ELTY","EMAS","EMDE","EMTK","ENAK","ENRG","ENVY","ENZO","EPAC","EPMT","ERAA","ERAL","ERTX","ESIP","ESSA","ESTA","ESTI","ETWA","EURO","EXCL","FAPA","FAST","FASW","FILM","FIMP","FIRE","FISH","FITT","FLMC","FMII","FOLK","FOOD","FORE","FORU","FPNI","FUJI","FUTR","FWCT","GAMA","GDST","GDYR","GEMA","GEMS","GGRM","GGRP","GHON","GIAA","GJTL","GLOB","GLVA","GMFI","GMTD","GOLD","GOLF","GOLL","GOOD","GOTO","GPRA","GPSO","GRIA","GRPH","GRPM","GSMF","GTBO","GTRA","GTSI","GULA","GUNA","GWSA","GZCO","HADE","HAIS","HAJJ","HALO","HATM","HBAT","HDFA","HDIT","HEAL","HELI","HERO","HEXA","HGII","HILL","HITS","HKMU","HMSP","HOKI","HOME","HOMI","HOPE","HOTL","HRME","HRTA","HRUM","HUMI","HYGN","IATA","IBFN","IBOS","IBST","ICBP","ICON","IDEA","IDPR","IFII","IFSH","IGAR","IIKP","IKAI","IKAN","IKBI","IKPM","IMAS","IMJS","IMPC","INAF","INAI","INCF","INCI","INCO","INDF","INDO","INDR","INDS","INDX","INDY","INET","INKP","INOV","INPC","INPP","INPS","INRU","INTA","INTD","INTP","IOTF","IPAC","IPCC","IPCM","IPOL","IPPE","IPTV","IRRA","IRSX","ISAP","ISAT","ISEA","ISSP","ITIC","ITMA","ITMG","JARR","JAST","JATI","JAWA","JAYA","JECC","JGLE","JIHD","JKON","JMAS","JPFA","JRPT","JSKY","JSMR","JSPT","JTPE","KAEF","KAQI","KARW","KAYU","KBAG","KBLI","KBLM","KBLV","KBRI","KDSI","KDTN","KEEN","KEJU","KETR","KIAS","KICI","KIJA","KING","KINO","KIOS","KJEN","KKES","KKGI","KLAS","KLBF","KLIN","KMDS","KMTR","KOBX","KOCI","KOIN","KOKA","KONI","KOPI","KOTA","KPIG","KRAS","KREN","KRYA","KSIX","KUAS","LABA","LABS","LAJU","LAND","LAPD","LCGP","LCKM","LEAD","LFLO","LIFE","LINK","LION","LIVE","LMAS","LMAX","LMPI","LMSH","LOPI","LPCK","LPGI","LPIN","LPKR","LPLI","LPPF","LPPS","LRNA","LSIP","LTLS","LUCK","LUCY","MABA","MAGP","MAHA","MAIN","MANG","MAPA","MAPB","MAPI","MARI","MARK","MASB","MAXI","MAYA","MBAP","MBMA","MBSS","MBTO","MCAS","MCOL","MCOR","MDIA","MDIY","MDKA","MDKI","MDLA","MDLN","MDRN","MEDC","MEDS","MEGA","MEJA","MENN","MERI","MERK","META","MFMI","MGLV","MGNA","MGRO","MHKI","MICE","MIDI","MIKA","MINA","MINE","MIRA","MITI","MKAP","MKNT","MKPI","MKTR","MLBI","MLIA","MLPL","MLPT","MMIX","MMLP","MNCN","MOLI","MORA","MPIX","MPMX","MPOW","MPPA","MPRO","MPXL","MRAT","MREI","MSIE","MSIN","MSJA","MSKY","MSTI","MTDL","MTEL","MTFN","MTLA","MTMH","MTPS","MTRA","MTSM","MTWI","MUTU","MYOH","MYOR","MYTX","NAIK","NANO","NASA","NASI","NATO","NAYZ","NCKL","NELY","NEST","NETV","NFCX","NICE","NICK","NICL","NIKL","NINE","NIRO","NISP","NOBU","NPGF","NRCA","NSSS","NTBK","NUSA","NZIA","OASA","OBAT","OBMD","OCAP","OILS","OKAS","OLIV","OMED","OMRE","OPMS","PACK","PADA","PADI","PALM","PAMG","PANI","PANR","PANS","PART","PBID","PBRX","PBSA","PCAR","PDES","PDPP","PEGE","PEHA","PEVE","PGAS","PGEO","PGJO","PGLI","PGUN","PICO","PIPA","PJAA","PJHB","PKPK","PLAN","PLAS","PLIN","PMJS","PMMP","PMUI","PNBN","PNBS","PNGO","PNIN","PNLF","PNSE","POLA","POLI","POLL","POLU","POLY","POOL","PORT","POSA","POWR","PPGL","PPRE","PPRI","PPRO","PRAY","PRDA","PRIM","PSAB","PSAT","PSDN","PSGO","PSKT","PSSI","PTBA","PTDU","PTIS","PTMP","PTMR","PTPP","PTPS","PTPW","PTRO","PTSN","PTSP","PUDP","PURA","PURE","PURI","PWON","PYFA","PZZA","RAAM","RAFI","RAJA","RALS","RANC","RATU","RBMS","RCCC","RDTX","REAL","RELF","RELI","RGAS","RICY","RIGS","RIMO","RISE","RLCO","RMKE","RMKO","ROCK","RODA","RONY","ROTI","RSCH","RSGK","RUIS","RUNS","SAFE","SAGE","SAME","SAMF","SAPX","SATU","SBAT","SBMA","SCCO","SCMA","SCNP","SCPI","SDMU","SDPC","SDRA","SEMA","SFAN","SGER","SGRO","SHID","SHIP","SICO","SIDO","SILO","SIMA","SIMP","SINI","SIPD","SKBM","SKLT","SKRN","SKYB","SLIS","SMAR","SMBR","SMCB","SMDM","SMDR","SMGA","SMGR","SMIL","SMKL","SMKM","SMLE","SMMA","SMMT","SMRA","SMRU","SMSM","SNLK","SOCI","SOFA","SOHO","SOLA","SONA","SOSS","SOTS","SOUL","SPMA","SPRE","SPTO","SQMI","SRAJ","SRIL","SRSN","SRTG","SSIA","SSMS","SSTM","STAA","STAR","STRK","STTP","SUGI","SULI","SUNI","SUPA","SUPR","SURE","SURI","SWAT","SWID","TALF","TAMA","TAMU","TAPG","TARA","TAXI","TAYS","TBIG","TBLA","TBMS","TCID","TCPI","TDPM","TEBE","TECH","TELE","TFAS","TFCO","TGKA","TGRA","TGUK","TIFA","TINS","TIRA","TIRT","TKIM","TLDN","TLKM","TMAS","TMPO","TNCA","TOBA","TOOL","TOPS","TOSK","TOTL","TOTO","TOWR","TOYS","TPIA","TPMA","TRAM","TRGU","TRIL","TRIM","TRIN","TRIO","TRIS","TRJA","TRON","TRST","TRUE","TRUK","TRUS","TSPC","TUGU","TYRE","UANG","UCID","UDNG","UFOE","ULTJ","UNIC","UNIQ","UNIT","UNSP","UNTD","UNTR","UNVR","URBN","UVCR","VAST","VERN","VICI","VICO","VINS","VISI","VIVA","VKTR","VOKS","VRNA","VTNY","WAPO","WEGE","WEHA","WGSH","WICO","WIDI","WIFI","WIIM","WIKA","WINE","WINR","WINS","WIRG","WMPP","WMUU","WOMF","WOOD","WOWS","WSBP","WSKT","WTON","YELO","YOII","YPAS","YULE","YUPI","ZATA","ZBRA","ZINC","ZONE","ZYRX"]
+  };
+
+  function setScanMode(mode) {
+    scanMode = mode;
+    document.getElementById('modeBsjp').className = 'mode-btn' + (mode === 'bsjp' ? ' active-bsjp' : '');
+    document.getElementById('modeBpjs').className = 'mode-btn' + (mode === 'bpjs' ? ' active-bpjs' : '');
+    document.getElementById('modeAll').className  = 'mode-btn' + (mode === 'all'  ? ' active-bsjp' : '');
+    if (scanResults.length) renderScanResults();
+  }
+
+  function setUniverse(u, btn) {
+    scanUniverse = u;
+    document.querySelectorAll('.uni-btn').forEach(b => b.classList.remove('uni-active'));
+    btn.classList.add('uni-active');
+    const count = UNIVERSES[u].length;
+    const eta = u === 'all' ? '~8-12 menit' : u === 'lq45' ? '~1 menit' : '~40 detik';
+    document.getElementById('scanEtaText').textContent = count + ' emiten · estimasi ' + eta;
+  }
+
+  function classifyStock(d) {
+    // Gunakan calcDualScore yang sudah benar
+    const result = calcDualScore(d);
+    const { bsjpScore, bpjsScore, mode } = result;
+    const volRatio = d.avg_volume > 0 ? (d.volume / d.avg_volume * 100) : 0;
+    const rsi = d.rsi || 50;
+    const gap = d.gap || 0;
+
+    let recommendation, reason, cardClass, recClass;
+
+    if (mode === 'BSJP' && bsjpScore >= 100) {
+      recommendation = 'BSJP';
+      reason = 'BSJP Strong: Beli sore 14:00-15:50 → Jual pagi besok. Volume ' + volRatio.toFixed(0) + '%, RSI ' + rsi + ', dekat high harian. Score ' + bsjpScore + '/130.';
+      cardClass = 'card-bsjp'; recClass = 'rec-bsjp';
+    } else if (mode === 'BSJP' && bsjpScore >= 80) {
+      recommendation = 'BSJP';
+      reason = 'BSJP Valid (score ' + bsjpScore + '/130): Setup overnight ok. Beli sore 14:00-15:50, jual pagi berikutnya.';
+      cardClass = 'card-bsjp'; recClass = 'rec-bsjp';
+    } else if (mode === 'BPJS' && bpjsScore >= 100) {
+      recommendation = 'BPJS';
+      reason = 'BPJS Strong: Beli pagi 09:00-10:30 → Jual sore hari ini. Gap ' + gap + '%, volume ' + volRatio.toFixed(0) + '%. Score ' + bpjsScore + '/130.';
+      cardClass = 'card-bpjs'; recClass = 'rec-bpjs';
+    } else if (mode === 'BPJS' && bpjsScore >= 80) {
+      recommendation = 'BPJS';
+      reason = 'BPJS Valid (score ' + bpjsScore + '/130): Intraday ok. Beli pagi 09:00-10:30, jual sebelum close sore.';
+      cardClass = 'card-bpjs'; recClass = 'rec-bpjs';
+    } else if (bsjpScore >= 60 || bpjsScore >= 60) {
+      recommendation = 'WAIT';
+      reason = 'Setup belum matang (BSJP: ' + bsjpScore + ', BPJS: ' + bpjsScore + '/130). Pantau dan tunggu konfirmasi sinyal.';
+      cardClass = 'card-wait'; recClass = 'rec-wait';
+    } else {
+      recommendation = 'SKIP';
+      reason = 'Tidak memenuhi kriteria BSJP/BPJS. Hindari saat ini.';
+      cardClass = 'card-skip'; recClass = 'rec-skip';
+    }
+
+    return { bsjpScore, bpjsScore, recommendation, reason, cardClass, recClass, volRatio, rsi };
+  }
+
+  async function startAutoScan() {
+    if (scanRunning) return;
+    const symbols = UNIVERSES[scanUniverse];
+    scanRunning = true;
+    scanShouldStop = false;
+    scanResults = [];
+
+    document.getElementById('btnScanStart').disabled = true;
+    document.getElementById('btnScanStop').classList.add('visible');
+    document.getElementById('scanProgressWrap').classList.add('visible');
+    document.getElementById('scanResultsArea').innerHTML = '<div class="scan-empty"><div class="scan-empty-icon"><span class="scan-spinner"></span></div><div class="scan-empty-text">Scanning... menemukan peluang terbaik</div></div>';
+
+    const chunkSize = 8;
+    let scanned = 0;
+
+    for (let i = 0; i < symbols.length && !scanShouldStop; i += chunkSize) {
+      const chunk = symbols.slice(i, i + chunkSize);
+      const promises = chunk.map(async sym => {
+        try {
+          const res = await fetch(API_BASE + '/stock/' + sym);
+          if (!res.ok) return null;
+          const d = await res.json();
+          if (d.error) return null;
+          const cls = classifyStock(d);
+          return { symbol: sym, data: d, ...cls };
+        } catch { return null; }
+      });
+
+      const results = await Promise.all(promises);
+      results.forEach(r => { if (r && r.recommendation !== 'SKIP') scanResults.push(r); });
+
+      scanned += chunk.length;
+      const pct = Math.round((scanned / symbols.length) * 100);
+      document.getElementById('scanProgressFill').style.width = pct + '%';
+      document.getElementById('scanProgressText').textContent = scanned + ' / ' + symbols.length + ' (' + pct + '%)';
+
+      // Render partial results every 3 chunks
+      if (i % (chunkSize * 3) === 0 || scanned >= symbols.length) renderScanResults();
+
+      // Small delay to avoid rate limit
+      await new Promise(r => setTimeout(r, 150));
+    }
+
+    scanRunning = false;
+    document.getElementById('btnScanStart').disabled = false;
+    document.getElementById('btnScanStop').classList.remove('visible');
+    document.getElementById('scanProgressWrap').classList.remove('visible');
+    renderScanResults();
+    showToast('Scan selesai! ' + scanResults.length + ' peluang ditemukan dari ' + UNIVERSES[scanUniverse].length + ' emiten.');
+  }
+
+  function stopScan() {
+    scanShouldStop = true;
+    scanRunning = false;
+    document.getElementById('btnScanStart').disabled = false;
+    document.getElementById('btnScanStop').classList.remove('visible');
+    document.getElementById('scanProgressWrap').classList.remove('visible');
+    showToast('Scan dihentikan. ' + scanResults.length + ' hasil ditemukan.');
+    renderScanResults();
+  }
+
+  function renderScanResults() {
+    const area = document.getElementById('scanResultsArea');
+
+    // Filter berdasarkan mode
+    let filtered = scanResults.filter(r => {
+      if (scanMode === 'bsjp') return r.recommendation === 'BSJP';
+      if (scanMode === 'bpjs') return r.recommendation === 'BPJS';
+      if (scanMode === 'all')  return r.recommendation !== 'SKIP';
+      return true;
+    });
+
+    // Sort: BSJP score desc, then BPJS score desc
+    filtered.sort((a, b) => {
+      if (a.recommendation === 'BSJP' && b.recommendation !== 'BSJP') return -1;
+      if (b.recommendation === 'BSJP' && a.recommendation !== 'BSJP') return 1;
+      return (b.bsjpScore + b.bpjsScore) - (a.bsjpScore + a.bpjsScore);
+    });
+
+    const bsjpCount = scanResults.filter(r => r.recommendation === 'BSJP').length;
+    const bpjsCount = scanResults.filter(r => r.recommendation === 'BPJS').length;
+    const waitCount = scanResults.filter(r => r.recommendation === 'WAIT').length;
+
+    if (filtered.length === 0 && !scanRunning) {
+      area.innerHTML = '<div class="scan-empty"><div class="scan-empty-icon">🔍</div><div class="scan-empty-text">Tidak ada hasil yang sesuai filter saat ini.<br>Coba ubah mode atau scan ulang.</div></div>';
+      return;
+    }
+
+    const header = `
+      <div class="scan-results-header">
+        <div class="scan-results-title">
+          ⚡ Hasil Scan
+          <span class="scan-count-badge">${filtered.length} peluang</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <span style="font-size:12px;color:var(--muted);font-family:var(--font-mono)">
+            BSJP: <strong style="color:var(--accent)">${bsjpCount}</strong> &nbsp;
+            BPJS: <strong style="color:#a78bfa">${bpjsCount}</strong> &nbsp;
+            WAIT: <strong style="color:var(--warn)">${waitCount}</strong>
+          </span>
+          <button onclick="exportScanCSV()" style="font-size:11px;padding:5px 12px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:var(--muted);cursor:pointer;">⬇ CSV</button>
+        </div>
+      </div>`;
+
+    const cards = filtered.map(r => {
+      const d = r.data;
+      const chgColor = d.change_pct >= 0 ? 'var(--accent)' : 'var(--danger)';
+      const volChipCls = r.volRatio >= 150 ? 'chip-green' : r.volRatio >= 100 ? 'chip-warn' : '';
+      const rsiChipCls = r.rsi <= 40 ? 'chip-purple' : r.rsi >= 65 ? 'chip-red' : '';
+
+      return `
+        <div class="scan-card ${r.cardClass}" onclick="showChart('${r.symbol}')">
+          <div class="scan-card-top">
+            <div class="scan-card-sym">${r.symbol}</div>
+            <span class="scan-card-rec ${r.recClass}">${r.recommendation}</span>
+          </div>
+          <div class="scan-card-price">
+            Rp ${Math.round(d.price).toLocaleString('id-ID')}
+            <span style="font-size:13px;color:${chgColor};margin-left:6px">${d.change_pct >= 0 ? '+' : ''}${d.change_pct}%</span>
+          </div>
+          <div class="scan-card-metrics">
+            <span class="scan-metric-chip ${volChipCls}">Vol ${r.volRatio.toFixed(0)}%</span>
+            <span class="scan-metric-chip ${rsiChipCls}">RSI ${r.rsi}</span>
+            <span class="scan-metric-chip">Score ${r.bsjpScore}</span>
+            ${r.recommendation === 'BPJS' ? '<span class="scan-metric-chip chip-purple">Akumulasi</span>' : ''}
+            ${d.gap > 1 ? '<span class="scan-metric-chip chip-green">Gap↑</span>' : ''}
+          </div>
+          <div class="scan-card-reason">${r.reason}</div>
+          <div style="font-size:11px;margin-top:6px;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,0.04)">
+            ${r.recommendation==='BSJP'?'🌙 <strong>Entry:</strong> 14:00–15:50 WIB · <strong>Exit:</strong> Pagi besok 09:00–10:00 WIB':
+              r.recommendation==='BPJS'?'☀️ <strong>Entry:</strong> 09:00–10:30 WIB · <strong>Exit:</strong> Sore ini 13:30–15:50 WIB':
+              '⏳ Tunggu konfirmasi sinyal lebih lanjut'}
+          </div>
+          <div class="scan-card-actions">
+            <button class="btn-add-to-screen" onclick="event.stopPropagation();addFromScan('${r.symbol}')">+ Tambah ke Screener</button>
+          </div>
+        </div>`;
+    }).join('');
+
+    area.innerHTML = header + '<div class="scan-cards-grid">' + cards + '</div>';
+  }
+
+  function addFromScan(sym) {
+    document.getElementById('sym').value = sym;
+    addStock();
+    switchTab('screener', document.querySelector('.tab'));
+    showToast(sym + ' ditambahkan ke Screener');
+  }
+
+  function exportScanCSV() {
+    if (!scanResults.length) { showToast('Tidak ada data scan.'); return; }
+    const header = 'Emiten,Harga,Chg%,Volume,VolRatio%,RSI,BSJP_Score,BPJS_Score,Rekomendasi,Alasan';
+    const rows = scanResults.map(r =>
+      [r.symbol, r.data.price, r.data.change_pct, r.data.volume,
+       r.volRatio.toFixed(0), r.rsi, r.bsjpScore, r.bpjsScore,
+       r.recommendation, '"' + r.reason + '"'].join(',')
+    );
+    const blob = new Blob([[header, ...rows].join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = 'scan_ihsg_' + new Date().toISOString().slice(0,10) + '.csv'; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // Init universe label
+  document.addEventListener('DOMContentLoaded', () => {
+    const count = UNIVERSES['lq45'].length;
+    document.getElementById('scanEtaText').textContent = count + ' emiten · estimasi ~1 menit';
+  });
+
   function showToast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.style.display = "block"; setTimeout(() => t.style.display = "none", 3200); }
   function showLoading(msg) { document.getElementById("loadingText").textContent = msg || "Mengambil data..."; document.getElementById("loading").style.display = "flex"; }
   function hideLoading() { document.getElementById("loading").style.display = "none"; }
+  </script>
+
+  <script>
+    function toggleMobileNav() {
+      const btn = document.getElementById('burgerBtn');
+      const nav = document.getElementById('mobileNav');
+      btn.classList.toggle('open');
+      nav.classList.toggle('open');
+    }
+    // Close nav when link clicked
+    document.addEventListener('DOMContentLoaded', function() {
+      const links = document.querySelectorAll('#mobileNav a');
+      links.forEach(function(a) {
+        a.addEventListener('click', function() {
+          document.getElementById('burgerBtn').classList.remove('open');
+          document.getElementById('mobileNav').classList.remove('open');
+        });
+      });
+    });
   </script>
 </body>
 </html>

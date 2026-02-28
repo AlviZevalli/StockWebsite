@@ -813,6 +813,85 @@ main   { padding-top: calc(48px + 28px) !important; }
   .topbar-home { display: none; }
   .topbar-badge { display: none; }
 }
+
+/* ===== BURGER MENU ===== */
+.burger-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.burger-btn:hover { background: rgba(255,255,255,0.1); }
+.burger-btn span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: #e8f0fe;
+  border-radius: 2px;
+  transition: all 0.25s ease;
+  transform-origin: center;
+}
+.burger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.burger-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.burger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Mobile nav dropdown */
+.mobile-nav-overlay {
+  display: none;
+  position: fixed;
+  top: 48px;
+  left: 0; right: 0;
+  z-index: 490;
+  background: rgba(6,12,20,0.98);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding: 12px 16px 16px;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.mobile-nav-overlay.open { display: flex; }
+.mobile-nav-overlay a {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(232,240,254,0.65);
+  text-decoration: none;
+  padding: 12px 16px;
+  border-radius: 10px;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+  font-family: 'Outfit', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mobile-nav-overlay a:hover { color: #e8f0fe; background: rgba(255,255,255,0.06); }
+.mobile-nav-overlay a.active {
+  color: #00e5a0;
+  background: rgba(0,229,160,0.08);
+  border-color: rgba(0,229,160,0.2);
+}
+
+/* Show burger on mobile, hide regular nav */
+@media (max-width: 680px) {
+  .burger-btn { display: flex; }
+  .topbar-nav { display: none; }
+  .topbar-home { display: none !important; }
+  /* Compensate for mobile nav overlay when open — push header/content down */
+  .topbar { gap: 12px; }
+  /* Fix: on pages with both topbar + sticky header, ensure content not covered */
+  header { top: 48px !important; }
+  main { padding-top: calc(48px + 48px + 16px) !important; }
+}
 /* ===== MENU GRID 5-CARD ===== */
 .menu-grid-5 {
   grid-template-columns: repeat(3, 1fr);
@@ -978,10 +1057,19 @@ main   { padding-top: calc(48px + 28px) !important; }
 
 /* --- Main padding --- */
 @media (max-width: 768px) {
-  main { padding: 14px 14px 70px !important; }
+  main {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    padding-bottom: 70px !important;
+    /* padding-top handled by topbar offset below */
+  }
 }
 @media (max-width: 480px) {
-  main { padding: 12px 12px 70px !important; }
+  main {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    padding-bottom: 70px !important;
+  }
 }
 
 /* --- Screener: search panel --- */

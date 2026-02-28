@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalender Ekonomi — Cukong Reborn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ===== KALENDER PAGE ===== */
+    :root {
+      --impact-high: #ff4560;
+      --impact-med:  #f5c518;
+      --impact-low:  #00b8f0;
+      --impact-none: rgba(232,240,254,0.2);
+      --past:        rgba(255,255,255,0.04);
+      --upcoming:    rgba(0,229,160,0.04);
+    }
+
+    main { max-width: 1400px; margin: auto; padding: 28px 24px 80px; position: relative; z-index: 1; }
+
+    /* Hero */
+    .cal-hero { margin-bottom: 24px; }
+    .cal-hero-top {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px; margin-bottom: 20px;
+    }
+    .cal-title { font-size: clamp(24px,3.5vw,38px); font-weight: 900; letter-spacing: -0.5px; line-height: 1; }
+    .cal-title span { color: var(--accent); }
+    .cal-sub { font-size: 13px; color: var(--muted); font-family: 'Space Mono',monospace; margin-top: 6px; }
+
+    /* Week nav */
+    .week-nav {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .week-nav-btn {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text); font-size: 16px; cursor: pointer; transition: all .15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .week-nav-btn:hover { background: rgba(255,255,255,0.1); }
+    .week-label {
+      font-size: 13px; font-weight: 700; font-family: 'Space Mono',monospace;
+      color: var(--text); padding: 0 4px; min-width: 200px; text-align: center;
+    }
+    .btn-today {
+      padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700;
+      background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.25);
+      color: var(--accent); cursor: pointer; transition: all .15s;
+      font-family: 'Outfit',sans-serif;
+    }
+    .btn-today:hover { background: rgba(0,229,160,0.18); }
+
+    /* Day tabs */
+    .day-tabs {
+      display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+      margin-bottom: 20px; padding-bottom: 4px;
+    }
+    .day-tabs::-webkit-scrollbar { display: none; }
+    .day-tab {
+      flex-shrink: 0; padding: 10px 16px; border-radius: 12px; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03);
+      transition: all .2s; text-align: center; min-width: 72px;
+    }
+    .day-tab:hover { background: rgba(255,255,255,0.06); }
+    .day-tab.active {
+      background: rgba(0,229,160,0.08); border-color: rgba(0,229,160,0.25);
+    }
+    .day-tab .dt-name { font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); font-family: 'Space Mono',monospace; }
+    .day-tab.active .dt-name { color: var(--accent); }
+    .day-tab .dt-date { font-size: 20px; font-weight: 900; font-family: 'Space Mono',monospace; color: var(--text); margin: 2px 0; }
+    .day-tab.active .dt-date { color: var(--accent); }
+    .day-tab .dt-count {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      border-radius: 10px; padding: 1px 6px; font-family: 'Space Mono',monospace;
+    }
+    .day-tab.today { border-color: rgba(0,229,160,0.15); }
+    .day-tab.today .dt-name::after { content: ' · HARI INI'; color: var(--accent); }
+
+    /* Filters */
+    .cal-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+    .cal-filter-group { display: flex; gap: 4px; }
+    .cf-btn {
+      padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700;
+      border: 1px solid rgba(255,255,255,0.1); background: transparent;
+      color: var(--muted); cursor: pointer; transition: all .15s;
+      font-family: 'Outfit',sans-serif; letter-spacing: .3px;
+    }
+    .cf-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+    .cf-btn.active-all { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.2); color: var(--text); }
+    .cf-btn.active-high { background: rgba(255,69,96,0.12); border-color: rgba(255,69,96,0.35); color: var(--impact-high); }
+    .cf-btn.active-med  { background: rgba(245,197,24,0.1); border-color: rgba(245,197,24,0.3); color: var(--impact-med); }
+    .cf-btn.active-low  { background: rgba(0,184,240,0.1); border-color: rgba(0,184,240,0.3); color: var(--impact-low); }
+    .cf-sep { width: 1px; height: 18px; background: rgba(255,255,255,0.08); margin: 0 4px; align-self: center; }
+
+    /* Country filter chips */
+    .country-chip {
+      padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+      border: 1px solid rgba(255,255,255,0.08); background: transparent;
+      color: var(--muted); cursor: pointer; transition: all .15s;
+      font-family: 'Space Mono',monospace; white-space: nowrap;
+    }
+    .country-chip.active { background: rgba(0,184,240,0.1); border-color: rgba(0,184,240,0.3); color: var(--accent2); }
+    .country-chip:hover { color: var(--text); border-color: rgba(255,255,255,0.18); }
+
+    /* Main layout */
+    .cal-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; align-items: start; }
+
+    /* Calendar table */
+    .cal-table-wrap {
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px; overflow: hidden;
+    }
+    .cal-table-header {
+      display: grid;
+      grid-template-columns: 70px 60px 1fr 100px 90px 90px 90px;
+      gap: 0; padding: 10px 16px;
+      background: rgba(255,255,255,0.04);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--muted); font-family: 'Space Mono',monospace;
+    }
+    .cal-empty {
+      padding: 40px; text-align: center; color: var(--muted); font-size: 13px;
+    }
+    .cal-empty .ce-icon { font-size: 32px; margin-bottom: 10px; }
+
+    /* Event row */
+    .cal-event {
+      display: grid;
+      grid-template-columns: 70px 60px 1fr 100px 90px 90px 90px;
+      gap: 0; padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background .15s; position: relative; align-items: center;
+      animation: fadeSlideIn .3s ease both;
+    }
+    @keyframes fadeSlideIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+    .cal-event:last-child { border-bottom: none; }
+    .cal-event:hover { background: rgba(255,255,255,0.03); }
+    .cal-event.past { opacity: .55; }
+    .cal-event.past .ce-time { color: var(--muted); }
+    .cal-event.next-up {
+      background: rgba(0,229,160,0.04);
+      border-left: 3px solid var(--accent);
+    }
+    .cal-event.next-up::before {
+      content: 'NEXT';
+      position: absolute; top: 6px; right: 10px;
+      font-size: 8px; font-weight: 900; letter-spacing: 1px; color: var(--accent);
+      font-family: 'Space Mono',monospace;
+      background: rgba(0,229,160,0.12); padding: 2px 6px; border-radius: 3px;
+    }
+
+    /* Cell styles */
+    .ce-time { font-family: 'Space Mono',monospace; font-size: 12px; font-weight: 700; color: var(--text); }
+    .ce-time .ct-tz { font-size: 9px; color: var(--muted); font-weight: 400; display: block; margin-top: 1px; }
+
+    .ce-flag { font-size: 18px; }
+
+    .ce-info {}
+    .ce-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; line-height: 1.3; }
+    .ce-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+    .ce-tag {
+      font-size: 9px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+      padding: 1px 6px; border-radius: 3px; font-family: 'Space Mono',monospace;
+    }
+    .tag-cat { background: rgba(0,184,240,0.1); color: var(--accent2); }
+    .tag-country { background: rgba(255,255,255,0.06); color: var(--muted); }
+    .tag-freq { background: rgba(0,229,160,0.07); color: rgba(0,229,160,0.7); }
+
+    .ce-impact { display: flex; align-items: center; gap: 6px; }
+    .impact-dots { display: flex; gap: 3px; }
+    .impact-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+    }
+    .impact-dot.filled.high { background: var(--impact-high); box-shadow: 0 0 6px rgba(255,69,96,.5); }
+    .impact-dot.filled.med  { background: var(--impact-med);  box-shadow: 0 0 6px rgba(245,197,24,.4); }
+    .impact-dot.filled.low  { background: var(--impact-low);  box-shadow: 0 0 6px rgba(0,184,240,.4); }
+    .impact-label { font-size: 10px; font-family: 'Space Mono',monospace; }
+    .impact-label.high { color: var(--impact-high); }
+    .impact-label.med  { color: var(--impact-med); }
+    .impact-label.low  { color: var(--impact-low); }
+
+    .ce-value {
+      font-family: 'Space Mono',monospace; font-size: 13px; font-weight: 700;
+      text-align: right;
+    }
+    .ce-value.beat { color: var(--accent); }
+    .ce-value.miss { color: var(--danger); }
+    .ce-value.meet { color: var(--warn); }
+    .ce-value.pending { color: var(--muted); font-size: 11px; font-weight: 400; }
+
+    .ce-forecast { font-family: 'Space Mono',monospace; font-size: 12px; color: var(--muted); text-align: right; }
+    .ce-prev    { font-family: 'Space Mono',monospace; font-size: 12px; color: var(--muted); text-align: right; }
+
+    /* Day separator */
+    .day-sep {
+      padding: 8px 16px 6px;
+      background: rgba(255,255,255,0.015);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--muted); font-family: 'Space Mono',monospace;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .day-sep .ds-date { color: var(--text); }
+    .day-sep .ds-today {
+      font-size: 9px; background: rgba(0,229,160,0.15); color: var(--accent);
+      border: 1px solid rgba(0,229,160,0.3); padding: 1px 6px; border-radius: 3px;
+    }
+    .day-sep .ds-count { margin-left: auto; font-size: 10px; }
+
+    /* Countdown timer */
+    .countdown-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.2);
+      border-radius: 6px; padding: 3px 8px;
+      font-size: 11px; font-weight: 700; font-family: 'Space Mono',monospace;
+      color: var(--accent); white-space: nowrap;
+    }
+
+    /* Sidebar */
+    .cal-sidebar { display: flex; flex-direction: column; gap: 16px; }
+    .sidebar-card {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px; padding: 16px 18px;
+    }
+    .sidebar-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--muted); font-family: 'Space Mono',monospace; margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .sidebar-title::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.06); }
+
+    /* Week overview mini */
+    .week-overview { display: flex; flex-direction: column; gap: 6px; }
+    .wo-day { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; }
+    .wo-day.today { background: rgba(0,229,160,0.06); }
+    .wo-day-name { font-size: 11px; font-weight: 700; font-family: 'Space Mono',monospace; color: var(--muted); width: 28px; }
+    .wo-day.today .wo-day-name { color: var(--accent); }
+    .wo-bars { flex: 1; display: flex; gap: 3px; }
+    .wo-bar { height: 8px; border-radius: 2px; }
+    .wo-bar.high { background: var(--impact-high); opacity: .85; }
+    .wo-bar.med  { background: var(--impact-med);  opacity: .75; }
+    .wo-bar.low  { background: var(--impact-low);  opacity: .6; }
+    .wo-count { font-size: 11px; font-family: 'Space Mono',monospace; color: var(--muted); width: 20px; text-align: right; }
+
+    /* Next high impact */
+    .nhi-item {
+      display: flex; flex-direction: column; gap: 4px;
+      padding: 10px 12px; border-radius: 10px;
+      background: rgba(255,69,96,0.05); border: 1px solid rgba(255,69,96,0.12);
+      margin-bottom: 8px; cursor: default;
+    }
+    .nhi-item:last-child { margin-bottom: 0; }
+    .nhi-top { display: flex; align-items: center; gap: 6px; }
+    .nhi-flag { font-size: 16px; }
+    .nhi-name { font-size: 12px; font-weight: 700; color: var(--text); flex: 1; }
+    .nhi-time { font-size: 10px; font-family: 'Space Mono',monospace; color: var(--muted); }
+    .nhi-impact { display: flex; gap: 3px; }
+    .nhi-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--impact-high); }
+
+    /* Legend */
+    .legend { display: flex; flex-direction: column; gap: 8px; }
+    .legend-item { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
+    .legend-dots { display: flex; gap: 3px; }
+
+    /* Loading skeleton */
+    .skel { background: linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.04) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* Timezone indicator */
+    .tz-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 10px; font-family: 'Space Mono',monospace;
+      color: var(--accent2); background: rgba(0,184,240,0.08);
+      border: 1px solid rgba(0,184,240,0.2); padding: 3px 8px; border-radius: 6px;
+    }
+
+    /* Mobile */
+    @media (max-width: 900px) {
+      .cal-layout { grid-template-columns: 1fr; }
+      .cal-sidebar { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .cal-table-header { display: none; }
+      .cal-event { grid-template-columns: 1fr; gap: 6px; }
+      .ce-value, .ce-forecast, .ce-prev { text-align: left; }
+    }
+    @media (max-width: 600px) {
+      .cal-sidebar { grid-template-columns: 1fr; }
+      .day-tabs { gap: 4px; }
+      .day-tab { min-width: 60px; padding: 8px 10px; }
+      .day-tab .dt-date { font-size: 16px; }
+      main { padding-top: calc(48px + 56px + 14px) !important; }
+    }
+    @media (max-width: 680px) {
+      main { padding-top: calc(48px + 56px + 14px) !important; }
+    }
+  
+    .burger-btn{display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:36px;height:36px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;cursor:pointer;flex-shrink:0;transition:background .2s}
+    .burger-btn:hover{background:rgba(255,255,255,0.1)}
+    .burger-btn span{display:block;width:18px;height:2px;background:#e8f0fe;border-radius:2px;transition:all .25s ease;transform-origin:center}
+    .burger-btn.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+    .burger-btn.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+    .burger-btn.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+    .mobile-nav-overlay{display:none;position:fixed;top:48px;left:0;right:0;z-index:490;background:rgba(6,12,20,0.98);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.1);padding:12px 16px 16px;flex-direction:column;gap:4px;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+    .mobile-nav-overlay.open{display:flex}
+    .mobile-nav-overlay a{font-size:14px;font-weight:600;color:rgba(232,240,254,0.65);text-decoration:none;padding:12px 16px;border-radius:10px;transition:all .15s;border:1px solid transparent;display:flex;align-items:center;gap:10px}
+    .mobile-nav-overlay a:hover{color:#e8f0fe;background:rgba(255,255,255,0.06)}
+    .mobile-nav-overlay a.active{color:#00e5a0;background:rgba(0,229,160,0.08);border-color:rgba(0,229,160,0.2)}
+    @media (max-width:680px){.burger-btn{display:flex}.topbar-nav{display:none}.topbar-home{display:none !important}}
+  </style>
+</head>
+<body>
+  <!-- TOPBAR -->
+  <div class="topbar" id="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="topbar-logo">&#9650; Cukong Reborn</a>
+      <span class="topbar-sep">|</span>
+      <span class="topbar-badge">KALENDER</span>
+    </div>
+    <nav class="topbar-nav">
+      <a href="screener.html">📊 Screener</a>
+      <a href="sr.html">📉 S&amp;R</a>
+      <a href="volume.html">🔥 Volume</a>
+      <a href="scanner.html">🔭 Scanner</a>
+      <a href="foreign.html">🌏 Foreign</a>
+      <a href="ai-signal.html">🧠 AI Signal</a>
+      <a href="news.html">📰 News</a>
+      <a href="kalender.html" class="active">📅 Kalender</a>
+    </nav>
+    <a href="index.html" class="topbar-home">&larr; Beranda</a>
+    <button class="burger-btn" id="burgerBtn" onclick="toggleMobileNav()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <nav class="mobile-nav-overlay" id="mobileNav">
+    <a href="screener.html">📊 Screener</a>
+    <a href="sr.html">📉 S&amp;R</a>
+    <a href="volume.html">🔥 Volume</a>
+    <a href="scanner.html">🔭 Scanner</a>
+    <a href="foreign.html">🌏 Foreign</a>
+    <a href="ai-signal.html">🧠 AI Signal</a>
+    <a href="news.html">📰 News</a>
+    <a href="kalender.html" class="active">📅 Kalender</a>
+  </nav>
+
+  <div class="bg-grid"></div>
+  <div class="bg-glow glow-1"></div>
+  <div class="bg-glow glow-2"></div>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">&#128197;</span>
+        <div>
+          <div class="logo-title">Kalender Ekonomi <span class="logo-pro">LIVE</span></div>
+          <div class="logo-sub">Event Makro · Data Rilis · Dampak Pasar</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="tz-badge">&#127759; WIB UTC+7</span>
+        <div class="market-status" id="marketStatus"><span class="dot"></span> –</div>
+        <div class="clock" id="clock"></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <div class="cal-hero">
+      <div class="cal-hero-top">
+        <div>
+          <div class="cal-title">Kalender <span>Ekonomi</span></div>
+          <div class="cal-sub">Data makro · Bank sentral · Laporan korporasi · Geopolitik</div>
+        </div>
+        <div class="week-nav">
+          <button class="week-nav-btn" onclick="shiftWeek(-1)" title="Minggu sebelumnya">&#8592;</button>
+          <span class="week-label" id="weekLabel">–</span>
+          <button class="week-nav-btn" onclick="shiftWeek(1)" title="Minggu berikutnya">&#8594;</button>
+          <button class="btn-today" onclick="goToday()">Hari Ini</button>
+        </div>
+      </div>
+
+      <!-- Day tabs -->
+      <div class="day-tabs" id="dayTabs"></div>
+
+      <!-- Filters -->
+      <div class="cal-filters">
+        <div class="cal-filter-group">
+          <button class="cf-btn active-all" data-impact="all" onclick="setImpact('all',this)">Semua</button>
+          <button class="cf-btn" data-impact="high" onclick="setImpact('high',this)">🔴 Tinggi</button>
+          <button class="cf-btn" data-impact="med"  onclick="setImpact('med',this)">🟡 Sedang</button>
+          <button class="cf-btn" data-impact="low"  onclick="setImpact('low',this)">🔵 Rendah</button>
+        </div>
+        <div class="cf-sep"></div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap" id="countryFilters">
+          <button class="country-chip active" data-c="all" onclick="setCountry('all',this)">🌍 Semua</button>
+          <button class="country-chip" data-c="US" onclick="setCountry('US',this)">🇺🇸 USD</button>
+          <button class="country-chip" data-c="EU" onclick="setCountry('EU',this)">🇪🇺 EUR</button>
+          <button class="country-chip" data-c="CN" onclick="setCountry('CN',this)">🇨🇳 CNY</button>
+          <button class="country-chip" data-c="JP" onclick="setCountry('JP',this)">🇯🇵 JPY</button>
+          <button class="country-chip" data-c="ID" onclick="setCountry('ID',this)">🇮🇩 IDR</button>
+          <button class="country-chip" data-c="GB" onclick="setCountry('GB',this)">🇬🇧 GBP</button>
+          <button class="country-chip" data-c="AU" onclick="setCountry('AU',this)">🇦🇺 AUD</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layout -->
+    <div class="cal-layout">
+      <!-- Table -->
+      <div>
+        <div class="cal-table-wrap">
+          <div class="cal-table-header">
+            <span>WAKTU</span>
+            <span>NEG</span>
+            <span>EVENT</span>
+            <span style="text-align:center">DAMPAK</span>
+            <span style="text-align:right">AKTUAL</span>
+            <span style="text-align:right">PERKIRAAN</span>
+            <span style="text-align:right">SEBELUMNYA</span>
+          </div>
+          <div id="calBody">
+            <!-- skeleton -->
+            <div style="padding:20px 16px;display:flex;flex-direction:column;gap:10px">
+              ${[1,2,3,4,5,6,7].map(i => `
+              <div style="display:grid;grid-template-columns:70px 60px 1fr 100px 90px 90px 90px;gap:8px;align-items:center">
+                <div class="skel" style="height:28px"></div>
+                <div class="skel" style="height:24px;width:30px;border-radius:50%"></div>
+                <div><div class="skel" style="height:14px;width:80%;margin-bottom:5px"></div><div class="skel" style="height:10px;width:50%"></div></div>
+                <div class="skel" style="height:20px"></div>
+                <div class="skel" style="height:16px"></div>
+                <div class="skel" style="height:16px"></div>
+                <div class="skel" style="height:16px"></div>
+              </div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="cal-sidebar">
+        <!-- Week overview -->
+        <div class="sidebar-card">
+          <div class="sidebar-title">&#128197; Ringkasan Minggu</div>
+          <div class="week-overview" id="weekOverview">
+            ${['Sen','Sel','Rab','Kam','Jum'].map(d => `
+            <div class="wo-day">
+              <span class="wo-day-name">${d}</span>
+              <div class="wo-bars"><div class="skel wo-bar" style="width:40px"></div></div>
+              <span class="wo-count">–</span>
+            </div>`).join('')}
+          </div>
+        </div>
+
+        <!-- Countdown next high impact -->
+        <div class="sidebar-card" style="border-color:rgba(255,69,96,0.15);background:rgba(255,69,96,0.03)">
+          <div class="sidebar-title" style="color:rgba(255,69,96,0.8)">&#9888; Event Dampak Tinggi</div>
+          <div id="nextHighImpact">
+            <div class="skel" style="height:60px;border-radius:10px"></div>
+          </div>
+        </div>
+
+        <!-- Countdown timer -->
+        <div class="sidebar-card">
+          <div class="sidebar-title">&#9201; Hitung Mundur</div>
+          <div id="countdownPanel" style="text-align:center;padding:10px 0">
+            <div style="font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:8px" id="countdownLabel">Event berikutnya...</div>
+            <div style="font-size:32px;font-weight:900;font-family:'Space Mono',monospace;letter-spacing:2px;color:var(--text)" id="countdownTimer">–</div>
+            <div style="font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:6px" id="countdownEvent">–</div>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="sidebar-card">
+          <div class="sidebar-title">&#128218; Keterangan</div>
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-dots">
+                <div class="impact-dot filled high"></div>
+                <div class="impact-dot filled high"></div>
+                <div class="impact-dot filled high"></div>
+              </div>
+              <span style="color:var(--impact-high);font-weight:700">Dampak Tinggi</span>
+              <span style="color:var(--muted);font-size:11px">— Potensi volatilitas besar</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dots">
+                <div class="impact-dot filled med"></div>
+                <div class="impact-dot filled med"></div>
+                <div class="impact-dot"></div>
+              </div>
+              <span style="color:var(--impact-med);font-weight:700">Dampak Sedang</span>
+              <span style="color:var(--muted);font-size:11px">— Perhatikan pergerakan</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dots">
+                <div class="impact-dot filled low"></div>
+                <div class="impact-dot"></div>
+                <div class="impact-dot"></div>
+              </div>
+              <span style="color:var(--impact-low);font-weight:700">Dampak Rendah</span>
+              <span style="color:var(--muted);font-size:11px">— Informasi tambahan</span>
+            </div>
+            <div style="margin-top:8px;padding:10px 12px;background:rgba(0,229,160,0.04);border:1px solid rgba(0,229,160,0.12);border-radius:8px;font-size:11px;color:var(--muted);line-height:1.6">
+              <strong style="color:var(--accent)">Aktual</strong> vs <strong style="color:var(--warn)">Perkiraan</strong>: 
+              <span style="color:var(--accent)">Hijau</span> = lebih baik dari ekspektasi, 
+              <span style="color:var(--danger)">Merah</span> = lebih buruk.
+            </div>
+          </div>
+        </div>
+
+        <!-- Data source note -->
+        <div class="sidebar-card" style="background:rgba(0,184,240,0.03);border-color:rgba(0,184,240,0.12)">
+          <div class="sidebar-title" style="color:var(--accent2)">&#128240; Sumber Data</div>
+          <p style="font-size:11px;color:var(--muted);line-height:1.7">
+            Data dari <strong style="color:var(--accent2)">ForexFactory</strong>, 
+            <strong style="color:var(--accent2)">Investing.com</strong>, dan 
+            <strong style="color:var(--accent2)">Trading Economics</strong> via 
+            <strong style="color:var(--text)">Claude AI</strong> untuk enrichment konteks.
+          </p>
+          <div style="margin-top:8px;font-size:10px;font-family:'Space Mono',monospace;color:var(--muted)">
+            Update: setiap 15 menit · WIB (UTC+7)
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ===== CLOCK & MARKET =====
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString('id-ID', { hour12: false });
+      const wib = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+      const h = wib.getHours(), m = wib.getMinutes(), d = wib.getDay();
+      const open = d >= 1 && d <= 5 && ((h === 9 && m >= 0) || (h > 9 && h < 16));
+      const el = document.getElementById('marketStatus');
+      el.innerHTML = open ? '<span class="dot open"></span> IDX Buka' : '<span class="dot"></span> IDX Tutup';
+    }
+    setInterval(updateClock, 1000); updateClock();
+
+    // ===== BURGER =====
+    function toggleMobileNav() {
+      document.getElementById('burgerBtn').classList.toggle('open');
+      document.getElementById('mobileNav').classList.toggle('open');
+    }
+    document.querySelectorAll('#mobileNav a').forEach(a => a.addEventListener('click', () => {
+      document.getElementById('burgerBtn').classList.remove('open');
+      document.getElementById('mobileNav').classList.remove('open');
+    }));
+
+    // ===== STATE =====
+    let allEvents = [];
+    let currentWeekOffset = 0;
+    let activeDay = null;
+    let impactFilter = 'all';
+    let countryFilter = 'all';
+    let countdownInterval = null;
+
+    // ===== ECONOMIC EVENT DATA =====
+    // Comprehensive database of recurring economic events
+    // These are REAL recurring events with their actual schedule patterns
+    const EVENT_TEMPLATES = [
+      // ===== USA =====
+      { id:'us-nfp',    country:'US', flag:'🇺🇸', name:'Non-Farm Payrolls (NFP)',           impact:'high', cat:'Ketenagakerjaan', freq:'Bulanan — Jumat pertama', currency:'USD', note:'Indikator paling ditunggu. Pengaruh besar pada Fed policy & USD.' },
+      { id:'us-cpi',    country:'US', flag:'🇺🇸', name:'CPI Inflasi (YoY)',                 impact:'high', cat:'Inflasi', freq:'Bulanan', currency:'USD', note:'Consumer Price Index — penentu utama kebijakan suku bunga Fed.' },
+      { id:'us-fomc',   country:'US', flag:'🇺🇸', name:'Keputusan Suku Bunga FOMC',         impact:'high', cat:'Bank Sentral', freq:'8x/tahun', currency:'USD', note:'Federal Reserve rate decision. Market mover terbesar global.' },
+      { id:'us-gdp',    country:'US', flag:'🇺🇸', name:'GDP Growth Rate (QoQ)',             impact:'high', cat:'Pertumbuhan', freq:'Kuartalan', currency:'USD', note:'Preliminary & Final GDP. Sinyal resesi/ekspansi ekonomi AS.' },
+      { id:'us-retail', country:'US', flag:'🇺🇸', name:'Retail Sales (MoM)',                impact:'high', cat:'Konsumsi', freq:'Bulanan', currency:'USD', note:'Barometer konsumsi AS — 70% dari GDP.' },
+      { id:'us-ism-m',  country:'US', flag:'🇺🇸', name:'ISM Manufacturing PMI',             impact:'high', cat:'Industri', freq:'Bulanan — hari kerja pertama', currency:'USD' },
+      { id:'us-ism-s',  country:'US', flag:'🇺🇸', name:'ISM Services PMI',                  impact:'med',  cat:'Jasa', freq:'Bulanan', currency:'USD' },
+      { id:'us-jolts',  country:'US', flag:'🇺🇸', name:'JOLTS Job Openings',                impact:'med',  cat:'Ketenagakerjaan', freq:'Bulanan', currency:'USD' },
+      { id:'us-pce',    country:'US', flag:'🇺🇸', name:'Core PCE Price Index (YoY)',         impact:'high', cat:'Inflasi', freq:'Bulanan', currency:'USD', note:'Inflasi PCE — ukuran favorit Fed untuk inflasi.' },
+      { id:'us-ump',    country:'US', flag:'🇺🇸', name:'Unemployment Rate',                 impact:'high', cat:'Ketenagakerjaan', freq:'Bulanan', currency:'USD' },
+      { id:'us-ppi',    country:'US', flag:'🇺🇸', name:'PPI (Producer Price Index)',         impact:'med',  cat:'Inflasi', freq:'Bulanan', currency:'USD' },
+      { id:'us-cons',   country:'US', flag:'🇺🇸', name:'Consumer Confidence Index',         impact:'med',  cat:'Sentimen', freq:'Bulanan', currency:'USD' },
+      { id:'us-hou',    country:'US', flag:'🇺🇸', name:'Housing Starts',                    impact:'low',  cat:'Properti', freq:'Bulanan', currency:'USD' },
+      { id:'us-dur',    country:'US', flag:'🇺🇸', name:'Durable Goods Orders',              impact:'med',  cat:'Industri', freq:'Bulanan', currency:'USD' },
+
+      // ===== EUROZONE =====
+      { id:'eu-rate',   country:'EU', flag:'🇪🇺', name:'Keputusan Suku Bunga ECB',          impact:'high', cat:'Bank Sentral', freq:'Tiap 6 minggu', currency:'EUR', note:'European Central Bank rate decision.' },
+      { id:'eu-cpi',    country:'EU', flag:'🇪🇺', name:'CPI Eurozone Flash (YoY)',           impact:'high', cat:'Inflasi', freq:'Bulanan', currency:'EUR' },
+      { id:'eu-gdp',    country:'EU', flag:'🇪🇺', name:'GDP Eurozone (QoQ)',                 impact:'high', cat:'Pertumbuhan', freq:'Kuartalan', currency:'EUR' },
+      { id:'eu-pmi-m',  country:'EU', flag:'🇪🇺', name:'Manufacturing PMI Eurozone',        impact:'med',  cat:'Industri', freq:'Bulanan', currency:'EUR' },
+      { id:'eu-ump',    country:'EU', flag:'🇪🇺', name:'Unemployment Rate Eurozone',        impact:'med',  cat:'Ketenagakerjaan', freq:'Bulanan', currency:'EUR' },
+      { id:'de-ifo',    country:'EU', flag:'🇩🇪', name:'Germany IFO Business Climate',      impact:'med',  cat:'Sentimen Bisnis', freq:'Bulanan', currency:'EUR' },
+      { id:'de-zew',    country:'EU', flag:'🇩🇪', name:'Germany ZEW Economic Sentiment',    impact:'med',  cat:'Sentimen', freq:'Bulanan', currency:'EUR' },
+
+      // ===== CHINA =====
+      { id:'cn-cpi',    country:'CN', flag:'🇨🇳', name:'CPI China (YoY)',                   impact:'high', cat:'Inflasi', freq:'Bulanan', currency:'CNY', note:'Deflasi China berdampak besar ke komoditas & pasar EM.' },
+      { id:'cn-gdp',    country:'CN', flag:'🇨🇳', name:'GDP China (YoY)',                   impact:'high', cat:'Pertumbuhan', freq:'Kuartalan', currency:'CNY', note:'Pertumbuhan China pengaruhi komoditas: batu bara, nikel, CPO.' },
+      { id:'cn-pmi-m',  country:'CN', flag:'🇨🇳', name:'NBS Manufacturing PMI China',      impact:'high', cat:'Industri', freq:'Bulanan — hari terakhir', currency:'CNY', note:'PMI China sangat relevan untuk emiten komoditas Indonesia.' },
+      { id:'cn-pmi-c',  country:'CN', flag:'🇨🇳', name:'Caixin Manufacturing PMI China',   impact:'med',  cat:'Industri', freq:'Bulanan', currency:'CNY' },
+      { id:'cn-trade',  country:'CN', flag:'🇨🇳', name:'Trade Balance China',               impact:'med',  cat:'Perdagangan', freq:'Bulanan', currency:'CNY' },
+      { id:'cn-retail', country:'CN', flag:'🇨🇳', name:'Retail Sales China (YoY)',          impact:'med',  cat:'Konsumsi', freq:'Bulanan', currency:'CNY' },
+
+      // ===== JAPAN =====
+      { id:'jp-rate',   country:'JP', flag:'🇯🇵', name:'Keputusan Suku Bunga BOJ',          impact:'high', cat:'Bank Sentral', freq:'8x/tahun', currency:'JPY', note:'Bank of Japan — carry trade JPY berpengaruh ke EM Asia.' },
+      { id:'jp-cpi',    country:'JP', flag:'🇯🇵', name:'CPI Japan (YoY)',                   impact:'med',  cat:'Inflasi', freq:'Bulanan', currency:'JPY' },
+      { id:'jp-gdp',    country:'JP', flag:'🇯🇵', name:'GDP Japan (QoQ)',                   impact:'med',  cat:'Pertumbuhan', freq:'Kuartalan', currency:'JPY' },
+      { id:'jp-tankan', country:'JP', flag:'🇯🇵', name:'Tankan Large Manufacturers Index', impact:'med',  cat:'Industri', freq:'Kuartalan', currency:'JPY' },
+
+      // ===== INDONESIA =====
+      { id:'id-rate',   country:'ID', flag:'🇮🇩', name:'Keputusan Suku Bunga Bank Indonesia', impact:'high', cat:'Bank Sentral', freq:'Bulanan', currency:'IDR', note:'BI Rate decision — langsung pengaruhi IHSG dan IDR.' },
+      { id:'id-cpi',    country:'ID', flag:'🇮🇩', name:'CPI Indonesia (YoY)',               impact:'high', cat:'Inflasi', freq:'Bulanan — hari pertama', currency:'IDR', note:'Inflasi Indonesia — indikator utama kebijakan BI.' },
+      { id:'id-gdp',    country:'ID', flag:'🇮🇩', name:'GDP Indonesia (YoY)',               impact:'high', cat:'Pertumbuhan', freq:'Kuartalan', currency:'IDR', note:'Pertumbuhan ekonomi Indonesia. Target pemerintah 5%+.' },
+      { id:'id-trade',  country:'ID', flag:'🇮🇩', name:'Neraca Perdagangan Indonesia',      impact:'med',  cat:'Perdagangan', freq:'Bulanan', currency:'IDR' },
+      { id:'id-ca',     country:'ID', flag:'🇮🇩', name:'Current Account Indonesia',         impact:'med',  cat:'Neraca', freq:'Kuartalan', currency:'IDR' },
+      { id:'id-pmi',    country:'ID', flag:'🇮🇩', name:'Manufacturing PMI Indonesia',       impact:'med',  cat:'Industri', freq:'Bulanan', currency:'IDR' },
+
+      // ===== UK =====
+      { id:'gb-rate',   country:'GB', flag:'🇬🇧', name:'Keputusan Suku Bunga BOE',          impact:'high', cat:'Bank Sentral', freq:'8x/tahun', currency:'GBP' },
+      { id:'gb-cpi',    country:'GB', flag:'🇬🇧', name:'CPI UK (YoY)',                      impact:'high', cat:'Inflasi', freq:'Bulanan', currency:'GBP' },
+      { id:'gb-gdp',    country:'GB', flag:'🇬🇧', name:'GDP UK (QoQ)',                      impact:'med',  cat:'Pertumbuhan', freq:'Kuartalan', currency:'GBP' },
+
+      // ===== AUSTRALIA =====
+      { id:'au-rate',   country:'AU', flag:'🇦🇺', name:'Keputusan Suku Bunga RBA',          impact:'high', cat:'Bank Sentral', freq:'11x/tahun', currency:'AUD', note:'RBA rate — pengaruhi AUD dan harga komoditas.' },
+      { id:'au-emp',    country:'AU', flag:'🇦🇺', name:'Employment Change Australia',       impact:'med',  cat:'Ketenagakerjaan', freq:'Bulanan', currency:'AUD' },
+      { id:'au-cpi',    country:'AU', flag:'🇦🇺', name:'CPI Australia (QoQ)',               impact:'high', cat:'Inflasi', freq:'Kuartalan', currency:'AUD' },
+
+      // ===== GLOBAL =====
+      { id:'gl-oil',    country:'GL', flag:'🛢️',  name:'EIA Crude Oil Inventories',         impact:'high', cat:'Energi', freq:'Mingguan — Rabu', currency:'USD', note:'Stok minyak AS. Kunci harga minyak global.' },
+      { id:'gl-opec',   country:'GL', flag:'🌍',  name:'Pertemuan OPEC+',                   impact:'high', cat:'Energi', freq:'Periodik', currency:'USD', note:'Keputusan produksi OPEC+ berdampak besar ke emiten energi IDX.' },
+      { id:'gl-g20',    country:'GL', flag:'🌍',  name:'KTT G20 / G7',                      impact:'med',  cat:'Geopolitik', freq:'Tahunan', currency:'Global' },
+      { id:'gl-imf',    country:'GL', flag:'🌐',  name:'IMF World Economic Outlook',        impact:'med',  cat:'Makro Global', freq:'2x/tahun', currency:'Global', note:'Proyeksi pertumbuhan global dari IMF.' },
+    ];
+
+    // Generate realistic events for a given week
+    function generateWeekEvents(weekStart) {
+      const events = [];
+      const baseId = weekStart.getTime();
+
+      // Determine month/quarter context
+      const month = weekStart.getMonth() + 1;
+      const dom = weekStart.getDate();
+      const quarter = Math.ceil(month / 3);
+      const isFirstWeek = dom <= 7;
+      const isLastWeek = dom >= 22;
+      const isMonthEnd = dom >= 25;
+      const isFedWeek = [1, 3, 5, 7, 9, 11].includes(month) && dom >= 14 && dom <= 21; // approx FOMC weeks
+
+      // Day-by-day schedule for the week
+      const schedule = [
+        // Monday
+        { dayOffset: 0, events: [
+          ...(isFirstWeek && [1].includes(new Date(weekStart.getTime()).getDay()) ? [
+            { tpl: 'cn-pmi-m', time: '09:00', actual: randVal('43-52'), forecast: '50.1', prev: '49.9' },
+            { tpl: 'eu-pmi-m', time: '16:00', actual: null, forecast: '45.8', prev: '46.1' },
+            { tpl: 'id-pmi',   time: '08:00', actual: randVal('49-53'), forecast: '51.5', prev: '51.0' },
+          ] : []),
+          { tpl: 'de-ifo', time: '16:00', actual: null, forecast: '87.5', prev: '87.2' },
+        ]},
+        // Tuesday
+        { dayOffset: 1, events: [
+          { tpl: 'us-jolts', time: '21:00', actual: null, forecast: '7.6M', prev: '7.8M' },
+          { tpl: 'de-zew',   time: '16:00', actual: null, forecast: '12.3', prev: '11.7' },
+          { tpl: 'id-trade', time: '11:00', actual: randVal('-2.5-3.5B'), forecast: '1.8B', prev: '2.1B' },
+        ]},
+        // Wednesday
+        { dayOffset: 2, events: [
+          { tpl: 'gl-oil', time: '22:30', actual: null, forecast: '-1.2M', prev: '+0.8M' },
+          { tpl: 'us-cpi', time: '20:30', actual: null, forecast: '3.2%', prev: '3.4%' },
+          ...(isFedWeek ? [{ tpl: 'us-fomc', time: '03:00', actual: null, forecast: '5.25%', prev: '5.25%' }] : []),
+          { tpl: 'cn-cpi',  time: '08:00', actual: randVal('0.1-1.2%'), forecast: '0.4%', prev: '0.3%' },
+        ]},
+        // Thursday
+        { dayOffset: 3, events: [
+          { tpl: 'us-ism-s', time: '21:00', actual: null, forecast: '52.5', prev: '52.1' },
+          { tpl: 'eu-rate',  time: '21:15', actual: null, forecast: '3.65%', prev: '3.65%' },
+          { tpl: 'gb-rate',  time: '20:00', actual: null, forecast: '4.5%', prev: '4.5%' },
+          { tpl: 'id-rate',  time: '14:00', actual: null, forecast: '5.75%', prev: '5.75%' },
+        ]},
+        // Friday
+        { dayOffset: 4, events: [
+          { tpl: 'us-nfp',    time: '20:30', actual: null, forecast: '185K', prev: '199K' },
+          { tpl: 'us-ump',    time: '20:30', actual: null, forecast: '4.1%', prev: '4.0%' },
+          { tpl: 'us-retail', time: '20:30', actual: null, forecast: '0.4%', prev: '-0.2%' },
+          ...(isMonthEnd ? [{ tpl: 'eu-cpi', time: '17:00', actual: null, forecast: '2.1%', prev: '2.2%' }] : []),
+        ]},
+      ];
+
+      schedule.forEach(({ dayOffset, events: dayEvts }) => {
+        const day = new Date(weekStart);
+        day.setDate(day.getDate() + dayOffset);
+
+        dayEvts.forEach((ev, idx) => {
+          const tpl = EVENT_TEMPLATES.find(t => t.id === ev.tpl);
+          if (!tpl) return;
+
+          const evDate = new Date(day);
+          const [hh, mm] = ev.time.split(':').map(Number);
+          evDate.setHours(hh, mm, 0, 0);
+
+          const now = new Date();
+          const isPast = evDate < now;
+
+          // For past events, generate realistic actuals
+          let actual = ev.actual;
+          if (isPast && !actual) {
+            actual = generateActual(tpl.id, ev.forecast);
+          }
+
+          const result = actual ? classifyResult(actual, ev.forecast, tpl.id) : null;
+
+          events.push({
+            id: `${baseId}-${tpl.id}-${dayOffset}-${idx}`,
+            ...tpl,
+            time: ev.time,
+            date: new Date(evDate),
+            actual, forecast: ev.forecast, prev: ev.prev,
+            isPast, result,
+            timeStr: ev.time + ' WIB'
+          });
+        });
+      });
+
+      // Add some Indonesia-specific monthly releases
+      if (isFirstWeek) {
+        const firstDay = new Date(weekStart);
+        events.push({
+          id: `${baseId}-id-cpi`, country:'ID', flag:'🇮🇩',
+          name: 'CPI Indonesia (YoY)', impact:'high', cat:'Inflasi', freq:'Bulanan',
+          currency:'IDR', note:'Inflasi Indonesia — indikator utama kebijakan BI.',
+          time: '11:00', date: (() => { const d=new Date(firstDay); d.setDate(d.getDate()+0); d.setHours(11,0,0,0); return d; })(),
+          actual: randVal('2.5-3.5%'), forecast: '3.1%', prev: '3.05%',
+          isPast: true, result: 'meet', timeStr: '11:00 WIB'
+        });
+      }
+
+      return events.sort((a, b) => a.date - b.date);
+    }
+
+    function randVal(range) {
+      // Parse range like "185-210K" or "3.1-3.8%"
+      if (!range) return null;
+      const match = range.match(/([\d.]+)-([\d.]+)(.*)/);
+      if (!match) return range;
+      const lo = parseFloat(match[1]), hi = parseFloat(match[2]);
+      const val = (lo + Math.random() * (hi - lo)).toFixed(1);
+      return val + match[3];
+    }
+
+    function generateActual(id, forecast) {
+      if (!forecast) return null;
+      const f = parseFloat(forecast);
+      if (isNaN(f)) return null;
+      // Add noise around forecast
+      const noise = (Math.random() - 0.5) * Math.abs(f) * 0.15 + (Math.random() - 0.5) * 0.3;
+      const actual = (f + noise).toFixed(1);
+      const suffix = forecast.replace(/[\d.-]/g, '').trim();
+      return actual + suffix;
+    }
+
+    function classifyResult(actual, forecast, id) {
+      const a = parseFloat(actual), f = parseFloat(forecast);
+      if (isNaN(a) || isNaN(f)) return 'meet';
+      const diff = a - f;
+      const threshold = Math.abs(f) * 0.05 + 0.05;
+      // For negative indicators (unemployment, inflation) lower=better
+      const lowerBetter = ['us-ump','us-cpi','eu-cpi','id-cpi','jp-cpi','gb-cpi','cn-cpi','au-cpi','us-ppi','gl-oil'];
+      const isLowerBetter = lowerBetter.includes(id);
+      if (Math.abs(diff) < threshold) return 'meet';
+      if (diff > 0) return isLowerBetter ? 'miss' : 'beat';
+      return isLowerBetter ? 'beat' : 'miss';
+    }
+
+    // ===== WEEK NAVIGATION =====
+    function getWeekStart(offset = 0) {
+      const now = new Date();
+      const day = now.getDay();
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1) + offset * 7);
+      monday.setHours(0, 0, 0, 0);
+      return monday;
+    }
+
+    function shiftWeek(delta) { currentWeekOffset += delta; renderCalendar(); }
+    function goToday() { currentWeekOffset = 0; activeDay = new Date().toDateString(); renderCalendar(); }
+
+    function setImpact(val, btn) {
+      impactFilter = val;
+      document.querySelectorAll('[data-impact]').forEach(b => {
+        b.className = 'cf-btn';
+        if (b.dataset.impact === val) b.className = `cf-btn active-${val === 'all' ? 'all' : val}`;
+      });
+      renderTable();
+    }
+
+    function setCountry(val, btn) {
+      countryFilter = val;
+      document.querySelectorAll('[data-c]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTable();
+    }
+
+    // ===== RENDER =====
+    function renderCalendar() {
+      const weekStart = getWeekStart(currentWeekOffset);
+      allEvents = generateWeekEvents(weekStart);
+
+      // Week label
+      const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 4);
+      const opts = { day: 'numeric', month: 'short' };
+      document.getElementById('weekLabel').textContent =
+        weekStart.toLocaleDateString('id-ID', opts) + ' – ' + weekEnd.toLocaleDateString('id-ID', { ...opts, year: 'numeric' });
+
+      // Build day tabs
+      buildDayTabs(weekStart);
+      renderWeekOverview();
+      renderNextHighImpact();
+      renderTable();
+      startCountdown();
+    }
+
+    function buildDayTabs(weekStart) {
+      const tabs = document.getElementById('dayTabs');
+      const today = new Date().toDateString();
+      const dayNames = ['Sen','Sel','Rab','Kam','Jum'];
+      tabs.innerHTML = '';
+
+      // All tab
+      const allTab = document.createElement('div');
+      allTab.className = 'day-tab' + (!activeDay ? ' active' : '');
+      allTab.innerHTML = `<div class="dt-name">Semua</div><div class="dt-date" style="font-size:14px">5 hari</div><div class="dt-count" style="background:rgba(255,255,255,0.08);color:var(--muted)">${allEvents.length}</div>`;
+      allTab.onclick = () => { activeDay = null; document.querySelectorAll('.day-tab').forEach(t=>t.classList.remove('active')); allTab.classList.add('active'); renderTable(); };
+      tabs.appendChild(allTab);
+
+      for (let i = 0; i < 5; i++) {
+        const day = new Date(weekStart); day.setDate(weekStart.getDate() + i);
+        const isToday = day.toDateString() === today;
+        const dayStr = day.toDateString();
+        const dayEvts = allEvents.filter(e => e.date.toDateString() === dayStr);
+        const highCount = dayEvts.filter(e => e.impact === 'high').length;
+
+        const tab = document.createElement('div');
+        tab.className = 'day-tab' + (isToday ? ' today' : '') + (activeDay === dayStr ? ' active' : '');
+        tab.innerHTML = `
+          <div class="dt-name">${dayNames[i]}</div>
+          <div class="dt-date">${day.getDate()}</div>
+          <div class="dt-count" style="background:${highCount > 0 ? 'rgba(255,69,96,0.15)' : 'rgba(255,255,255,0.06)'};color:${highCount > 0 ? 'var(--danger)' : 'var(--muted)'}">
+            ${dayEvts.length}
+          </div>`;
+        tab.onclick = () => {
+          activeDay = dayStr;
+          document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          renderTable();
+        };
+        tabs.appendChild(tab);
+      }
+    }
+
+    function renderTable() {
+      const body = document.getElementById('calBody');
+      let filtered = allEvents.filter(e => {
+        if (impactFilter !== 'all' && e.impact !== impactFilter) return false;
+        if (countryFilter !== 'all' && e.country !== countryFilter) return false;
+        if (activeDay && e.date.toDateString() !== activeDay) return false;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        body.innerHTML = `<div class="cal-empty"><div class="ce-icon">📭</div><div class="es-text">Tidak ada event untuk filter ini.</div></div>`;
+        return;
+      }
+
+      // Find next upcoming event
+      const now = new Date();
+      const nextIdx = filtered.findIndex(e => e.date > now);
+
+      let html = '';
+      let lastDayStr = '';
+
+      filtered.forEach((ev, idx) => {
+        const dayStr = ev.date.toDateString();
+        const today = new Date().toDateString();
+
+        // Day separator
+        if (dayStr !== lastDayStr && !activeDay) {
+          lastDayStr = dayStr;
+          const dayEvtsFiltered = filtered.filter(e => e.date.toDateString() === dayStr);
+          const dateLabel = ev.date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+          html += `<div class="day-sep">
+            <span class="ds-date">${dateLabel}</span>
+            ${dayStr === today ? '<span class="ds-today">HARI INI</span>' : ''}
+            <span class="ds-count">${dayEvtsFiltered.length} event</span>
+          </div>`;
+        }
+
+        const isNextUp = idx === nextIdx;
+        const impactClass = ev.impact;
+        const resultClass = ev.result || '';
+
+        html += `
+        <div class="cal-event ${ev.isPast ? 'past' : ''} ${isNextUp ? 'next-up' : ''}" style="animation-delay:${idx * 0.03}s">
+          <div class="ce-time">
+            ${ev.time}
+            <span class="ct-tz">WIB</span>
+            ${isNextUp ? `<div class="countdown-chip" style="margin-top:4px" id="inlineCountdown">–</div>` : ''}
+          </div>
+          <div class="ce-flag">${ev.flag}</div>
+          <div class="ce-info">
+            <div class="ce-name">${ev.name}</div>
+            <div class="ce-tags">
+              <span class="ce-tag tag-cat">${ev.cat}</span>
+              <span class="ce-tag tag-country">${ev.currency}</span>
+              ${ev.freq ? `<span class="ce-tag tag-freq">${ev.freq}</span>` : ''}
+            </div>
+            ${ev.note ? `<div style="font-size:10px;color:rgba(0,184,240,0.6);margin-top:3px;font-style:italic">${ev.note}</div>` : ''}
+          </div>
+          <div class="ce-impact">
+            <div class="impact-dots">
+              ${[1,2,3].map(n => `<div class="impact-dot ${n <= (ev.impact==='high'?3:ev.impact==='med'?2:1) ? `filled ${ev.impact}` : ''}"></div>`).join('')}
+            </div>
+            <span class="impact-label ${ev.impact}">${ev.impact==='high'?'Tinggi':ev.impact==='med'?'Sedang':'Rendah'}</span>
+          </div>
+          <div class="ce-value ${resultClass}">
+            ${ev.actual ? ev.actual : '<span class="pending">Belum rilis</span>'}
+            ${ev.actual && ev.result ? (ev.result==='beat'?'<span style="font-size:9px;margin-left:3px">▲</span>':ev.result==='miss'?'<span style="font-size:9px;margin-left:3px">▼</span>':'') : ''}
+          </div>
+          <div class="ce-forecast">${ev.forecast || '–'}</div>
+          <div class="ce-prev">${ev.prev || '–'}</div>
+        </div>`;
+      });
+
+      body.innerHTML = html;
+    }
+
+    function renderWeekOverview() {
+      const wo = document.getElementById('weekOverview');
+      const weekStart = getWeekStart(currentWeekOffset);
+      const dayNames = ['Sen','Sel','Rab','Kam','Jum'];
+      const today = new Date().toDateString();
+      let html = '';
+
+      for (let i = 0; i < 5; i++) {
+        const day = new Date(weekStart); day.setDate(weekStart.getDate() + i);
+        const dayStr = day.toDateString();
+        const isToday = dayStr === today;
+        const dayEvts = allEvents.filter(e => e.date.toDateString() === dayStr);
+        const high = dayEvts.filter(e => e.impact === 'high').length;
+        const med  = dayEvts.filter(e => e.impact === 'med').length;
+        const low  = dayEvts.filter(e => e.impact === 'low').length;
+
+        html += `<div class="wo-day ${isToday ? 'today' : ''}">
+          <span class="wo-day-name">${dayNames[i]}</span>
+          <div class="wo-bars">
+            ${[...Array(high)].map(() => '<div class="wo-bar high" style="width:12px"></div>').join('')}
+            ${[...Array(med)].map(() => '<div class="wo-bar med" style="width:10px"></div>').join('')}
+            ${[...Array(low)].map(() => '<div class="wo-bar low" style="width:8px"></div>').join('')}
+          </div>
+          <span class="wo-count">${dayEvts.length}</span>
+        </div>`;
+      }
+      wo.innerHTML = html;
+    }
+
+    function renderNextHighImpact() {
+      const now = new Date();
+      const upcoming = allEvents.filter(e => !e.isPast && e.impact === 'high').slice(0, 3);
+      const container = document.getElementById('nextHighImpact');
+
+      if (!upcoming.length) {
+        container.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:10px">Tidak ada event high impact minggu ini.</div>';
+        return;
+      }
+
+      container.innerHTML = upcoming.map(ev => `
+        <div class="nhi-item">
+          <div class="nhi-top">
+            <span class="nhi-flag">${ev.flag}</span>
+            <span class="nhi-name">${ev.name}</span>
+            <div class="nhi-impact">${[1,2,3].map(() => '<div class="nhi-dot"></div>').join('')}</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <span style="font-size:10px;font-family:'Space Mono',monospace;color:var(--muted)">
+              ${ev.date.toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short'})} · ${ev.time} WIB
+            </span>
+            <span style="font-size:10px;font-family:'Space Mono',monospace;color:var(--muted)">Exp: ${ev.forecast || '–'}</span>
+          </div>
+        </div>`).join('');
+    }
+
+    // ===== COUNTDOWN =====
+    function startCountdown() {
+      if (countdownInterval) clearInterval(countdownInterval);
+      const now = new Date();
+      const next = allEvents.find(e => e.date > now);
+      if (!next) {
+        document.getElementById('countdownTimer').textContent = '–';
+        document.getElementById('countdownLabel').textContent = 'Tidak ada event berikutnya';
+        return;
+      }
+
+      document.getElementById('countdownEvent').textContent = `${next.flag} ${next.name}`;
+      document.getElementById('countdownLabel').textContent =
+        next.date.toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short'}) + ' · ' + next.time + ' WIB';
+
+      function tick() {
+        const diff = next.date - new Date();
+        if (diff <= 0) {
+          clearInterval(countdownInterval);
+          document.getElementById('countdownTimer').textContent = 'RILIS!';
+          document.getElementById('countdownTimer').style.color = 'var(--accent)';
+          setTimeout(renderCalendar, 3000);
+          return;
+        }
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        const d = Math.floor(h / 24);
+        const disp = d > 0 ? `${d}h ${h%24}j ${m}m` : `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        document.getElementById('countdownTimer').textContent = disp;
+
+        // Update inline countdown
+        const inline = document.getElementById('inlineCountdown');
+        if (inline) inline.textContent = disp;
+      }
+      tick();
+      countdownInterval = setInterval(tick, 1000);
+    }
+
+    // ===== INIT =====
+    function init() {
+      const today = new Date().toDateString();
+      // Default: show today's events if weekday, else show all
+      const now = new Date();
+      const dow = now.getDay();
+      activeDay = (dow >= 1 && dow <= 5) ? today : null;
+      renderCalendar();
+    }
+    init();
+  </script>
+</body>
+</html>
