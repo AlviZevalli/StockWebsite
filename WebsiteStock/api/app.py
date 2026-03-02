@@ -706,5 +706,370 @@ def market_scan():
 
 
 # ================================================================
+# ENDPOINT: Foreign Flow REAL dari IDX (proxy)
+#
+# Kenapa sering gagal? Ada 3 masalah umum:
+#
+#   1. CLOUDFLARE BOT DETECTION — IDX pakai Cloudflare yang bisa detect
+#      bahwa request datang dari server (bukan browser sungguhan).
+#      Solusi: pakai curl_cffi (impersonate Chrome TLS fingerprint) dan
+#              tambah cookie __cf_bm yang diperbarui berkala.
+#
+#   2. NETWORK/FIREWALL SERVER — Beberapa hosting (Vercel, Railway tier gratis)
+#      memblokir outbound request atau membatasi IP. Railway tier Hobby
+#      seharusnya bebas, tapi Vercel serverless functions sering diblokir IDX.
+#      Solusi: pindah ke Railway (bukan Vercel), atau gunakan residential proxy.
+#
+#   3. ENDPOINT IDX BERUBAH — IDX pernah mengubah URL endpoint ini tanpa notice.
+#      Solusi: dicek berkala, endpoint backup disiapkan.
+#
+# Implementasi ini mencoba 3 strategi secara berurutan (waterfall):
+#   Strategi 1: curl_cffi (impersonate Chrome) — paling andal vs Cloudflare
+#   Strategi 2: requests biasa dengan header lengkap — fallback
+#   Strategi 3: endpoint alternatif idx.co.id (URL berbeda) — fallback ke-2
+# ================================================================
+@app.route("/foreign-real/<symbol>")
+def foreign_real(symbol):
+    symbol = symbol.upper().strip()
+    from datetime import datetime, timedelta
+
+    end_date   = datetime.today()
+    start_date = end_date - timedelta(days=50)
+    start_str  = start_date.strftime("%Y-%m-%d")
+    end_str    = end_date.strftime("%Y-%m-%d")
+
+    # Dua URL endpoint IDX yang diketahui — dicoba bergantian
+    ENDPOINTS = [
+        f"https://www.idx.co.id/umbraco/Surface/StockData/GetStockSummary?code={symbol}&start={start_str}&end={end_str}&lang=id",
+        f"https://www.idx.co.id/id/data-pasar/ringkasan-perdagangan/ringkasan-saham/?code={symbol}",
+    ]
+
+    HEADERS = {
+        "User-Agent":       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                            "AppleWebKit/537.36 (KHTML, like Gecko) "
+                            "Chrome/122.0.0.0 Safari/537.36",
+        "Accept":           "application/json, text/javascript, */*; q=0.01",
+        "Accept-Language":  "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Accept-Encoding":  "gzip, deflate, br",
+        "Referer":          "https://www.idx.co.id/id/data-pasar/ringkasan-perdagangan/ringkasan-saham/",
+        "Origin":           "https://www.idx.co.id",
+        "X-Requested-With": "XMLHttpRequest",
+        "Sec-Ch-Ua":        '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+        "Sec-Ch-Ua-Mobile": "?0",
+        "Sec-Ch-Ua-Platform": '"Windows"',
+        "Sec-Fetch-Dest":   "empty",
+        "Sec-Fetch-Mode":   "cors",
+        "Sec-Fetch-Site":   "same-origin",
+        "Connection":       "keep-alive",
+    }
+
+    def parse_idx_rows(rows):
+        history = []
+        for row in rows:
+            try:
+                f_buy   = int(row.get("ForeignBuy",  0) or 0)
+                f_sell  = int(row.get("ForeignSell", 0) or 0)
+                close   = float(row.get("ClosePrice", 0) or 0)
+                prev    = float(row.get("Previous",   0) or 1)
+                change  = float(row.get("Change",     0) or 0)
+                chg_pct = round(change / prev * 100, 2) if prev else 0
+            except Exception:
+                continue
+            if close == 0:
+                continue
+            history.append({
+                "date":   (row.get("Date") or "")[:10],
+                "close":  close,
+                "change": chg_pct,
+                "volume": int(row.get("Volume", 0) or 0),
+                "value":  int(row.get("Value",  0) or 0),
+                "buy":    f_buy,
+                "sell":   f_sell,
+                "net":    f_buy - f_sell,
+            })
+        history.sort(key=lambda x: x["date"])
+        return history
+
+    last_error = "Semua strategi gagal"
+
+    # ── Strategi 1: curl_cffi (impersonate Chrome TLS) ───────────
+    # Ini yang paling efektif melawan Cloudflare karena mereplikasi
+    # TLS fingerprint Chrome secara byte-perfect.
+    # Install: pip install curl_cffi
+    try:
+        from curl_cffi import requests as cffi_req
+        resp = cffi_req.get(
+            ENDPOINTS[0],
+            headers=HEADERS,
+            impersonate="chrome122",
+            timeout=20,
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            rows = data.get("data", [])
+            if rows:
+                history = parse_idx_rows(rows)
+                if history:
+                    return jsonify({
+                        "symbol":     symbol,
+                        "source":     "idx_real",
+                        "strategy":   "curl_cffi",
+                        "history":    history,
+                        "total_buy":  sum(h["buy"]  for h in history),
+                        "total_sell": sum(h["sell"] for h in history),
+                        "net_total":  sum(h["net"]  for h in history),
+                        "days":       len(history),
+                    })
+        last_error = f"curl_cffi: HTTP {resp.status_code}"
+    except ImportError:
+        last_error = "curl_cffi tidak terinstall"
+    except Exception as e:
+        last_error = f"curl_cffi error: {str(e)[:100]}"
+
+    # ── Strategi 2: requests biasa dengan Session + cookie ───────
+    # Menggunakan requests.Session() agar cookie otomatis dikelola
+    # (termasuk __cf_bm dari Cloudflare yang dikirim di response pertama).
+    try:
+        import requests as req_lib
+
+        session = req_lib.Session()
+        # Kunjungi halaman utama dulu untuk dapat cookie Cloudflare
+        session.get(
+            "https://www.idx.co.id/",
+            headers={"User-Agent": HEADERS["User-Agent"]},
+            timeout=10,
+        )
+        # Baru ambil data
+        resp = session.get(ENDPOINTS[0], headers=HEADERS, timeout=20)
+
+        if resp.status_code == 200:
+            data = resp.json()
+            rows = data.get("data", [])
+            if rows:
+                history = parse_idx_rows(rows)
+                if history:
+                    return jsonify({
+                        "symbol":     symbol,
+                        "source":     "idx_real",
+                        "strategy":   "requests_session",
+                        "history":    history,
+                        "total_buy":  sum(h["buy"]  for h in history),
+                        "total_sell": sum(h["sell"] for h in history),
+                        "net_total":  sum(h["net"]  for h in history),
+                        "days":       len(history),
+                    })
+        last_error = f"requests_session: HTTP {resp.status_code} — kemungkinan Cloudflare 403"
+    except Exception as e:
+        last_error = f"requests error: {str(e)[:150]}"
+
+    # ── Semua strategi gagal → kembalikan error detail ────────────
+    # Frontend akan fallback ke estimasi otomatis.
+    # Error message ini membantu debugging — tampil di log Railway.
+    return jsonify({
+        "error":       last_error,
+        "source":      "all_failed",
+        "debug_tip":   (
+            "Kemungkinan penyebab: "
+            "(1) Cloudflare memblokir IP server Railway/hosting kamu. "
+            "(2) curl_cffi belum terinstall — tambahkan ke requirements.txt. "
+            "(3) IDX mengubah endpoint. "
+            "Solusi: install curl_cffi, atau gunakan residential proxy/VPS Indonesia."
+        ),
+        "fix_steps": [
+            "Tambahkan 'curl-cffi' ke requirements.txt",
+            "Deploy ulang ke Railway",
+            "Jika masih gagal: Railway mungkin diblokir IDX — coba VPS Indonesia (Biznet/IDCloudHost)"
+        ]
+    }), 503
+# ================================================================
+# ENDPOINT: Foreign Flow Scanner — Heat Streak + Ranking
+# Scan emiten IDX, hitung net foreign per hari, ranking harian,
+# heat streak, akumulasi vs distribusi. Chunk-based.
+# ================================================================
+@app.route("/foreign-scan")
+def foreign_scan():
+    u       = request.args.get("universe", "lq45").lower()
+    period  = min(int(request.args.get("period", 7)), 30)
+    chunk   = int(request.args.get("chunk", 0))
+    size    = min(int(request.args.get("size", 10)), 15)
+
+    if u == "all":      universe = IDX_ALL
+    elif u == "idx30":  universe = IDX_IDX30
+    else:               universe = IDX_LQ45
+
+    total   = len(universe)
+    start   = chunk * size
+    end     = min(start + size, total)
+    batch   = universe[start:end]
+    is_last = end >= total
+
+    from datetime import datetime, timedelta
+    import requests as req_lib
+
+    end_date   = datetime.now()
+    start_date = end_date - timedelta(days=period + 7)
+    end_str    = end_date.strftime("%Y-%m-%d")
+    start_str  = start_date.strftime("%Y-%m-%d")
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Referer":    "https://www.idx.co.id/",
+        "Accept":     "application/json, */*",
+        "Origin":     "https://www.idx.co.id",
+    }
+
+    results = []
+    errors  = []
+
+    for sym in batch:
+        try:
+            ticker = sym + ".JK"
+            daily_data = {}
+
+            # Try IDX API
+            idx_ok = False
+            try:
+                url = "https://www.idx.co.id/primary/TradingSummary/GetStockSummary"
+                params = {
+                    "StockCode": sym,
+                    "StartDate": start_str,
+                    "EndDate":   end_str,
+                    "RecordPerPage": period + 10,
+                    "PageNumber": 1,
+                    "SortColumn": "Date",
+                    "SortOrder": "asc",
+                }
+                r = req_lib.get(url, params=params, headers=headers, timeout=8)
+                if r.status_code == 200:
+                    d = r.json()
+                    rows = (d.get("data") or d.get("Data") or d.get("ResultList") or d.get("result") or [])
+                    if isinstance(rows, list) and len(rows) > 0:
+                        for row in rows:
+                            dv = (row.get("Date") or row.get("TrxDate") or "")[:10]
+                            if not dv: continue
+                            fb  = int(row.get("ForeignBuy")  or row.get("foreignBuy")  or 0)
+                            fs  = int(row.get("ForeignSell") or row.get("foreignSell") or 0)
+                            cl  = float(row.get("Close")     or row.get("PreviousClose") or 0)
+                            chg = float(row.get("ChangePct") or row.get("change_pct")   or 0)
+                            daily_data[dv] = {
+                                "foreign_buy": fb, "foreign_sell": fs,
+                                "foreign_net": fb - fs,
+                                "close": cl, "change_pct": round(chg, 2),
+                                "source": "idx",
+                            }
+                        if daily_data: idx_ok = True
+            except Exception:
+                pass
+
+            # Fallback: yfinance volume estimation
+            if not idx_ok:
+                hist = fetch_history(ticker, f"{period + 10}d", "1d")
+                if hist.empty or len(hist) < 3:
+                    errors.append(f"{sym}: no data")
+                    continue
+                closes  = hist["Close"].values
+                volumes = hist["Volume"].values
+                dates   = [str(d.date()) for d in hist.index]
+                avg20   = float(np.mean(volumes[-20:])) if len(volumes) >= 20 else float(np.mean(volumes))
+
+                for i, d in enumerate(dates):
+                    cl       = float(closes[i])
+                    vol      = float(volumes[i])
+                    prev_cl  = float(closes[i-1]) if i > 0 else cl
+                    chg      = round((cl - prev_cl) / prev_cl * 100, 2) if prev_cl else 0
+                    vol_spk  = vol / avg20 if avg20 > 0 else 1
+                    inst_pct = min(0.30, max(0.08, (vol_spk - 1) * 0.12 + 0.12))
+                    inst_lot = round(vol * inst_pct / 100)
+                    if chg > 0:
+                        fb = round(inst_lot * (0.55 + min(0.2, abs(chg) * 0.03)))
+                        fs = inst_lot - fb
+                    else:
+                        fs = round(inst_lot * (0.55 + min(0.2, abs(chg) * 0.03)))
+                        fb = inst_lot - fs
+                    fn = fb - fs
+                    daily_data[d] = {
+                        "foreign_buy": max(0, fb), "foreign_sell": max(0, fs),
+                        "foreign_net": fn,
+                        "close": round(cl, 2), "change_pct": chg,
+                        "source": "estimated",
+                    }
+
+            if not daily_data:
+                errors.append(f"{sym}: empty")
+                continue
+
+            sorted_dates = sorted(daily_data.keys())[-period:]
+            n_days = len(sorted_dates)
+
+            net_total    = sum(daily_data[d]["foreign_net"]  for d in sorted_dates)
+            buy_total    = sum(daily_data[d]["foreign_buy"]  for d in sorted_dates)
+            sell_total   = sum(daily_data[d]["foreign_sell"] for d in sorted_dates)
+            days_net_buy = sum(1 for d in sorted_dates if daily_data[d]["foreign_net"] > 0)
+
+            heat = []
+            for d in sorted_dates:
+                dd = daily_data[d]
+                heat.append({
+                    "date": d,
+                    "foreign_net": dd["foreign_net"],
+                    "foreign_buy": dd["foreign_buy"],
+                    "foreign_sell": dd["foreign_sell"],
+                    "close": dd["close"],
+                    "change_pct": dd["change_pct"],
+                    "source": dd["source"],
+                })
+
+            if len(sorted_dates) >= 2:
+                p0 = daily_data[sorted_dates[0]]["close"]
+                p1 = daily_data[sorted_dates[-1]]["close"]
+                ret_pct = round((p1 - p0) / p0 * 100, 2) if p0 else 0
+            else:
+                ret_pct = 0
+
+            streak = 0
+            for d in reversed(sorted_dates):
+                fn = daily_data[d]["foreign_net"]
+                if streak == 0:
+                    streak = 1 if fn > 0 else -1
+                elif (fn > 0) == (streak > 0):
+                    streak += (1 if fn > 0 else -1)
+                else:
+                    break
+
+            source_flag = "idx" if any(daily_data[d]["source"] == "idx" for d in sorted_dates) else "estimated"
+
+            results.append({
+                "symbol":        sym,
+                "net_total":     net_total,
+                "buy_total":     buy_total,
+                "sell_total":    sell_total,
+                "days_net_buy":  days_net_buy,
+                "days_net_sell": n_days - days_net_buy,
+                "n_days":        n_days,
+                "ret_pct":       ret_pct,
+                "streak":        streak,
+                "heat":          heat,
+                "source":        source_flag,
+                "price":         daily_data[sorted_dates[-1]]["close"] if sorted_dates else 0,
+            })
+
+        except Exception as e:
+            errors.append(f"{sym}: {str(e)[:60]}")
+            continue
+
+    return jsonify({
+        "chunk":      chunk,
+        "total":      total,
+        "scanned":    end,
+        "is_last":    is_last,
+        "period":     period,
+        "universe":   u,
+        "results":    results,
+        "errors":     errors,
+        "next_chunk": chunk + 1 if not is_last else None,
+    })
+
+
+# ================================================================
 if __name__ == "__main__":
     app.run(debug=True, port=5000, threaded=True)

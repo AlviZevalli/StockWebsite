@@ -7,167 +7,121 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
   <style>
     main { max-width: 1400px; margin: auto; padding: 28px 24px 80px; position: relative; z-index: 1; }
 
-    .page-hero { margin-bottom: 32px; }
-    .page-hero h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+    /* ── PAGE TABS ── */
+    .page-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 28px;
+      border-bottom: 2px solid var(--border);
+    }
+    .page-tab {
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--muted);
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .page-tab:hover { color: var(--text); }
+    .page-tab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+
+    /* ========================================================
+       TAB 1: MONITOR per emiten (ORIGINAL)
+    ======================================================== */
+    .page-hero { margin-bottom: 24px; }
+    .page-hero h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
     .page-hero p { color: var(--muted); font-size: 14px; max-width: 600px; line-height: 1.6; }
     .hero-accent { color: var(--accent2); }
 
-    /* Search */
-    .ff-search {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 28px;
-      flex-wrap: wrap;
-    }
+    .ff-search { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
     .ff-input-wrap {
-      flex: 1;
-      min-width: 200px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-radius: 12px;
-      padding: 0 16px;
+      flex: 1; min-width: 200px;
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: 12px; padding: 0 16px;
     }
     .ff-input-wrap input {
-      flex: 1;
-      background: none;
-      border: none;
-      outline: none;
-      color: var(--text);
-      font-family: var(--font-mono);
-      font-size: 14px;
-      padding: 14px 0;
-      text-transform: uppercase;
+      flex: 1; background: none; border: none; outline: none;
+      color: var(--text); font-family: var(--font-mono);
+      font-size: 14px; padding: 14px 0; text-transform: uppercase;
     }
     .ff-input-wrap input::placeholder { color: var(--muted); text-transform: none; font-family: var(--font); }
     .ff-btn {
-      background: var(--accent2);
-      color: #060c14;
-      border: none;
-      border-radius: 10px;
-      padding: 13px 24px;
-      font-weight: 700;
-      font-size: 14px;
-      cursor: pointer;
-      font-family: var(--font);
-      transition: opacity 0.2s;
-      white-space: nowrap;
+      background: var(--accent2); color: #060c14;
+      border: none; border-radius: 10px; padding: 13px 24px;
+      font-weight: 700; font-size: 14px; cursor: pointer;
+      font-family: var(--font); transition: opacity 0.2s; white-space: nowrap;
     }
     .ff-btn:hover { opacity: 0.85; }
 
-    /* Quick picks */
     .ff-quick { display: flex; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; align-items: center; }
     .ff-quick-label { font-size: 12px; color: var(--muted); }
     .ff-quick button {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border2);
-      color: var(--text);
-      border-radius: 7px;
-      padding: 5px 12px;
-      font-size: 12px;
-      font-family: var(--font-mono);
-      cursor: pointer;
-      font-weight: 700;
-      transition: all 0.15s;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border2);
+      color: var(--text); border-radius: 7px; padding: 5px 12px;
+      font-size: 12px; font-family: var(--font-mono); cursor: pointer;
+      font-weight: 700; transition: all 0.15s;
     }
     .ff-quick button:hover { background: rgba(0,184,240,0.1); border-color: rgba(0,184,240,0.4); color: var(--accent2); }
 
-    /* Flow Summary Cards */
     .ff-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 14px;
-      margin-bottom: 28px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px; margin-bottom: 24px;
     }
     .ff-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 18px 20px;
-      position: relative;
-      overflow: hidden;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px 20px;
+      position: relative; overflow: hidden;
     }
-    .ff-card::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-    }
-    .ff-card.buy::before { background: linear-gradient(90deg, var(--accent), transparent); }
+    .ff-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+    .ff-card.buy::before  { background: linear-gradient(90deg, var(--accent), transparent); }
     .ff-card.sell::before { background: linear-gradient(90deg, var(--danger), transparent); }
-    .ff-card.net::before { background: linear-gradient(90deg, var(--accent2), transparent); }
+    .ff-card.net::before  { background: linear-gradient(90deg, var(--accent2), transparent); }
     .ff-card.days::before { background: linear-gradient(90deg, var(--warn), transparent); }
     .ff-card-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
     .ff-card-val { font-size: 22px; font-weight: 800; font-family: var(--font-mono); }
     .ff-card-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
-    .buy .ff-card-val { color: var(--accent); }
+    .buy  .ff-card-val { color: var(--accent); }
     .sell .ff-card-val { color: var(--danger); }
-    .net .ff-card-val { color: var(--accent2); }
+    .net  .ff-card-val { color: var(--accent2); }
     .days .ff-card-val { color: var(--warn); }
 
-    /* Flow bar */
     .flow-bar-section {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px 24px;
-      margin-bottom: 20px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 20px 24px; margin-bottom: 20px;
     }
     .fbs-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
     .flow-bar-wrap { display: flex; height: 28px; border-radius: 8px; overflow: hidden; gap: 2px; }
-    .flow-bar-buy { background: rgba(0,229,160,0.7); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #060c14; transition: width 0.8s ease; }
-    .flow-bar-sell { background: rgba(255,69,96,0.7); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; transition: width 0.8s ease; }
+    .flow-bar-buy  { background: rgba(0,229,160,0.7); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #060c14; transition: width 0.8s ease; }
+    .flow-bar-sell { background: rgba(255,69,96,0.7);  display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; transition: width 0.8s ease; }
     .flow-bar-labels { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: var(--muted); }
 
-    /* Signal badge */
     .ff-signal {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 18px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 20px;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 18px; border-radius: 10px;
+      font-size: 14px; font-weight: 700; margin-bottom: 20px;
     }
     .ff-signal.accumulation { background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.3); color: var(--accent); }
     .ff-signal.distribution { background: rgba(255,69,96,0.1); border: 1px solid rgba(255,69,96,0.3); color: var(--danger); }
-    .ff-signal.neutral { background: rgba(245,197,24,0.1); border: 1px solid rgba(245,197,24,0.3); color: var(--warn); }
+    .ff-signal.neutral      { background: rgba(245,197,24,0.1); border: 1px solid rgba(245,197,24,0.3); color: var(--warn); }
 
-    /* History Table */
     .ff-table-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-      margin-bottom: 20px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden; margin-bottom: 20px;
     }
-    .ff-table-title {
-      padding: 16px 20px 12px;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-bottom: 1px solid var(--border);
-    }
+    .ff-table-title { padding: 16px 20px 12px; font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
     .ff-table { width: 100%; border-collapse: collapse; }
-    .ff-table th {
-      padding: 10px 16px;
-      text-align: left;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(255,255,255,0.02);
-    }
+    .ff-table th { padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
     .ff-table td { padding: 11px 16px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.04); font-family: var(--font-mono); }
     .ff-table tr:last-child td { border-bottom: none; }
     .ff-table tr:hover td { background: rgba(255,255,255,0.02); }
@@ -177,44 +131,201 @@
     .td-net-neg { color: var(--danger); font-weight: 700; }
     .td-date { color: var(--muted); }
 
-    /* Trend section */
-    .ff-trend {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px 24px;
-      margin-bottom: 20px;
-    }
+    .ff-trend { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; margin-bottom: 20px; }
     .trend-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 13px; }
     .trend-label { color: var(--muted); }
     .trend-val { font-family: var(--font-mono); font-weight: 700; }
-    .trend-bar-wrap { height: 6px; background: rgba(255,255,255,0.07); border-radius: 999px; overflow: hidden; margin-bottom: 16px; }
-    .trend-bar-fill { height: 100%; border-radius: 999px; transition: width 1s ease; }
 
-    /* Empty state */
-    .ff-empty {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--muted);
-    }
+    .ff-note { background: rgba(245,197,24,0.05); border: 1px solid rgba(245,197,24,0.15); border-radius: 10px; padding: 12px 16px; font-size: 12px; color: rgba(245,197,24,0.7); line-height: 1.6; }
+
+    .ff-empty { text-align: center; padding: 60px 20px; color: var(--muted); }
     .ff-empty-icon { font-size: 40px; margin-bottom: 12px; }
     .ff-empty-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
-    .ff-empty-sub { font-size: 13px; line-height: 1.6; }
+    .ff-empty-sub { font-size: 13px; line-height: 1.6; max-width: 400px; margin: auto; }
 
-    /* Disclaimer */
-    .ff-note {
-      background: rgba(245,197,24,0.05);
-      border: 1px solid rgba(245,197,24,0.15);
-      border-radius: 10px;
-      padding: 12px 16px;
-      font-size: 12px;
-      color: rgba(245,197,24,0.7);
-      line-height: 1.6;
+    /* ========================================================
+       TAB 2: HEAT STREAK SCANNER
+    ======================================================== */
+    .hs-hero { margin-bottom: 20px; }
+    .hs-hero h2 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+    .hs-hero p  { color: var(--muted); font-size: 13px; max-width: 600px; line-height: 1.5; }
+
+    /* Source pill */
+    .src-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700;
+      letter-spacing: 0.8px; text-transform: uppercase; margin-top: 6px;
+    }
+    .src-idx { background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.25); color: var(--accent); }
+    .src-est { background: rgba(245,197,24,0.1); border: 1px solid rgba(245,197,24,0.25); color: var(--warn); }
+    .src-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+    /* Controls */
+    .hs-controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 12px 16px; margin-bottom: 18px;
+    }
+    .ctrl-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    .ctrl-group { display: flex; gap: 4px; }
+    .ctrl-btn {
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border2);
+      color: var(--muted); border-radius: 8px; padding: 6px 14px;
+      font-family: var(--font); font-size: 12px; font-weight: 700;
+      cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    }
+    .ctrl-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+    .ctrl-btn.active { background: rgba(0,229,160,0.12); border-color: rgba(0,229,160,0.35); color: var(--accent); }
+    .ctrl-sep { width: 1px; height: 28px; background: var(--border2); margin: 0 4px; flex-shrink: 0; }
+    .ctrl-scan-btn {
+      margin-left: auto; background: var(--accent2); color: #060c14;
+      border: none; border-radius: 10px; padding: 8px 22px;
+      font-family: var(--font); font-size: 13px; font-weight: 800;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .ctrl-scan-btn:hover { opacity: 0.88; }
+    .ctrl-scan-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Progress */
+    .hs-progress { display: none; margin-bottom: 18px; }
+    .hs-progress.active { display: block; }
+    .prog-header { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; }
+    .prog-title  { font-weight: 700; }
+    .prog-count  { font-family: var(--font-mono); color: var(--muted); }
+    .prog-track  { height: 4px; background: rgba(255,255,255,0.07); border-radius: 99px; overflow: hidden; }
+    .prog-fill   { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 99px; transition: width 0.4s; width: 0%; }
+    .prog-step   { font-size: 11px; color: var(--muted); margin-top: 5px; font-family: var(--font-mono); }
+
+    /* Summary stats */
+    .hs-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 18px; }
+    .hs-stat {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px; position: relative; overflow: hidden;
+    }
+    .hs-stat::after { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+    .hs-stat.s-acc::after { background: linear-gradient(90deg, var(--accent), transparent); }
+    .hs-stat.s-dis::after { background: linear-gradient(90deg, var(--danger), transparent); }
+    .hs-stat.s-neu::after { background: linear-gradient(90deg, var(--accent2), transparent); }
+    .hs-stat.s-gld::after { background: linear-gradient(90deg, var(--warn), transparent); }
+    .hs-stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .hs-stat-val   { font-family: var(--font-mono); font-size: 22px; font-weight: 700; }
+    .hs-stat-sub   { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+    /* Inner tabs (heat vs split) */
+    .hs-tabs { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+    .hs-tab {
+      padding: 9px 18px; font-size: 13px; font-weight: 700; cursor: pointer;
+      color: var(--muted); border-bottom: 2px solid transparent;
+      transition: all 0.15s; margin-bottom: -1px;
+    }
+    .hs-tab:hover { color: var(--text); }
+    .hs-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* Heat table */
+    .heat-table-wrap { overflow-x: auto; }
+    .heat-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .heat-table th {
+      padding: 9px 12px; text-align: left; font-size: 10px; font-weight: 700;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02);
+      white-space: nowrap;
+    }
+    .heat-table td { padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+    .heat-table tr:last-child td { border-bottom: none; }
+    .heat-table tr:hover td { background: rgba(255,255,255,0.025); }
+    .heat-table tbody tr { animation: rowIn 0.25s ease both; }
+    @keyframes rowIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+
+    .ht-rank { font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-align: center; }
+    .ht-sym  { font-weight: 800; font-size: 14px; }
+    .ht-sym-sub { font-size: 10px; color: var(--muted); font-family: var(--font-mono); margin-top: 2px; }
+
+    /* Heat bubbles */
+    .heat-bubbles { display: flex; gap: 4px; align-items: center; flex-wrap: nowrap; }
+    .heat-bubble {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+      transition: transform 0.15s; cursor: default; flex-shrink: 0;
+    }
+    .heat-bubble:hover { transform: scale(1.2); }
+    .hb-top5  { background: rgba(0,229,160,0.9); color: #060c14; }
+    .hb-top10 { background: rgba(0,229,160,0.55); color: #060c14; }
+    .hb-top20 { background: rgba(0,229,160,0.25); color: var(--accent); }
+    .hb-out   { background: rgba(255,255,255,0.07); color: var(--muted); }
+    .hb-neg   { background: rgba(255,69,96,0.25); color: var(--danger); }
+    .hb-none  { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.2); font-size: 8px; }
+
+    .ht-hari { display: inline-flex; align-items: center; justify-content: center; padding: 3px 10px; border-radius: 20px; font-family: var(--font-mono); font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .hari-strong { background: rgba(0,229,160,0.15); border: 1px solid rgba(0,229,160,0.3); color: var(--accent); }
+    .hari-good   { background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.15); color: rgba(0,229,160,0.7); }
+    .hari-mid    { background: rgba(245,197,24,0.08); border: 1px solid rgba(245,197,24,0.2); color: var(--warn); }
+    .hari-weak   { background: rgba(255,69,96,0.08); border: 1px solid rgba(255,69,96,0.2); color: var(--danger); }
+
+    .ht-net { font-family: var(--font-mono); font-weight: 700; white-space: nowrap; }
+    .net-pos { color: var(--accent); }
+    .net-neg { color: var(--danger); }
+    .ht-ret  { font-family: var(--font-mono); font-weight: 700; font-size: 13px; white-space: nowrap; }
+    .ret-pos { color: var(--accent); }
+    .ret-neg { color: var(--danger); }
+    .ht-streak { font-family: var(--font-mono); font-size: 11px; white-space: nowrap; }
+    .streak-buy  { color: var(--accent); }
+    .streak-sell { color: var(--danger); }
+    .ht-avgrank  { font-family: var(--font-mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+    /* Tooltip */
+    .hb-wrap { position: relative; }
+    .hb-tooltip {
+      position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+      background: #1a2030; border: 1px solid var(--border2); border-radius: 8px;
+      padding: 8px 12px; font-size: 11px; white-space: nowrap; pointer-events: none;
+      opacity: 0; transition: opacity 0.15s; z-index: 100; font-family: var(--font-mono);
+      min-width: 130px;
+    }
+    .hb-wrap:hover .hb-tooltip { opacity: 1; }
+    .tip-date { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+    .tip-buy  { color: var(--accent); }
+    .tip-sell { color: var(--danger); }
+    .tip-net  { font-weight: 700; border-top: 1px solid var(--border); margin-top: 4px; padding-top: 4px; }
+
+    /* Legend */
+    .heat-legend { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 8px 0 12px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+    .legend-bub  { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; flex-shrink: 0; }
+
+    /* Split tables */
+    .split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 860px) { .split-grid { grid-template-columns: 1fr; } }
+    .split-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .split-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+    .split-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .split-dot-acc { background: var(--accent); box-shadow: 0 0 6px rgba(0,229,160,0.5); }
+    .split-dot-dis { background: var(--danger); box-shadow: 0 0 6px rgba(255,69,96,0.5); }
+    .split-title { font-size: 14px; font-weight: 800; }
+    .split-table { width: 100%; border-collapse: collapse; }
+    .split-table th { padding: 8px 14px; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); text-align: left; }
+    .split-table td { padding: 9px 14px; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.04); font-family: var(--font-mono); }
+    .split-table td:not(:first-child):not(:nth-child(2)) { text-align: right; }
+    .split-table th:not(:first-child):not(:nth-child(2)) { text-align: right; }
+    .split-table tr:last-child td { border-bottom: none; }
+    .split-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .st-rank { font-size: 10px; color: var(--muted); }
+    .st-sym  { font-family: var(--font); font-weight: 800; font-size: 13px; }
+    .st-net-acc { color: var(--accent); font-weight: 700; }
+    .st-net-dis { color: var(--danger); font-weight: 700; }
+
+    .hs-disc { background: rgba(0,184,240,0.04); border: 1px solid rgba(0,184,240,0.12); border-radius: 10px; padding: 12px 16px; font-size: 11px; color: rgba(0,184,240,0.6); line-height: 1.7; margin-top: 16px; }
+
+    @media (max-width: 768px) {
+      .hs-controls { flex-wrap: wrap; }
+      .ctrl-scan-btn { margin-left: 0; width: 100%; text-align: center; }
+      .page-tabs { overflow-x: auto; }
+      .heat-bubble { width: 24px; height: 24px; font-size: 9px; }
     }
   </style>
 </head>
 <body>
-    <div class="topbar" id="topbar">
+  <div class="topbar" id="topbar">
     <div class="topbar-left">
       <a href="index.html" class="topbar-logo">&#9650; Cukong Reborn</a>
       <span class="topbar-sep">|</span>
@@ -231,6 +342,9 @@
       <a href="kalender.html">&#128197; Kalender</a>
     </nav>
     <a href="index.html" class="topbar-home">&larr; Beranda</a>
+    <button class="burger-btn" id="burgerBtn" onclick="toggleMobileNav()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
   <div class="bg-grid"></div>
   <div class="bg-glow glow-1"></div>
@@ -241,7 +355,7 @@
       <div class="logo">
         <span class="logo-icon">&#9650;</span>
         <div>
-          <div class="logo-title">Foreign Flow <span class="logo-pro">MONITOR</span></div>
+          <div class="logo-title">Foreign Flow <span class="logo-pro">CENTER</span></div>
           <div class="logo-sub">by AlviZevalli &middot; IDX Market</div>
         </div>
       </div>
@@ -253,35 +367,181 @@
   </header>
 
   <main>
-    <div class="page-hero">
-      <h1>&#127758; Foreign Flow <span class="hero-accent">Monitor</span></h1>
-      <p>Pantau pergerakan uang asing (foreign buy/sell) per emiten IDX. Pola akumulasi asing sering menjadi leading indicator pergerakan harga berikutnya.</p>
-    </div>
-
-    <div class="ff-search">
-      <div class="ff-input-wrap">
-        <span style="color:var(--accent2);font-size:16px">&#127758;</span>
-        <input id="ffSym" placeholder="Masukkan kode emiten... (contoh: BBRI, TLKM)" autocomplete="off" spellcheck="false">
+    <!-- Page-level tabs -->
+    <div class="page-tabs">
+      <div class="page-tab active" data-ptab="monitor" onclick="switchPageTab('monitor')">
+        &#127758; Monitor Emiten
       </div>
-      <button class="ff-btn" onclick="loadForeignFlow()">Cek Flow</button>
-    </div>
-    <div class="ff-quick">
-      <span class="ff-quick-label">Cepat:</span>
-      <button onclick="quickFF('BBRI')">BBRI</button>
-      <button onclick="quickFF('BBCA')">BBCA</button>
-      <button onclick="quickFF('BMRI')">BMRI</button>
-      <button onclick="quickFF('TLKM')">TLKM</button>
-      <button onclick="quickFF('ASII')">ASII</button>
-      <button onclick="quickFF('GOTO')">GOTO</button>
-      <button onclick="quickFF('ANTM')">ANTM</button>
-      <button onclick="quickFF('BREN')">BREN</button>
+      <div class="page-tab" data-ptab="heatscanner" onclick="switchPageTab('heatscanner')">
+        &#128293; Heat Streak Scanner
+        <span style="font-size:10px;background:rgba(0,229,160,0.15);color:var(--accent);padding:2px 7px;border-radius:20px;margin-left:4px;font-weight:700">BARU</span>
+      </div>
     </div>
 
-    <div id="ffContent">
-      <div class="ff-empty">
-        <div class="ff-empty-icon">&#127758;</div>
-        <div class="ff-empty-title">Masukkan kode emiten</div>
-        <div class="ff-empty-sub">Data foreign buy/sell akan tampil di sini.<br>Sistem mengambil data dari yfinance dan mengestimasi foreign flow berdasarkan pola volume institusional.</div>
+    <!-- ══════════════════════════════════
+         TAB 1: MONITOR PER EMITEN
+    ══════════════════════════════════ -->
+    <div id="tabMonitor">
+      <div class="page-hero">
+        <h1>&#127758; Foreign Flow <span class="hero-accent">Monitor</span></h1>
+        <p>Pantau pergerakan uang asing (foreign buy/sell) per emiten IDX. Pola akumulasi asing sering menjadi leading indicator pergerakan harga berikutnya.</p>
+      </div>
+
+      <div class="ff-search">
+        <div class="ff-input-wrap">
+          <span style="color:var(--accent2);font-size:16px">&#127758;</span>
+          <input id="ffSym" placeholder="Masukkan kode emiten... (contoh: BBRI, TLKM)" autocomplete="off" spellcheck="false">
+        </div>
+        <button class="ff-btn" onclick="loadForeignFlow()">Cek Flow</button>
+      </div>
+      <div class="ff-quick">
+        <span class="ff-quick-label">Cepat:</span>
+        <button onclick="quickFF('BBRI')">BBRI</button>
+        <button onclick="quickFF('BBCA')">BBCA</button>
+        <button onclick="quickFF('BMRI')">BMRI</button>
+        <button onclick="quickFF('TLKM')">TLKM</button>
+        <button onclick="quickFF('ASII')">ASII</button>
+        <button onclick="quickFF('GOTO')">GOTO</button>
+        <button onclick="quickFF('ANTM')">ANTM</button>
+        <button onclick="quickFF('BREN')">BREN</button>
+      </div>
+
+      <div id="ffContent">
+        <div class="ff-empty">
+          <div class="ff-empty-icon">&#127758;</div>
+          <div class="ff-empty-title">Masukkan kode emiten</div>
+          <div class="ff-empty-sub">Data foreign buy/sell akan tampil di sini.<br>Sistem mengambil data dari yfinance dan mengestimasi foreign flow berdasarkan pola volume institusional.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         TAB 2: HEAT STREAK SCANNER
+    ══════════════════════════════════ -->
+    <div id="tabHeatScanner" style="display:none">
+      <div class="hs-hero">
+        <h2>&#128293; Heat Streak <span style="color:var(--accent)">Scanner</span></h2>
+        <p>Ranking harian arus dana asing seluruh emiten IDX. Lihat siapa yang paling banyak diakumulasi atau didistribusi asing, dengan heat streak per hari.</p>
+        <div id="srcPill" class="src-pill src-idx">
+          <span class="src-dot"></span>
+          <span id="srcLabel">IDX API + Estimasi</span>
+        </div>
+      </div>
+
+      <div class="hs-controls">
+        <span class="ctrl-label">Periode</span>
+        <div class="ctrl-group" id="periodGroup">
+          <button class="ctrl-btn active" data-period="7">7D</button>
+          <button class="ctrl-btn" data-period="14">14D</button>
+          <button class="ctrl-btn" data-period="30">30D</button>
+        </div>
+        <div class="ctrl-sep"></div>
+        <span class="ctrl-label">Universe</span>
+        <div class="ctrl-group" id="universeGroup">
+          <button class="ctrl-btn active" data-universe="lq45">LQ45</button>
+          <button class="ctrl-btn" data-universe="idx30">IDX30</button>
+          <button class="ctrl-btn" data-universe="all">Semua IDX</button>
+        </div>
+        <div class="ctrl-sep"></div>
+        <span class="ctrl-label">Tipe</span>
+        <div class="ctrl-group" id="typeGroup">
+          <button class="ctrl-btn active" data-type="accumulation">&#128200; Akumulasi</button>
+          <button class="ctrl-btn" data-type="distribution">&#128201; Distribusi</button>
+        </div>
+        <button class="ctrl-scan-btn" id="scanBtn" onclick="startScan()">&#128301; Mulai Scan</button>
+      </div>
+
+      <div class="hs-progress" id="hsProgress">
+        <div class="prog-header">
+          <span class="prog-title" id="progTitle">Scanning...</span>
+          <span class="prog-count" id="progCount">0 / 0</span>
+        </div>
+        <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+        <div class="prog-step" id="progStep">Menginisialisasi...</div>
+      </div>
+
+      <div class="hs-stats" id="hsStats" style="display:none">
+        <div class="hs-stat s-acc">
+          <div class="hs-stat-label">Saham Akumulasi</div>
+          <div class="hs-stat-val" id="statAcc">-</div>
+          <div class="hs-stat-sub">Net Buy dominan</div>
+        </div>
+        <div class="hs-stat s-dis">
+          <div class="hs-stat-label">Saham Distribusi</div>
+          <div class="hs-stat-val" id="statDis">-</div>
+          <div class="hs-stat-sub">Net Sell dominan</div>
+        </div>
+        <div class="hs-stat s-neu">
+          <div class="hs-stat-label">Total Scanned</div>
+          <div class="hs-stat-val" id="statTotal">-</div>
+          <div class="hs-stat-sub" id="statPeriod">-</div>
+        </div>
+        <div class="hs-stat s-gld">
+          <div class="hs-stat-label">Paling Konsisten</div>
+          <div class="hs-stat-val" id="statTop" style="font-size:16px;padding-top:4px">-</div>
+          <div class="hs-stat-sub" id="statTopSub">Streak tertinggi</div>
+        </div>
+      </div>
+
+      <div class="hs-tabs" id="hsTabs" style="display:none">
+        <div class="hs-tab active" data-htab="heat" onclick="switchHsTab('heat')">&#128293; Heat Streak</div>
+        <div class="hs-tab" data-htab="split" onclick="switchHsTab('split')">&#9878;&#65039; Akumulasi vs Distribusi</div>
+      </div>
+
+      <div id="htabHeat">
+        <div class="heat-legend">
+          <span style="font-size:11px;color:var(--muted);font-weight:700">LEGEND:</span>
+          <span class="legend-item"><span class="legend-bub hb-top5">5</span> Top 5</span>
+          <span class="legend-item"><span class="legend-bub hb-top10">10</span> Top 10</span>
+          <span class="legend-item"><span class="legend-bub hb-top20">20</span> Top 20</span>
+          <span class="legend-item"><span class="legend-bub hb-out">-</span> Di luar Top 20</span>
+          <span class="legend-item"><span class="legend-bub hb-neg">S</span> Net Sell</span>
+        </div>
+        <div class="heat-table-wrap">
+          <div id="heatTableContainer">
+            <div class="ff-empty">
+              <div class="ff-empty-icon">&#128293;</div>
+              <div class="ff-empty-title">Belum ada data</div>
+              <div class="ff-empty-sub">Pilih periode &amp; universe lalu klik <strong>Mulai Scan</strong>.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="htabSplit" style="display:none">
+        <div class="split-grid">
+          <div class="split-card">
+            <div class="split-header">
+              <div class="split-dot split-dot-acc"></div>
+              <div class="split-title">Top Foreign Accumulation</div>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="split-table">
+                <thead><tr><th>#</th><th>Stock</th><th>Net Value</th><th>Buy</th><th>Sell</th></tr></thead>
+                <tbody id="accumBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="split-card">
+            <div class="split-header">
+              <div class="split-dot split-dot-dis"></div>
+              <div class="split-title">Top Foreign Distribution</div>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="split-table">
+                <thead><tr><th>#</th><th>Stock</th><th>Net Value</th><th>Buy</th><th>Sell</th></tr></thead>
+                <tbody id="distribBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hs-disc">
+        &#8505;&#65039; <strong>Sumber Data:</strong> Sistem mencoba mengambil data dari <strong>IDX Trading Summary API</strong> terlebih dahulu.
+        Jika tidak tersedia, digunakan <strong>estimasi berbasis pola volume institusional</strong> dari Yahoo Finance.
+        Data resmi IDX: <a href="https://www.idx.co.id/id/data-pasar" target="_blank" style="color:var(--accent2)">idx.co.id</a>.
+        Nilai dalam satuan lot (1 lot = 100 lembar saham).
       </div>
     </div>
   </main>
@@ -293,105 +553,99 @@
   </div>
 
   <script>
-  const API_BASE = (() => {
-    const RAILWAY = "https://stockwebsite-production.up.railway.app";
-    const h = window.location.hostname;
-    return (h === "localhost" || h === "127.0.0.1") ? "http://localhost:5000" : RAILWAY;
-  })();
+  // \u2500\u2500 Page tab switch \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  function switchPageTab(tab) {
+    document.querySelectorAll('.page-tab').forEach(t => t.classList.toggle('active', t.dataset.ptab === tab));
+    document.getElementById('tabMonitor').style.display     = tab === 'monitor'      ? 'block' : 'none';
+    document.getElementById('tabHeatScanner').style.display = tab === 'heatscanner'  ? 'block' : 'none';
+  }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  // \u2500\u2500 Clock & market status \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  document.addEventListener('DOMContentLoaded', () => {
     updateClock();
     setInterval(updateClock, 1000);
-    document.getElementById("ffSym").addEventListener("keydown", e => {
-      if (e.key === "Enter") loadForeignFlow();
+    document.getElementById('ffSym').addEventListener('keydown', e => {
+      if (e.key === 'Enter') loadForeignFlow();
     });
+    setupScanControls();
   });
 
   function updateClock() {
-    const now = new Date();
-    const wib = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
-    document.getElementById("clock").textContent =
-      wib.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) + " WIB";
-    const day = wib.getDay(), h = wib.getHours(), m = wib.getMinutes(), time = h * 100 + m;
-    const el = document.getElementById("marketStatus");
-    if (day === 0 || day === 6) el.innerHTML = '<span class="dot"></span> Market Tutup (Akhir Pekan)';
-    else if (time >= 900 && time < 1600) el.innerHTML = '<span class="dot open"></span> Market Buka (09:00-16:00)';
-    else el.innerHTML = '<span class="dot"></span> Market Tutup';
+    const wib = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+    document.getElementById('clock').textContent =
+      wib.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+    const day = wib.getDay(), h = wib.getHours(), m = wib.getMinutes(), t = h * 100 + m;
+    const el = document.getElementById('marketStatus');
+    if (day === 0 || day === 6)
+      el.innerHTML = '<span class="dot"></span> Market Tutup (Akhir Pekan)';
+    else if (t >= 900 && t < 1600)
+      el.innerHTML = '<span class="dot open"></span> Market Buka (09:00-16:00)';
+    else
+      el.innerHTML = '<span class="dot"></span> Market Tutup';
   }
 
+  // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+  // TAB 1: MONITOR PER EMITEN (ORIGINAL)
+  // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
   function quickFF(sym) {
-    document.getElementById("ffSym").value = sym;
+    document.getElementById('ffSym').value = sym;
     loadForeignFlow();
   }
 
   async function loadForeignFlow() {
-    const sym = document.getElementById("ffSym").value.trim().toUpperCase();
-    if (!sym) { showToast("Masukkan kode emiten terlebih dahulu!"); return; }
-    showLoading("Mengambil data " + sym + "...");
+    const sym = document.getElementById('ffSym').value.trim().toUpperCase();
+    if (!sym) { showToast('Masukkan kode emiten terlebih dahulu!'); return; }
+    showLoading('Mengambil data ' + sym + '...');
     try {
       const [stockRes, volRes] = await Promise.all([
-        fetch(API_BASE + "/stock/" + sym),
-        fetch(API_BASE + "/volume/" + sym)
+        fetch(API_BASE + '/stock/' + sym),
+        fetch(API_BASE + '/volume/' + sym)
       ]);
-      if (!stockRes.ok || !volRes.ok) throw new Error("Data tidak tersedia untuk " + sym);
+      if (!stockRes.ok || !volRes.ok) throw new Error('Data tidak tersedia untuk ' + sym);
       const stock = await stockRes.json();
-      const vol = await volRes.json();
+      const vol   = await volRes.json();
       if (stock.error) throw new Error(stock.error);
       renderForeignFlow(sym, stock, vol);
     } catch (err) {
-      showToast("Error: " + err.message);
-      document.getElementById("ffContent").innerHTML = '<div class="ff-empty"><div class="ff-empty-icon">&#10060;</div><div class="ff-empty-title">Gagal memuat data</div><div class="ff-empty-sub">' + err.message + '</div></div>';
+      showToast('Error: ' + err.message);
+      document.getElementById('ffContent').innerHTML =
+        '<div class="ff-empty"><div class="ff-empty-icon">&#10060;</div><div class="ff-empty-title">Gagal memuat data</div><div class="ff-empty-sub">' + err.message + '</div></div>';
     } finally {
       hideLoading();
     }
   }
 
   function renderForeignFlow(sym, stock, vol) {
-    // Simulate foreign flow dari data yfinance
-    // Estimasi: volume besar + harga naik = akumulasi asing; volume besar + harga turun = distribusi
     const chart = vol.chart || [];
-    const totalDays = chart.length;
-    
-    // Hitung estimasi foreign flow berdasarkan pola institusional
     let foreignBuyTotal = 0, foreignSellTotal = 0;
     const history = [];
-    
-    chart.slice(-20).forEach((c, i) => {
+
+    chart.slice(-20).forEach((c) => {
       const isUpDay = c.change > 0;
       const volSpike = c.avg20 > 0 ? c.volume / c.avg20 : 1;
-      // Estimasi: volume di atas rata-rata pada hari naik = potensi akumulasi asing
-      const instFraction = Math.min(0.35, (volSpike - 1) * 0.15 + 0.15); // 15-35% dari volume
+      const instFraction = Math.min(0.35, (volSpike - 1) * 0.15 + 0.15);
       const instVol = Math.round(c.volume * Math.max(0.1, instFraction));
-      
       let fBuy = 0, fSell = 0;
       if (isUpDay) {
-        fBuy = Math.round(instVol * (0.55 + Math.random() * 0.2));
+        fBuy  = Math.round(instVol * (0.55 + Math.random() * 0.2));
         fSell = instVol - fBuy;
       } else {
         fSell = Math.round(instVol * (0.55 + Math.random() * 0.2));
-        fBuy = instVol - fSell;
+        fBuy  = instVol - fSell;
       }
-      foreignBuyTotal += fBuy;
+      foreignBuyTotal  += fBuy;
       foreignSellTotal += fSell;
-      history.push({
-        date: c.date,
-        buy: fBuy,
-        sell: fSell,
-        net: fBuy - fSell,
-        price: c.close,
-        change: c.change
-      });
+      history.push({ date: c.date, buy: fBuy, sell: fSell, net: fBuy - fSell, price: c.close, change: c.change });
     });
 
     const netFlow = foreignBuyTotal - foreignSellTotal;
-    const buyPct = foreignBuyTotal / (foreignBuyTotal + foreignSellTotal) * 100;
+    const buyPct  = foreignBuyTotal / (foreignBuyTotal + foreignSellTotal) * 100;
     const consecutive = calcConsecutive(history);
-    
-    // Signal
+
     let signalClass, signalText, signalIcon;
-    if (buyPct >= 55) { signalClass = "accumulation"; signalIcon = "&#128200;"; signalText = "AKUMULASI ASING - Foreign cenderung NET BUY"; }
-    else if (buyPct <= 45) { signalClass = "distribution"; signalIcon = "&#128201;"; signalText = "DISTRIBUSI ASING - Foreign cenderung NET SELL"; }
-    else { signalClass = "neutral"; signalIcon = "&#8644;"; signalText = "FLOW NETRAL - Tidak ada bias dominan"; }
+    if (buyPct >= 55)      { signalClass = 'accumulation'; signalIcon = '&#128200;'; signalText = 'AKUMULASI ASING - Foreign cenderung NET BUY'; }
+    else if (buyPct <= 45) { signalClass = 'distribution'; signalIcon = '&#128201;'; signalText = 'DISTRIBUSI ASING - Foreign cenderung NET SELL'; }
+    else                   { signalClass = 'neutral';      signalIcon = '&#8644;';   signalText = 'FLOW NETRAL - Tidak ada bias dominan'; }
 
     const content = `
       <div class="ff-cards">
@@ -407,15 +661,15 @@
         </div>
         <div class="ff-card net">
           <div class="ff-card-label">Net Foreign Flow</div>
-          <div class="ff-card-val" style="color:${netFlow >= 0 ? "var(--accent)" : "var(--danger)"}">
-            ${netFlow >= 0 ? "+" : ""}${formatVol(Math.abs(netFlow))}
+          <div class="ff-card-val" style="color:${netFlow >= 0 ? 'var(--accent)' : 'var(--danger)'}">
+            ${netFlow >= 0 ? '+' : ''}${formatVol(Math.abs(netFlow))}
           </div>
-          <div class="ff-card-sub">${netFlow >= 0 ? "Net Buy" : "Net Sell"}</div>
+          <div class="ff-card-sub">${netFlow >= 0 ? 'Net Buy' : 'Net Sell'}</div>
         </div>
         <div class="ff-card days">
           <div class="ff-card-label">Tren Saat Ini</div>
           <div class="ff-card-val">${Math.abs(consecutive)} Hari</div>
-          <div class="ff-card-sub">${consecutive >= 0 ? "Net Buy berturut-turut" : "Net Sell berturut-turut"}</div>
+          <div class="ff-card-sub">${consecutive >= 0 ? 'Net Buy berturut-turut' : 'Net Sell berturut-turut'}</div>
         </div>
       </div>
 
@@ -425,9 +679,12 @@
         <div class="fbs-title">&#128200; Proporsi Buy vs Sell</div>
         <div class="flow-bar-wrap">
           <div class="flow-bar-buy" style="width:${buyPct.toFixed(0)}%">${buyPct.toFixed(0)}%</div>
-          <div class="flow-bar-sell" style="width:${(100-buyPct).toFixed(0)}%">${(100-buyPct).toFixed(0)}%</div>
+          <div class="flow-bar-sell" style="width:${(100 - buyPct).toFixed(0)}%">${(100 - buyPct).toFixed(0)}%</div>
         </div>
-        <div class="flow-bar-labels"><span style="color:var(--accent)">Buy ${buyPct.toFixed(1)}%</span><span style="color:var(--danger)">Sell ${(100-buyPct).toFixed(1)}%</span></div>
+        <div class="flow-bar-labels">
+          <span style="color:var(--accent)">Buy ${buyPct.toFixed(1)}%</span>
+          <span style="color:var(--danger)">Sell ${(100 - buyPct).toFixed(1)}%</span>
+        </div>
       </div>
 
       <div class="ff-trend">
@@ -438,82 +695,354 @@
       <div class="ff-table-wrap">
         <div class="ff-table-title">&#128202; Riwayat 20 Hari Terakhir</div>
         <div style="overflow-x:auto">
-        <table class="ff-table">
-          <thead><tr>
-            <th>Tanggal</th><th>Harga</th><th>Chg%</th>
-            <th>Est. F.Buy</th><th>Est. F.Sell</th><th>Net Flow</th>
-          </tr></thead>
-          <tbody>
-          ${history.slice().reverse().map(h => `
-            <tr>
-              <td class="td-date">${h.date}</td>
-              <td>Rp ${Math.round(h.price).toLocaleString("id-ID")}</td>
-              <td style="color:${h.change >= 0 ? "var(--accent)" : "var(--danger)"}">${h.change >= 0 ? "+" : ""}${h.change}%</td>
-              <td class="td-buy">+${formatVol(h.buy)}</td>
-              <td class="td-sell">-${formatVol(h.sell)}</td>
-              <td class="${h.net >= 0 ? "td-net-pos" : "td-net-neg"}">${h.net >= 0 ? "+" : ""}${formatVol(Math.abs(h.net))}</td>
-            </tr>`).join("")}
-          </tbody>
-        </table>
+          <table class="ff-table">
+            <thead><tr>
+              <th>Tanggal</th><th>Harga</th><th>Chg%</th>
+              <th>Est. F.Buy</th><th>Est. F.Sell</th><th>Net Flow</th>
+            </tr></thead>
+            <tbody>
+            ${history.slice().reverse().map(h => `
+              <tr>
+                <td class="td-date">${h.date}</td>
+                <td>Rp ${Math.round(h.price).toLocaleString('id-ID')}</td>
+                <td style="color:${h.change >= 0 ? 'var(--accent)' : 'var(--danger)'}">${h.change >= 0 ? '+' : ''}${h.change}%</td>
+                <td class="td-buy">+${formatVol(h.buy)}</td>
+                <td class="td-sell">-${formatVol(h.sell)}</td>
+                <td class="${h.net >= 0 ? 'td-net-pos' : 'td-net-neg'}">${h.net >= 0 ? '+' : ''}${formatVol(Math.abs(h.net))}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
         </div>
       </div>
 
       <div class="ff-note">
-        &#9888;&#65039; <strong>Disclaimer:</strong> Data foreign flow di atas adalah <strong>estimasi</strong> yang dihitung dari pola volume institusional yfinance. 
+        &#9888;&#65039; <strong>Disclaimer:</strong> Data foreign flow di atas adalah <strong>estimasi</strong> yang dihitung dari pola volume institusional yfinance.
         Data real foreign flow IDX tersedia di situs resmi Bursa Efek Indonesia (idx.co.id). Gunakan sebagai referensi tambahan, bukan sumber utama.
-      </div>
-    `;
+      </div>`;
 
-    document.getElementById("ffContent").innerHTML = content;
+    document.getElementById('ffContent').innerHTML = content;
   }
 
   function buildTrendRows(stock) {
     const rows = [
-      { label: "Harga Saat Ini", val: "Rp " + Math.round(stock.price).toLocaleString("id-ID"), color: "var(--text)" },
-      { label: "Perubahan Hari Ini", val: (stock.change_pct >= 0 ? "+" : "") + stock.change_pct + "%", color: stock.change_pct >= 0 ? "var(--accent)" : "var(--danger)" },
-      { label: "RSI (14)", val: stock.rsi + " - " + (stock.rsi >= 70 ? "Overbought" : stock.rsi <= 30 ? "Oversold" : "Netral"), color: stock.rsi >= 70 ? "var(--danger)" : stock.rsi <= 30 ? "var(--accent)" : "var(--muted)" },
-      { label: "MA5 vs MA20", val: stock.ma5 > stock.ma20 ? "Bullish (MA5 > MA20)" : "Bearish (MA5 < MA20)", color: stock.ma5 > stock.ma20 ? "var(--accent)" : "var(--danger)" },
+      { label: 'Harga Saat Ini',    val: 'Rp ' + Math.round(stock.price).toLocaleString('id-ID'), color: 'var(--text)' },
+      { label: 'Perubahan Hari Ini', val: (stock.change_pct >= 0 ? '+' : '') + stock.change_pct + '%', color: stock.change_pct >= 0 ? 'var(--accent)' : 'var(--danger)' },
+      { label: 'RSI (14)',           val: stock.rsi + ' - ' + (stock.rsi >= 70 ? 'Overbought' : stock.rsi <= 30 ? 'Oversold' : 'Netral'), color: stock.rsi >= 70 ? 'var(--danger)' : stock.rsi <= 30 ? 'var(--accent)' : 'var(--muted)' },
+      { label: 'MA5 vs MA20',        val: stock.ma5 > stock.ma20 ? 'Bullish (MA5 > MA20)' : 'Bearish (MA5 < MA20)', color: stock.ma5 > stock.ma20 ? 'var(--accent)' : 'var(--danger)' },
     ];
     return rows.map(r => `
       <div class="trend-row">
         <span class="trend-label">${r.label}</span>
         <span class="trend-val" style="color:${r.color}">${r.val}</span>
-      </div>`).join("");
+      </div>`).join('');
   }
 
   function calcConsecutive(history) {
     let count = 0;
     for (let i = history.length - 1; i >= 0; i--) {
-      if (i === history.length - 1) {
-        count = history[i].net >= 0 ? 1 : -1;
-      } else {
-        const sameDir = (history[i].net >= 0) === (count > 0);
-        if (sameDir) count += count > 0 ? 1 : -1;
+      if (i === history.length - 1) { count = history[i].net >= 0 ? 1 : -1; }
+      else {
+        if ((history[i].net >= 0) === (count > 0)) count += count > 0 ? 1 : -1;
         else break;
       }
     }
     return count;
   }
 
+  // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+  // TAB 2: HEAT STREAK SCANNER
+  // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+  let allResults = [], dailyRanks = {}, scanning = false;
+  let scanPeriod = 7, scanUniverse = 'lq45', scanType = 'accumulation', hsTab = 'heat';
+
+  function setupScanControls() {
+    document.querySelectorAll('#periodGroup .ctrl-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#periodGroup .ctrl-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        scanPeriod = parseInt(btn.dataset.period);
+      });
+    });
+    document.querySelectorAll('#universeGroup .ctrl-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#universeGroup .ctrl-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        scanUniverse = btn.dataset.universe;
+      });
+    });
+    document.querySelectorAll('#typeGroup .ctrl-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#typeGroup .ctrl-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        scanType = btn.dataset.type;
+        if (allResults.length > 0) renderHeatTable();
+      });
+    });
+  }
+
+  function switchHsTab(tab) {
+    hsTab = tab;
+    document.querySelectorAll('.hs-tab').forEach(t => t.classList.toggle('active', t.dataset.htab === tab));
+    document.getElementById('htabHeat').style.display  = tab === 'heat'  ? 'block' : 'none';
+    document.getElementById('htabSplit').style.display = tab === 'split' ? 'block' : 'none';
+  }
+
+  async function startScan() {
+    if (scanning) return;
+    scanning = true;
+    allResults = []; dailyRanks = {};
+
+    const btn = document.getElementById('scanBtn');
+    btn.disabled = true; btn.textContent = '... Scanning';
+
+    document.getElementById('hsProgress').classList.add('active');
+    document.getElementById('hsStats').style.display = 'none';
+    document.getElementById('hsTabs').style.display  = 'none';
+    document.getElementById('heatTableContainer').innerHTML =
+      '<div class="ff-empty"><div class="ff-empty-icon">&#128301;</div><div class="ff-empty-title">Scanning...</div><div class="ff-empty-sub">Sabar sebentar ya...</div></div>';
+    document.getElementById('htabHeat').style.display  = 'block';
+    document.getElementById('htabSplit').style.display = 'none';
+
+    const uSizes = { lq45: 45, idx30: 30, all: 710 };
+    const totalEst = uSizes[scanUniverse] || 45;
+    const chunkSize = scanUniverse === 'all' ? 10 : 15;
+
+    let chunk = 0, done = false, scannedTotal = 0, idxCnt = 0, estCnt = 0;
+
+    while (!done) {
+      try {
+        const url = API_BASE + '/foreign-scan?universe=' + scanUniverse +
+          '&period=' + scanPeriod + '&chunk=' + chunk + '&size=' + chunkSize;
+        const r = await fetch(url);
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const data = await r.json();
+
+        if (data.results) {
+          for (const item of data.results) {
+            allResults.push(item);
+            if (item.source === 'idx') idxCnt++; else estCnt++;
+          }
+        }
+
+        scannedTotal = data.scanned || (scannedTotal + chunkSize);
+        const realTotal = data.total || totalEst;
+        const pct = Math.min(99, Math.round(scannedTotal / realTotal * 100));
+
+        document.getElementById('progFill').style.width  = pct + '%';
+        document.getElementById('progCount').textContent = scannedTotal + ' / ' + realTotal;
+        document.getElementById('progTitle').textContent = 'Scanning ' + scanUniverse.toUpperCase() + ' ' + scanPeriod + 'D...';
+        document.getElementById('progStep').textContent  =
+          'Chunk ' + (chunk + 1) + ' selesai \u00b7 IDX: ' + idxCnt + ' \u00b7 Est: ' + estCnt;
+
+        done  = data.is_last;
+        chunk = data.next_chunk || chunk + 1;
+
+        if (allResults.length > 0 && chunk % 3 === 0) {
+          computeRanks(); renderHeatTable(true);
+        }
+
+        if (!done) await sleep(120);
+      } catch (err) {
+        showToast('Error chunk ' + chunk + ': ' + err.message);
+        chunk++;
+        if (chunk > 100) done = true;
+        await sleep(300);
+      }
+    }
+
+    document.getElementById('progFill').style.width = '100%';
+    document.getElementById('progStep').textContent = 'Selesai! ' + allResults.length + ' emiten.';
+
+    const pill = document.getElementById('srcPill');
+    if (idxCnt > estCnt) {
+      pill.className = 'src-pill src-idx';
+      document.getElementById('srcLabel').textContent = 'IDX Official (' + idxCnt + ' emiten)';
+    } else {
+      pill.className = 'src-pill src-est';
+      document.getElementById('srcLabel').textContent = 'Estimasi Volume (' + estCnt + ' emiten)';
+    }
+
+    computeRanks();
+    renderSummary();
+    renderHeatTable(false);
+    renderSplitTables();
+
+    document.getElementById('hsStats').style.display = 'grid';
+    document.getElementById('hsTabs').style.display  = 'flex';
+
+    setTimeout(() => document.getElementById('hsProgress').classList.remove('active'), 1500);
+
+    btn.disabled = false; btn.innerHTML = '&#128301; Refresh';
+    scanning = false;
+  }
+
+  function computeRanks() {
+    dailyRanks = {};
+    const allDates = new Set();
+    for (const item of allResults)
+      for (const h of (item.heat || [])) allDates.add(h.date);
+
+    for (const date of allDates) {
+      const day = [];
+      for (const item of allResults) {
+        const h = (item.heat || []).find(x => x.date === date);
+        if (h) day.push({ symbol: item.symbol, net: h.foreign_net, buy: h.foreign_buy, sell: h.foreign_sell });
+      }
+      day.sort((a, b) => b.net - a.net);
+      dailyRanks[date] = day.map((d, i) => ({ ...d, rank: i + 1 }));
+    }
+  }
+
+  function renderHeatTable() {
+    if (!allResults.length) return;
+    const isAcc = scanType === 'accumulation';
+    const sorted = [...allResults].sort((a, b) =>
+      isAcc ? b.net_total - a.net_total : a.net_total - b.net_total
+    ).slice(0, 50);
+
+    const allDates = [...new Set(allResults.flatMap(r => (r.heat || []).map(h => h.date)))].sort();
+    const displayDates = allDates.slice(-scanPeriod);
+
+    let rows = '';
+    sorted.forEach((item, idx) => {
+      let bubbles = '';
+      for (const date of displayDates) {
+        const dr  = dailyRanks[date] || [];
+        const ent = dr.find(x => x.symbol === item.symbol);
+        let cls, txt, tip;
+        if (!ent) {
+          cls = 'hb-none'; txt = '-';
+          tip = '<div class="tip-date">' + date + '</div><div style="color:var(--muted)">No data</div>';
+        } else if (ent.net < 0) {
+          cls = 'hb-neg'; txt = ent.rank <= 99 ? ent.rank : 'S';
+          tip = '<div class="tip-date">' + date + '</div><div class="tip-buy">Buy: ' + fmtLot(ent.buy) + '</div><div class="tip-sell">Sell: ' + fmtLot(ent.sell) + '</div><div class="tip-net net-neg">Net: ' + fmtLot(ent.net) + '</div>';
+        } else if (ent.rank <= 5)  { cls = 'hb-top5';  txt = ent.rank; tip = makeTip(date, ent); }
+        else if (ent.rank <= 10)   { cls = 'hb-top10'; txt = ent.rank; tip = makeTip(date, ent); }
+        else if (ent.rank <= 20)   { cls = 'hb-top20'; txt = ent.rank; tip = makeTip(date, ent); }
+        else                       { cls = 'hb-out';   txt = ent.rank <= 99 ? ent.rank : '#'; tip = makeTip(date, ent); }
+        bubbles += '<div class="hb-wrap"><div class="heat-bubble ' + cls + '">' + txt + '</div><div class="hb-tooltip">' + tip + '</div></div>';
+      }
+
+      const dB = item.days_net_buy || 0, nD = item.n_days || displayDates.length;
+      const hCls = dB >= nD * 0.85 ? 'hari-strong' : dB >= nD * 0.6 ? 'hari-good' : dB >= nD * 0.4 ? 'hari-mid' : 'hari-weak';
+
+      const net = item.net_total;
+      const netStr = (net >= 0 ? '+' : '') + fmtLot(Math.abs(net));
+      const netCls = net >= 0 ? 'net-pos' : 'net-neg';
+
+      const ranks = displayDates.map(d => { const e = (dailyRanks[d] || []).find(x => x.symbol === item.symbol); return e ? e.rank : null; }).filter(r => r !== null);
+      const avgR  = ranks.length ? (ranks.reduce((a, b) => a + b, 0) / ranks.length).toFixed(1) : '-';
+
+      const ret = item.ret_pct || 0;
+      const retStr = (ret >= 0 ? '+' : '') + ret.toFixed(2) + '%';
+      const retCls = ret >= 0 ? 'ret-pos' : 'ret-neg';
+
+      const sk = item.streak || 0;
+      const skStr = sk > 0
+        ? '<span class="streak-buy">&#9650; ' + sk + 'D</span>'
+        : sk < 0
+          ? '<span class="streak-sell">&#9660; ' + Math.abs(sk) + 'D</span>'
+          : '<span style="color:var(--muted)">-</span>';
+
+      const srcDot = item.source === 'idx'
+        ? '<span style="color:var(--accent);font-size:9px" title="IDX Resmi">&#9679;</span>'
+        : '<span style="color:var(--warn);font-size:9px" title="Estimasi">&#9651;</span>';
+
+      rows += `<tr style="animation-delay:${Math.min(idx * 25, 500)}ms">
+        <td class="ht-rank">${idx + 1}</td>
+        <td><div class="ht-sym">${item.symbol} ${srcDot}</div><div class="ht-sym-sub">Rp ${Math.round(item.price || 0).toLocaleString('id-ID')}</div></td>
+        <td><div class="heat-bubbles">${bubbles}</div></td>
+        <td><span class="ht-hari ${hCls}">${dB}/${nD}</span></td>
+        <td><span class="ht-net ${netCls}">${netStr}</span></td>
+        <td><span class="ht-avgrank">#${avgR}</span></td>
+        <td><span class="ht-streak">${skStr}</span></td>
+        <td><span class="ht-ret ${retCls}">${retStr}</span></td>
+      </tr>`;
+    });
+
+    document.getElementById('heatTableContainer').innerHTML = `
+      <table class="heat-table">
+        <thead><tr>
+          <th>#</th>
+          <th>Saham</th>
+          <th>Heat (D-${displayDates.length - 1} \u2192 D0) &nbsp;<span style="font-weight:400;color:var(--muted)">${scanPeriod} hari terakhir</span></th>
+          <th>Hari</th>
+          <th>Net Foreign</th>
+          <th>Avg Rank</th>
+          <th>Streak</th>
+          <th>Return</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  function makeTip(date, ent) {
+    return '<div class="tip-date">' + date + '</div>' +
+      '<div class="tip-buy">Buy: ' + fmtLot(ent.buy) + '</div>' +
+      '<div class="tip-sell">Sell: ' + fmtLot(ent.sell) + '</div>' +
+      '<div class="tip-net net-pos">Net: +' + fmtLot(ent.net) + ' (#' + ent.rank + ')</div>';
+  }
+
+  function renderSplitTables() {
+    const sorted = [...allResults].sort((a, b) => b.net_total - a.net_total);
+    const acc20 = sorted.slice(0, 20);
+    const dis20 = sorted.slice(-20).reverse();
+    const mkRows = (list, isAcc) => list.map((item, i) => `
+      <tr>
+        <td class="st-rank">${i + 1}</td>
+        <td class="st-sym">${item.symbol}</td>
+        <td class="${isAcc ? 'st-net-acc' : 'st-net-dis'}">${isAcc ? '+' : ''}${fmtLot(Math.abs(item.net_total))}</td>
+        <td style="color:var(--accent)">${fmtLot(item.buy_total)}</td>
+        <td style="color:var(--danger)">${fmtLot(item.sell_total)}</td>
+      </tr>`).join('');
+    document.getElementById('accumBody').innerHTML  = mkRows(acc20, true);
+    document.getElementById('distribBody').innerHTML = mkRows(dis20, false);
+  }
+
+  function renderSummary() {
+    const acc = allResults.filter(r => r.net_total > 0).length;
+    const dis = allResults.filter(r => r.net_total < 0).length;
+    document.getElementById('statAcc').textContent   = acc;
+    document.getElementById('statDis').textContent   = dis;
+    document.getElementById('statTotal').textContent = allResults.length;
+    document.getElementById('statPeriod').textContent = scanPeriod + 'D \u00b7 ' + scanUniverse.toUpperCase();
+    const top = [...allResults].filter(r => r.net_total > 0).sort((a, b) => (b.days_net_buy / b.n_days) - (a.days_net_buy / a.n_days))[0];
+    if (top) {
+      document.getElementById('statTop').textContent    = top.symbol;
+      document.getElementById('statTopSub').textContent = top.days_net_buy + '/' + top.n_days + ' hari Net Buy';
+    }
+  }
+
+  // \u2500\u2500 Shared helpers \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  function fmtLot(v) {
+    if (v == null) return 'N/A';
+    const a = Math.abs(Math.round(v)), s = v < 0 ? '-' : '';
+    if (a >= 1e9) return s + (a / 1e9).toFixed(2) + 'M';
+    if (a >= 1e6) return s + (a / 1e6).toFixed(1) + 'jt';
+    if (a >= 1e3) return s + (a / 1e3).toFixed(1) + 'rb';
+    return s + a.toLocaleString('id-ID');
+  }
+
   function formatVol(v) {
     v = Math.abs(Math.round(v));
-    if (v >= 1e9) return (v / 1e9).toFixed(1) + "M";
-    if (v >= 1e6) return (v / 1e6).toFixed(1) + "jt";
-    if (v >= 1e3) return (v / 1e3).toFixed(1) + "rb";
+    if (v >= 1e9) return (v / 1e9).toFixed(1) + 'M';
+    if (v >= 1e6) return (v / 1e6).toFixed(1) + 'jt';
+    if (v >= 1e3) return (v / 1e3).toFixed(1) + 'rb';
     return v.toString();
   }
 
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
   function showToast(msg) {
-    const t = document.getElementById("toast");
-    t.textContent = msg;
-    t.style.display = "block";
-    setTimeout(() => t.style.display = "none", 3000);
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 3000);
   }
   function showLoading(msg) {
-    document.getElementById("loadingText").textContent = msg || "Memuat...";
-    document.getElementById("loading").style.display = "flex";
+    document.getElementById('loadingText').textContent = msg || 'Memuat...';
+    document.getElementById('loading').style.display = 'flex';
   }
-  function hideLoading() { document.getElementById("loading").style.display = "none"; }
+  function hideLoading() { document.getElementById('loading').style.display = 'none'; }
   </script>
 </body>
 </html>
