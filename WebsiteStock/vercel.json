@@ -125,6 +125,14 @@
       "src": "/kalender",
       "dest": "public/kalender.html"
     },
+        {
+      "src": "/entry\\.html",
+      "dest": "public/entry.html"
+    },
+    {
+      "src": "/entry",
+      "dest": "public/entry.html"
+    },
     {
       "src": "/index\\.html",
       "dest": "public/index.html"
