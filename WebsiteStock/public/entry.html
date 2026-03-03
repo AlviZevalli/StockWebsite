@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entry Finder — Cukong Reborn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
+  <style>
+    main { max-width: 860px; margin: auto; padding: 28px 24px 80px; position: relative; z-index: 1; }
+
+    .page-hero { margin-bottom: 32px; }
+    .page-hero-eyebrow { font-size: 11px; font-weight: 700; color: var(--accent2); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; font-family: var(--font-mono); }
+    .page-hero h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .page-hero p  { color: var(--muted); font-size: 14px; line-height: 1.7; max-width: 580px; }
+
+    /* ── WIZARD 3 STEPS ── */
+    .wizard-steps { display: flex; align-items: center; margin-bottom: 32px; }
+    .ws-item { display: flex; align-items: center; flex: 1; }
+    .ws-num  { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 12px; font-weight: 700; border: 1.5px solid var(--border2); color: var(--muted); background: var(--surface); flex-shrink: 0; transition: all .3s; }
+    .ws-label{ font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .6px; text-transform: uppercase; margin-left: 8px; white-space: nowrap; transition: color .3s; }
+    .ws-line { flex: 1; height: 1px; background: var(--border); margin: 0 10px; transition: background .3s; }
+    .ws-item.active .ws-num  { background: rgba(0,184,240,0.15); border-color: var(--accent2); color: var(--accent2); }
+    .ws-item.active .ws-label{ color: var(--accent2); }
+    .ws-item.done   .ws-num  { background: var(--accent); border-color: var(--accent); color: #060c14; }
+    .ws-item.done   .ws-label{ color: var(--accent); }
+    .ws-item.done   .ws-line { background: var(--accent); }
+
+    /* ── CARDS ── */
+    .sec { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 26px 28px; margin-bottom: 16px; animation: fadeUp .3s ease; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    .sec-title { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+    .sec-title::before { content: ''; width: 3px; height: 14px; border-radius: 2px; background: var(--accent2); }
+
+    /* ── DIRECTION CARDS ── */
+    .dir-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .dir-card { border: 1px solid var(--border2); border-radius: 12px; padding: 22px 20px; cursor: pointer; transition: all .2s; text-align: left; background: var(--surface2); position: relative; overflow: hidden; }
+    .dir-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; transform: scaleX(0); transform-origin: left; transition: transform .3s; }
+    .dir-card.buy::after  { background: linear-gradient(90deg, var(--accent), transparent); }
+    .dir-card.sell::after { background: linear-gradient(90deg, var(--danger), transparent); }
+    .dir-card:hover { transform: translateY(-2px); }
+    .dir-card.buy:hover,  .dir-card.buy.sel  { border-color: rgba(0,229,160,0.4);  background: rgba(0,229,160,0.05); }
+    .dir-card.sell:hover, .dir-card.sell.sel { border-color: rgba(255,69,96,0.4);  background: rgba(255,69,96,0.05); }
+    .dir-card.sel::after { transform: scaleX(1); }
+    .dir-icon { font-size: 28px; margin-bottom: 12px; display: block; }
+    .dir-name { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+    .dir-name.buy  { color: var(--accent); }
+    .dir-name.sell { color: var(--danger); }
+    .dir-desc { font-size: 12px; color: var(--muted); line-height: 1.65; margin-bottom: 14px; }
+
+    /* Condition text box — read only, no interaction */
+    .cond-info { border-radius: 8px; padding: 11px 13px; }
+    .cond-info.buy  { background: rgba(0,229,160,0.04);  border: 1px solid rgba(0,229,160,0.15); }
+    .cond-info.sell { background: rgba(255,69,96,0.04);  border: 1px solid rgba(255,69,96,0.15); }
+    .cond-label { font-size: 9px; font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 8px; }
+    .cond-item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--muted); font-family: var(--font-mono); margin-bottom: 5px; }
+    .cond-item:last-child { margin-bottom: 0; }
+    .cond-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── INPUT ── */
+    .inp-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+    .inp-group label { display: block; font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 7px; }
+    .inp-field { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 13px 14px; color: var(--text); font-family: var(--font-mono); font-size: 15px; font-weight: 700; outline: none; transition: border-color .2s, background .2s; text-align: right; }
+    .inp-field::placeholder { color: rgba(232,240,254,0.2); font-size: 12px; font-weight: 400; text-align: right; }
+    .inp-field.buy-f:focus  { border-color: var(--accent);  background: rgba(0,229,160,0.04); }
+    .inp-field.sell-f:focus { border-color: var(--danger);  background: rgba(255,69,96,0.04); }
+    .inp-hint { font-size: 10px; color: var(--muted); font-family: var(--font-mono); margin-top: 5px; text-align: right; }
+
+    .range-preview { background: rgba(0,184,240,0.04); border: 1px solid rgba(0,184,240,0.14); border-radius: 8px; padding: 11px 15px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 18px; margin-bottom: 16px; }
+
+    .btn-row  { display: flex; gap: 10px; }
+    .btn-back { flex: 1; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border2); background: transparent; color: var(--muted); font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; }
+    .btn-back:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .btn-calc { flex: 3; padding: 14px 20px; border-radius: 10px; border: none; font-family: var(--font); font-size: 14px; font-weight: 800; cursor: pointer; transition: all .2s; }
+    .btn-calc.buy-btn  { background: var(--accent); color: #060c14; }
+    .btn-calc.sell-btn { background: var(--danger); color: #fff; }
+    .btn-calc:hover    { transform: translateY(-1px); opacity: .9; }
+    .btn-calc:disabled { opacity: .35; cursor: not-allowed; transform: none !important; }
+
+    /* ── RESULT ── */
+    #resultSec { display: none; animation: fadeUp .4s ease; }
+
+    .entry-hero { border-radius: 14px; padding: 28px 32px; margin-bottom: 16px; position: relative; overflow: hidden; }
+    .entry-hero.buy  { background: linear-gradient(135deg, rgba(0,229,160,0.09), rgba(0,229,160,0.03)); border: 1px solid rgba(0,229,160,0.25); }
+    .entry-hero.sell { background: linear-gradient(135deg, rgba(255,69,96,0.09),  rgba(255,69,96,0.03));  border: 1px solid rgba(255,69,96,0.25); }
+    .entry-hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+    .entry-hero.buy::before  { background: linear-gradient(90deg, var(--accent), transparent); }
+    .entry-hero.sell::before { background: linear-gradient(90deg, var(--danger), transparent); }
+    .eh-tag     { font-family: var(--font-mono); font-size: 9px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; opacity: .6; }
+    .eh-label   { font-size: 12px; color: var(--muted); font-family: var(--font-mono); margin-bottom: 4px; }
+    .eh-val     { font-family: var(--font-mono); font-size: clamp(38px,6vw,56px); font-weight: 800; line-height: 1; margin-bottom: 5px; }
+    .eh-val.buy  { color: var(--accent); }
+    .eh-val.sell { color: var(--danger); }
+    .eh-formula { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+
+    .metric-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 16px; }
+    .mc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+    .mc-lbl { font-size: 10px; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 6px; }
+    .mc-val { font-family: var(--font-mono); font-size: 18px; font-weight: 700; }
+    .mc-sub { font-size: 10px; color: var(--muted); font-family: var(--font-mono); margin-top: 3px; }
+
+    .formula-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 16px; }
+    .formula-title { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 16px; }
+    .f-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 12px; font-family: var(--font-mono); gap: 12px; }
+    .f-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .f-key { color: var(--muted); flex: 1; }
+    .f-eq  { color: rgba(0,184,240,0.4); font-size: 11px; }
+    .f-val { font-weight: 700; text-align: right; }
+    .f-val.gold  { color: var(--warn); }
+    .f-val.green { color: var(--accent); }
+    .f-val.red   { color: var(--danger); }
+    .f-highlight { background: rgba(0,184,240,0.05); border: 1px solid rgba(0,184,240,0.15); border-radius: 8px; padding: 12px 14px; margin: 10px 0; display: flex; align-items: center; justify-content: space-between; font-family: var(--font-mono); font-size: 12px; }
+    .f-highlight .f-key { color: var(--accent2); font-weight: 700; }
+    .f-highlight .f-val { font-size: 15px; }
+
+    .levels-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 16px; }
+    .lv-stack { display: flex; flex-direction: column; gap: 8px; }
+    .lv-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 8px; border: 1px solid transparent; }
+    .lv-row.entry-row { border-color: rgba(0,184,240,0.2); background: rgba(0,184,240,0.04); }
+    .lv-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .lv-name { font-size: 12px; font-weight: 700; font-family: var(--font-mono); min-width: 120px; }
+    .lv-bar-wrap { flex: 1; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+    .lv-bar-fill { height: 100%; border-radius: 2px; }
+    .lv-price { font-family: var(--font-mono); font-size: 13px; font-weight: 700; text-align: right; min-width: 80px; }
+    .lv-tag { font-size: 9px; padding: 2px 7px; border-radius: 3px; font-weight: 700; letter-spacing: .5px; font-family: var(--font-mono); flex-shrink: 0; }
+
+    .tpsl-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .tpsl-card { border-radius: 12px; padding: 18px 20px; border: 1px solid; }
+    .tpsl-card.tp { background: rgba(0,229,160,0.05); border-color: rgba(0,229,160,0.25); }
+    .tpsl-card.sl { background: rgba(255,69,96,0.05);  border-color: rgba(255,69,96,0.25); }
+    .tpsl-lbl { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 10px; }
+    .tpsl-lbl.tp { color: var(--accent); } .tpsl-lbl.sl { color: var(--danger); }
+    .tpsl-val { font-family: var(--font-mono); font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .tpsl-val.tp { color: var(--accent); } .tpsl-val.sl { color: var(--danger); }
+    .tpsl-pct { font-family: var(--font-mono); font-size: 11px; }
+    .tpsl-pct.tp { color: var(--accent); } .tpsl-pct.sl { color: var(--danger); }
+
+    .rr-row { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+    .rr-lbl { font-size: 10px; color: var(--muted); font-family: var(--font-mono); letter-spacing: .5px; margin-bottom: 4px; }
+    .rr-val { font-family: var(--font-mono); font-size: 22px; font-weight: 700; color: var(--warn); }
+    .rr-verdict { font-size: 12px; font-family: var(--font-mono); padding: 6px 14px; border-radius: 6px; }
+    .rr-verdict.great { background: rgba(0,229,160,0.1);  color: var(--accent);  border: 1px solid rgba(0,229,160,0.2); }
+    .rr-verdict.ok    { background: rgba(245,197,24,0.1); color: var(--warn);    border: 1px solid rgba(245,197,24,0.2); }
+    .rr-verdict.bad   { background: rgba(255,69,96,0.1);  color: var(--danger);  border: 1px solid rgba(255,69,96,0.2); }
+
+    .disclaimer { background: rgba(245,197,24,0.04); border: 1px solid rgba(245,197,24,0.15); border-radius: 10px; padding: 14px 16px; font-size: 11px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; display: flex; gap: 10px; align-items: flex-start; }
+    .btn-reset { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border2); background: transparent; color: var(--muted); font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; }
+    .btn-reset:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+
+    @media (max-width: 640px) {
+      .dir-grid, .inp-grid, .metric-row, .tpsl-row { grid-template-columns: 1fr; }
+      main { padding: 20px 16px 60px; }
+      .sec { padding: 18px 16px; }
+      .ws-label { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar" id="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="topbar-logo">&#9650; Cukong Reborn</a>
+      <span class="topbar-sep">|</span>
+      <span class="topbar-badge">ENTRY FINDER</span>
+    </div>
+    <nav class="topbar-nav">
+      <a href="screener.html">&#128202; Screener</a>
+      <a href="sr.html">&#128201; S&amp;R</a>
+      <a href="volume.html">&#128293; Volume</a>
+      <a href="scanner.html">&#128301; Scanner</a>
+      <a href="foreign.html">&#127758; Foreign Flow</a>
+      <a href="ai-signal.html">&#129504; AI Signal</a>
+      <a href="entry.html" class="active">&#127919; Entry</a>
+      <a href="news.html">&#128240; News</a>
+      <a href="kalender.html">&#128197; Kalender</a>
+    </nav>
+    <a href="index.html" class="topbar-home">&larr; Beranda</a>
+    <button class="burger-btn" id="burgerBtn" onclick="toggleMobileNav()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <nav class="mobile-nav-overlay" id="mobileNav">
+    <a href="screener.html">&#128202; Screener</a>
+    <a href="sr.html">&#128201; S&R</a>
+    <a href="volume.html">&#128293; Volume</a>
+    <a href="scanner.html">&#128301; Scanner</a>
+    <a href="foreign.html">&#127758; Foreign Flow</a>
+    <a href="ai-signal.html">&#129504; AI Signal</a>
+    <a href="entry.html" class="active">&#127919; Entry Finder</a>
+    <a href="news.html">&#128240; News</a>
+    <a href="kalender.html">&#128197; Kalender</a>
+    <a href="index.html">&#8592; Beranda</a>
+  </nav>
+  <div class="bg-grid"></div>
+  <div class="bg-glow glow-1"></div>
+  <div class="bg-glow glow-2"></div>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">&#9650;</span>
+        <div>
+          <div class="logo-title">Entry Finder <span class="logo-pro">PRO</span></div>
+          <div class="logo-sub">by AlviZevalli &middot; IDX Market</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="market-status" id="marketStatus"><span class="dot"></span> Market Loading...</div>
+        <div class="clock" id="clock"></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <div class="page-hero">
+      <div class="page-hero-eyebrow">&#127919; Entry Point Calculator</div>
+      <h1>Cari Titik Entry yang <span style="color:var(--accent2)">Presisi</span></h1>
+      <p>Metode Fibonacci-Range: hitung Buy Level (76.4%) atau Sell Level (23.6%) dari range candle secara otomatis. Pilih arah, masukkan High &amp; Low, sistem langsung kalkulasi titik entry Anda.</p>
+    </div>
+
+    <!-- WIZARD 3 STEPS -->
+    <div class="wizard-steps">
+      <div class="ws-item active" id="ws1">
+        <div class="ws-num">1</div>
+        <div class="ws-label">ARAH</div>
+        <div class="ws-line"></div>
+      </div>
+      <div class="ws-item" id="ws2">
+        <div class="ws-num">2</div>
+        <div class="ws-label">INPUT DATA</div>
+        <div class="ws-line"></div>
+      </div>
+      <div class="ws-item" id="ws3">
+        <div class="ws-num">3</div>
+        <div class="ws-label">HASIL</div>
+      </div>
+    </div>
+
+    <!-- STEP 1: ARAH -->
+    <div class="sec" id="sec1">
+      <div class="sec-title">Step 1 &mdash; Tentukan Arah Trading</div>
+      <div class="dir-grid">
+
+        <button class="dir-card buy" id="btnBuy" onclick="pickDir('buy')">
+          <span class="dir-icon">&#128200;</span>
+          <div class="dir-name buy">BUY / Long</div>
+          <div class="dir-desc">Entry di support Fibonacci 76.4% &mdash; antisipasi kenaikan harga.</div>
+          <div class="cond-info buy">
+            <div class="cond-label">Syarat Struktur Market</div>
+            <div class="cond-item">
+              <span class="cond-dot" style="background:var(--accent)"></span>
+              Higher High (HH) terbentuk
+            </div>
+            <div class="cond-item">
+              <span class="cond-dot" style="background:var(--accent)"></span>
+              Higher Low (HL) terkonfirmasi
+            </div>
+            <div class="cond-item">
+              <span class="cond-dot" style="background:var(--accent)"></span>
+              Tren naik aktif (MA naik)
+            </div>
+          </div>
+        </button>
+
+        <button class="dir-card sell" id="btnSell" onclick="pickDir('sell')">
+          <span class="dir-icon">&#128201;</span>
+          <div class="dir-name sell">SELL / Short</div>
+          <div class="dir-desc">Entry di resistance Fibonacci 23.6% &mdash; antisipasi penurunan harga.</div>
+          <div class="cond-info sell">
+            <div class="cond-label">Syarat Struktur Market</div>
+            <div class="cond-item">
+              <span class="cond-dot" style="background:var(--danger)"></span>
+              Lower High (LH) terbentuk
+            </div>
+            <div class="cond-item">
+              <span class="cond-dot" style="background:var(--danger)"></span>
+              Lower Low (LL) terkonfirmasi
+            </div>
+            <div class="cond-item">
+              <span class="cond-dot" style="background:var(--danger)"></span>
+              Tren turun aktif (MA turun)
+            </div>
+          </div>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- STEP 2: INPUT -->
+    <div class="sec" id="sec2" style="display:none">
+      <div class="sec-title">Step 2 &mdash; Masukkan Data Harga</div>
+      <div class="inp-grid">
+        <div class="inp-group">
+          <label>&#128200; High</label>
+          <input type="number" class="inp-field" id="inpH" placeholder="mis: 1550" min="0" step="1" oninput="liveCalc()">
+          <div class="inp-hint">Harga tertinggi candle</div>
+        </div>
+        <div class="inp-group">
+          <label>&#128201; Low</label>
+          <input type="number" class="inp-field" id="inpL" placeholder="mis: 1480" min="0" step="1" oninput="liveCalc()">
+          <div class="inp-hint">Harga terendah candle</div>
+        </div>
+        <div class="inp-group">
+          <label>&#9632; Close <span style="color:var(--muted);font-weight:400;font-size:9px">(opsional)</span></label>
+          <input type="number" class="inp-field" id="inpC" placeholder="mis: 1515" min="0" step="1" oninput="liveCalc()">
+          <div class="inp-hint">Untuk hitung TP referensi</div>
+        </div>
+      </div>
+
+      <div id="rangePreview" style="display:none" class="range-preview">
+        <span>Range: <strong id="pvRange" style="color:var(--warn)">&#8212;</strong></span>
+        <span>0.764&times;R: <strong id="pv764" style="color:var(--accent)">&#8212;</strong></span>
+        <span>0.236&times;R: <strong id="pv236" style="color:var(--danger)">&#8212;</strong></span>
+        <span id="pvEntry"></span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="goBack()">&#8592; Kembali</button>
+        <button class="btn-calc" id="btnCalc" onclick="calculate()" disabled>Hitung Entry Point</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: RESULT -->
+    <div id="resultSec">
+
+      <div class="entry-hero" id="entryHero">
+        <div class="eh-tag" id="ehTag">&#8212; BUY SIGNAL &#8212;</div>
+        <div class="eh-label">Titik Entry</div>
+        <div class="eh-val" id="ehVal">&#8212;</div>
+        <div class="eh-formula" id="ehFormula">Buy Level &minus; 2 &nbsp;|&nbsp; Fib 76.4% dari Range</div>
+      </div>
+
+      <div class="metric-row">
+        <div class="mc">
+          <div class="mc-lbl">High</div>
+          <div class="mc-val" id="mHigh">&#8212;</div>
+          <div class="mc-sub">Harga tertinggi</div>
+        </div>
+        <div class="mc">
+          <div class="mc-lbl">Low</div>
+          <div class="mc-val" id="mLow">&#8212;</div>
+          <div class="mc-sub">Harga terendah</div>
+        </div>
+        <div class="mc">
+          <div class="mc-lbl" id="mLevelLbl">Buy Level</div>
+          <div class="mc-val" id="mLevel" style="color:var(--warn)">&#8212;</div>
+          <div class="mc-sub" id="mLevelSub">High &minus; 0.764 &times; Range</div>
+        </div>
+      </div>
+
+      <div class="formula-card">
+        <div class="formula-title">&#128203; Formula Breakdown</div>
+        <div class="f-row">
+          <span class="f-key">Range = High &minus; Low</span>
+          <span class="f-eq">=</span>
+          <span class="f-val gold" id="fRange">&#8212;</span>
+        </div>
+        <div class="f-row">
+          <span class="f-key" id="fFibKey">0.764 &times; Range</span>
+          <span class="f-eq">=</span>
+          <span class="f-val" id="fFibVal">&#8212;</span>
+        </div>
+        <div class="f-row">
+          <span class="f-key" id="fLevelKey">Buy Level = High &minus; (0.764 &times; Range)</span>
+          <span class="f-eq">=</span>
+          <span class="f-val" id="fLevelVal">&#8212;</span>
+        </div>
+        <div class="f-highlight">
+          <span class="f-key" id="fEntryKey">Entry = Buy Level &minus; 2</span>
+          <span class="f-val" id="fEntryVal">&#8212;</span>
+        </div>
+      </div>
+
+      <div class="levels-card">
+        <div class="sec-title" style="margin-bottom:16px">&#128200; Peta Level</div>
+        <div class="lv-stack" id="lvStack"></div>
+      </div>
+
+      <div class="tpsl-row">
+        <div class="tpsl-card tp">
+          <div class="tpsl-lbl tp">&#127919; Take Profit</div>
+          <div class="tpsl-val tp" id="tpVal">&#8212;</div>
+          <div class="tpsl-pct tp" id="tpPct">+0.00%</div>
+        </div>
+        <div class="tpsl-card sl">
+          <div class="tpsl-lbl sl">&#128721; Stop Loss</div>
+          <div class="tpsl-val sl" id="slVal">&#8212;</div>
+          <div class="tpsl-pct sl" id="slPct">&minus;0.00%</div>
+        </div>
+      </div>
+
+      <div class="rr-row">
+        <div>
+          <div class="rr-lbl">RISK / REWARD RATIO</div>
+          <div class="rr-val" id="rrVal">1 : &#8212;</div>
+        </div>
+        <div class="rr-verdict" id="rrVerdict">&#8212;</div>
+      </div>
+
+      <div class="disclaimer">
+        <span>&#9888;&#65039;</span>
+        <span>Kalkulasi ini bersifat <strong>edukatif</strong> dan bukan rekomendasi investasi. Entry point adalah zona referensi &mdash; selalu konfirmasi dengan price action, volume, dan manajemen risiko pribadi sebelum mengambil posisi.</span>
+      </div>
+
+      <button class="btn-reset" onclick="resetAll()">&#8635; Hitung Ulang dengan Data Baru</button>
+    </div>
+
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+  let dir = null;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateClock(); setInterval(updateClock, 1000);
+  });
+
+  function updateClock() {
+    const wib = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+    document.getElementById('clock').textContent =
+      wib.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', second:'2-digit' }) + ' WIB';
+    const day = wib.getDay(), h = wib.getHours(), m = wib.getMinutes(), t = h * 100 + m;
+    const el = document.getElementById('marketStatus');
+    if (day === 0 || day === 6)     el.innerHTML = '<span class="dot"></span> Market Tutup (Akhir Pekan)';
+    else if (t >= 900 && t < 1600) el.innerHTML = '<span class="dot open"></span> Market Buka';
+    else                            el.innerHTML = '<span class="dot"></span> Market Tutup';
+  }
+
+  // STEP 1 → langsung ke STEP 2
+  function pickDir(d) {
+    dir = d;
+    document.getElementById('btnBuy').classList.toggle('sel',  d === 'buy');
+    document.getElementById('btnSell').classList.toggle('sel', d === 'sell');
+    setStep(1, 'done');
+    setStep(2, 'active');
+    ['inpH','inpL','inpC'].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.remove('buy-f','sell-f');
+      el.classList.add(d === 'buy' ? 'buy-f' : 'sell-f');
+    });
+    const btn = document.getElementById('btnCalc');
+    btn.className = 'btn-calc ' + (d === 'buy' ? 'buy-btn' : 'sell-btn');
+    btn.textContent = d === 'buy' ? '📈 Hitung Entry BUY' : '📉 Hitung Entry SELL';
+    document.getElementById('sec2').style.display = 'block';
+    smooth('sec2');
+    liveCalc();
+  }
+
+  // Live preview
+  function liveCalc() {
+    const H = num('inpH'), L = num('inpL');
+    const preview = document.getElementById('rangePreview');
+    if (H > 0 && L > 0 && H > L) {
+      const R = H - L;
+      setText('pvRange', p(R));
+      setText('pv764',   p(0.764 * R));
+      setText('pv236',   p(0.236 * R));
+      const level = dir === 'buy' ? H - 0.764 * R : H - 0.236 * R;
+      const entry = dir === 'buy' ? level - 2 : level + 2;
+      const col   = dir === 'buy' ? 'var(--accent)' : 'var(--danger)';
+      const lbl   = dir === 'buy' ? 'Buy Level' : 'Sell Level';
+      document.getElementById('pvEntry').innerHTML =
+        lbl + ': <strong style="color:' + col + '">' + p(level) + '</strong>' +
+        ' &rarr; Entry: <strong style="color:' + col + '">' + p(entry) + '</strong>';
+      preview.style.display = 'flex';
+      document.getElementById('btnCalc').disabled = false;
+    } else {
+      preview.style.display = 'none';
+      document.getElementById('btnCalc').disabled = true;
+    }
+  }
+
+  // Calculate
+  function calculate() {
+    const H = num('inpH'), L = num('inpL'), C = num('inpC');
+    if (!H || !L || H <= L) { toast('⚠️ High harus lebih besar dari Low'); return; }
+    const isBuy = dir === 'buy';
+    const R     = H - L;
+    const fib   = isBuy ? 0.764 : 0.236;
+    const level = H - fib * R;
+    const entry = isBuy ? level - 2 : level + 2;
+    const sl    = isBuy ? L - 2 : H + 2;
+    const tp    = C ? (isBuy ? entry + (C - sl) : entry - (sl - C))
+                    : (isBuy ? entry + R * 1.2  : entry - R * 1.2);
+    const risk  = Math.abs(entry - sl);
+    const reward= Math.abs(tp - entry);
+    const rr    = risk > 0 ? reward / risk : 0;
+
+    setStep(2, 'done'); setStep(3, 'active');
+
+    document.getElementById('entryHero').className = 'entry-hero ' + (isBuy ? 'buy' : 'sell');
+    setText('ehTag', isBuy ? '— BUY SIGNAL —' : '— SELL SIGNAL —');
+    const ev = document.getElementById('ehVal');
+    ev.className = 'eh-val ' + (isBuy ? 'buy' : 'sell');
+    ev.textContent = 'Rp ' + fmt(entry);
+    setText('ehFormula', isBuy
+      ? 'Entry = Buy Level − 2  |  Fib 76.4% dari Range (' + p(R) + ')'
+      : 'Entry = Sell Level + 2  |  Fib 23.6% dari Range (' + p(R) + ')');
+
+    setText('mHigh', fmt(H)); setText('mLow', fmt(L));
+    setText('mLevelLbl', isBuy ? 'Buy Level (76.4%)' : 'Sell Level (23.6%)');
+    setText('mLevel', fmt(level));
+    setText('mLevelSub', isBuy ? 'High − 0.764 × Range' : 'High − 0.236 × Range');
+
+    setText('fRange', p(R));
+    setText('fFibKey', isBuy ? '0.764 × Range' : '0.236 × Range');
+    const ff = document.getElementById('fFibVal');
+    ff.textContent = p(fib * R); ff.className = 'f-val ' + (isBuy ? 'green' : 'red');
+    setText('fLevelKey', isBuy ? 'Buy Level = High − (0.764 × Range)' : 'Sell Level = High − (0.236 × Range)');
+    const fl = document.getElementById('fLevelVal');
+    fl.textContent = p(level); fl.className = 'f-val ' + (isBuy ? 'green' : 'red');
+    setText('fEntryKey', isBuy ? 'Entry = Buy Level − 2' : 'Entry = Sell Level + 2');
+    const fe = document.getElementById('fEntryVal');
+    fe.textContent = 'Rp ' + fmt(entry);
+    fe.style.color = isBuy ? 'var(--accent)' : 'var(--danger)';
+
+    renderLevels(H, L, level, entry, sl, tp, isBuy);
+
+    const tpPct = ((Math.abs(tp-entry)/entry)*100).toFixed(2);
+    const slPct = ((Math.abs(sl-entry)/entry)*100).toFixed(2);
+    setText('tpVal','Rp '+fmt(tp)); setText('slVal','Rp '+fmt(sl));
+    setText('tpPct','+'+tpPct+'%'); setText('slPct','−'+slPct+'%');
+
+    setText('rrVal','1 : '+rr.toFixed(2));
+    const rv = document.getElementById('rrVerdict');
+    if (rr >= 2)      { rv.className='rr-verdict great'; rv.textContent='🔥 RR Bagus — layak entry'; }
+    else if (rr >= 1) { rv.className='rr-verdict ok';    rv.textContent='⚠️ RR Cukup — pertimbangkan'; }
+    else               { rv.className='rr-verdict bad';   rv.textContent='❌ RR Buruk — skip trade ini'; }
+
+    document.getElementById('resultSec').style.display = 'block';
+    smooth('resultSec');
+  }
+
+  function renderLevels(H, L, level, entry, sl, tp, isBuy) {
+    const items = isBuy ? [
+      { name:'Stop Loss',    price:sl,    color:'var(--danger)', tag:'SL',    bg:'rgba(255,69,96,0.12)' },
+      { name:'Low',          price:L,     color:'var(--muted)',  tag:'LOW',   bg:'rgba(255,255,255,0.06)' },
+      { name:'ENTRY BUY ★',  price:entry, color:'var(--accent)', tag:'ENTRY', bg:'rgba(0,229,160,0.12)', isEntry:true },
+      { name:'Buy Level',    price:level, color:'var(--warn)',   tag:'76.4%', bg:'rgba(245,197,24,0.12)' },
+      { name:'High',         price:H,     color:'var(--muted)',  tag:'HIGH',  bg:'rgba(255,255,255,0.06)' },
+      { name:'Take Profit',  price:tp,    color:'var(--accent)', tag:'TP',    bg:'rgba(0,229,160,0.12)' },
+    ] : [
+      { name:'Take Profit',  price:tp,    color:'var(--accent)', tag:'TP',    bg:'rgba(0,229,160,0.12)' },
+      { name:'Low',          price:L,     color:'var(--muted)',  tag:'LOW',   bg:'rgba(255,255,255,0.06)' },
+      { name:'Sell Level',   price:level, color:'var(--warn)',   tag:'23.6%', bg:'rgba(245,197,24,0.12)' },
+      { name:'ENTRY SELL ★', price:entry, color:'var(--danger)', tag:'ENTRY', bg:'rgba(255,69,96,0.12)',  isEntry:true },
+      { name:'High',         price:H,     color:'var(--muted)',  tag:'HIGH',  bg:'rgba(255,255,255,0.06)' },
+      { name:'Stop Loss',    price:sl,    color:'var(--danger)', tag:'SL',    bg:'rgba(255,69,96,0.12)' },
+    ];
+    const sorted = [...items].sort((a,b) => b.price - a.price);
+    const pMin = Math.min(...sorted.map(i=>i.price));
+    const pRng = (Math.max(...sorted.map(i=>i.price)) - pMin) || 1;
+    document.getElementById('lvStack').innerHTML = sorted.map(lv => {
+      const pct = ((lv.price - pMin) / pRng * 100).toFixed(0);
+      return `<div class="lv-row${lv.isEntry?' entry-row':''}">
+        <div class="lv-dot" style="background:${lv.color}"></div>
+        <div class="lv-name" style="color:${lv.color}">${lv.name}</div>
+        <div class="lv-bar-wrap"><div class="lv-bar-fill" style="width:${pct}%;background:${lv.color};opacity:.45"></div></div>
+        <div class="lv-price" style="color:${lv.color}">${fmt(lv.price)}</div>
+        <span class="lv-tag" style="background:${lv.bg};color:${lv.color}">${lv.tag}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function goBack() {
+    document.getElementById('sec2').style.display = 'none';
+    document.getElementById('resultSec').style.display = 'none';
+    setStep(2,''); setStep(3,''); setStep(1,'active');
+    smooth('sec1');
+  }
+
+  function resetAll() {
+    dir = null;
+    document.getElementById('btnBuy').classList.remove('sel');
+    document.getElementById('btnSell').classList.remove('sel');
+    document.getElementById('sec2').style.display = 'none';
+    document.getElementById('resultSec').style.display = 'none';
+    ['inpH','inpL','inpC'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('rangePreview').style.display = 'none';
+    document.getElementById('btnCalc').disabled = true;
+    setStep(1,'active'); setStep(2,''); setStep(3,'');
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  function setStep(n, state) {
+    const el = document.getElementById('ws' + n);
+    el.className = 'ws-item' + (state ? ' ' + state : '');
+    el.querySelector('.ws-num').textContent = state === 'done' ? '✓' : n;
+    const line = el.querySelector('.ws-line');
+    if (line) line.style.background = state === 'done' ? 'var(--accent)' : 'var(--border)';
+  }
+
+  function setText(id,v) { document.getElementById(id).textContent = v; }
+  function num(id)       { return parseFloat(document.getElementById(id).value) || 0; }
+  function p(n)          { return n.toFixed(2); }
+  function fmt(n)        { return Math.round(n).toLocaleString('id-ID'); }
+  function smooth(id)    { setTimeout(()=>document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'}),80); }
+  function toast(msg)    {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 3000);
+  }
+  function toggleMobileNav() {
+    document.getElementById('burgerBtn').classList.toggle('open');
+    document.getElementById('mobileNav').classList.toggle('open');
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('#mobileNav a').forEach(a =>
+      a.addEventListener('click', () => {
+        document.getElementById('burgerBtn').classList.remove('open');
+        document.getElementById('mobileNav').classList.remove('open');
+      })
+    );
+  });
+  </script>
+</body>
+</html>
