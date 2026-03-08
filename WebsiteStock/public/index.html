@@ -125,6 +125,7 @@
     /* MENU */
     .menu-section{padding:80px 60px 120px;border-top:1px solid var(--border)}
     .menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+    .menu-grid-5{grid-template-columns:repeat(3,1fr)}
     .menu-card{background:var(--bg);padding:40px;text-decoration:none;color:var(--text);display:block;transition:background .25s;position:relative;overflow:hidden}
     .menu-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent);transform:scaleX(0);transform-origin:left;transition:transform .3s ease}
     .menu-card:hover{background:var(--bg2)}
@@ -139,7 +140,9 @@
     .menu-desc{font-size:13px;color:var(--muted);line-height:1.6}
     .menu-tag{display:inline-block;margin-top:16px;font-family:'DM Mono',monospace;font-size:9px;padding:3px 10px;border-radius:2px;letter-spacing:1px;text-transform:uppercase}
     .tag-live{background:rgba(46,204,138,.1);color:var(--green);border:1px solid rgba(46,204,138,.2)}
+    .tag-new{background:rgba(0,184,240,.1);color:var(--accent2);border:1px solid rgba(0,184,240,.2)}
     .tag-soon{background:rgba(200,169,110,.08);color:var(--gold);border:1px solid rgba(200,169,110,.15)}
+    .tag-ai{background:rgba(129,104,255,.12);color:#a78bfa;border:1px solid rgba(129,104,255,.25)}
 
     /* FOOTER */
     footer{padding:40px 60px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
@@ -194,13 +197,6 @@
   <nav id="navbar">
     <a href="index.html" class="nav-logo">Cukong Reborn <span>by AlviZevalli</span></a>
     <ul class="nav-links">
-      <li><a href="index.html" class="active">Beranda</a></li>
-      <li><a href="screener.html">Screener</a></li>
-      <li><a href="sr.html">S&amp;R Finder</a></li>
-      <li><a href="volume.html">Volume Anomaly</a></li>
-      <li><a href="scanner.html">Market Scanner</a></li>
-      <li><a href="foreign.html">Foreign Flow</a></li>
-      <li><a href="ai-signal.html">AI Signal</a></li>
       <li><a href="screener.html" class="nav-cta">Mulai Gratis →</a></li>
     </ul>
   </nav>
@@ -353,6 +349,42 @@
         <div class="menu-title">AI Signal Engine <span class="menu-arrow">&#8599;</span></div>
         <p class="menu-desc">AI analisis berbasis market structure: HH/HL, BOS, CHOCH, value area, konfirmasi momentum. Output: sinyal entry, SL di swing low, TP 1:2 minimum — atau skip jika tidak valid.</p>
         <div class="menu-tag tag-ai">&#9679; AI Powered</div>
+      </a>
+      <a href="scanner.html" class="menu-card available">
+        <div class="menu-num">06</div>
+        <div class="menu-icon">&#128301;</div>
+        <div class="menu-title">Market Scanner <span class="menu-arrow">&#8599;</span></div>
+        <p class="menu-desc">Scan seluruh emiten IDX, LQ45, atau IDX30 berdasarkan kondisi RSI. Temukan saham overbought &amp; oversold secara massal dalam sekali scan.</p>
+        <div class="menu-tag tag-live">&#9679; Live</div>
+      </a>
+      <a href="entry.html" class="menu-card available">
+        <div class="menu-num">07</div>
+        <div class="menu-icon">&#127919;</div>
+        <div class="menu-title">Entry Finder <span class="menu-arrow">&#8599;</span></div>
+        <p class="menu-desc">Temukan titik entry optimal berdasarkan kombinasi sinyal teknikal — momentum, tren, volume, dan posisi harga terhadap MA.</p>
+        <div class="menu-tag tag-live">&#9679; Live</div>
+      </a>
+      <a href="news.html" class="menu-card available">
+        <div class="menu-num">08</div>
+        <div class="menu-icon">&#128240;</div>
+        <div class="menu-title">Market News <span class="menu-arrow">&#8599;</span></div>
+        <p class="menu-desc">Berita pasar modal terkini dari berbagai sumber. Filter otomatis konten relevan IDX untuk mendukung keputusan trading harian.</p>
+        <div class="menu-tag tag-live">&#9679; Live</div>
+      </a>
+      <a href="kalender.html" class="menu-card available">
+        <div class="menu-num">09</div>
+        <div class="menu-icon">&#128197;</div>
+        <div class="menu-title">Kalender Ekonomi <span class="menu-arrow">&#8599;</span></div>
+        <p class="menu-desc">Pantau jadwal rilis data ekonomi makro, dividen, RUPS, dan event penting pasar yang berpotensi menggerakkan harga saham IDX.</p>
+        <div class="menu-tag tag-live">&#9679; Live</div>
+      </a>
+
+      <a href="rrg.html" class="menu-card available">
+        <div class="menu-num">10</div>
+        <div class="menu-icon">&#128260;</div>
+        <div class="menu-title">Sector Rotation RRG <span class="menu-arrow">&#8599;</span></div>
+        <p class="menu-desc">Relative Rotation Graph &#8212; visualisasi rotasi sektor IDX berdasarkan Relative Strength vs IHSG dan Momentum RS. Identifikasi sektor Leading, Weakening, Lagging, dan Improving.</p>
+        <div class="menu-tag tag-new">&#10024; New</div>
       </a>
     </div>
   </section>

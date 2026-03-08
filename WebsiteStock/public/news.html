@@ -176,6 +176,104 @@
     .filter-btn.sent-neu.active { background: rgba(232,240,254,0.07); border-color: rgba(232,240,254,0.2); color: var(--text); }
     .filter-sep { width: 1px; height: 20px; background: rgba(255,255,255,0.1); }
 
+    /* ── MAIN TABS ── */
+    .main-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+    .main-tab {
+      padding: 9px 20px; border-radius: 10px; border: 1px solid var(--border2);
+      background: var(--surface2); color: var(--muted); font-family: var(--font);
+      font-size: 13px; font-weight: 700; cursor: pointer; transition: all .2s;
+    }
+    .main-tab:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+    .main-tab.active {
+      background: rgba(0,229,160,0.1); border-color: rgba(0,229,160,0.3);
+      color: var(--accent);
+    }
+
+    /* ── SOCIAL PULSE ── */
+    #newsSection  { display: block; }
+    #socialSection { display: none; }
+    .social-layout { display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start; }
+    .social-search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+    .social-inp {
+      flex: 1; background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: 10px; padding: 10px 16px; color: var(--text);
+      font-family: var(--font-mono); font-size: 13px; outline: none;
+      text-transform: uppercase;
+    }
+    .social-inp:focus { border-color: rgba(0,229,160,0.4); }
+    .social-inp::placeholder { text-transform: none; color: var(--muted); font-family: var(--font); }
+    .social-search-btn {
+      padding: 10px 20px; border-radius: 10px; border: none;
+      background: var(--accent); color: #060c14; font-weight: 800;
+      font-family: var(--font); font-size: 13px; cursor: pointer;
+    }
+    .social-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+    .social-tab {
+      padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border2);
+      background: var(--surface2); color: var(--muted); font-size: 12px;
+      font-weight: 700; cursor: pointer; transition: all .2s; font-family: var(--font);
+    }
+    .social-tab.active { background: rgba(0,184,240,0.12); border-color: rgba(0,184,240,0.3); color: var(--accent2); }
+    .social-feed { display: flex; flex-direction: column; gap: 10px; }
+    .social-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px; transition: border-color .2s;
+    }
+    .social-card:hover { border-color: rgba(255,255,255,0.15); }
+    .social-card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .social-avatar {
+      width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 14px; flex-shrink: 0;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    }
+    .social-author { font-size: 13px; font-weight: 700; color: var(--text); }
+    .social-source { font-size: 10px; font-family: var(--font-mono); padding: 2px 7px; border-radius: 4px; margin-left: auto; }
+    .social-source.st  { background: rgba(0,184,240,0.12); color: var(--accent2); border: 1px solid rgba(0,184,240,0.2); }
+    .social-source.rd  { background: rgba(255,69,96,0.1); color: #ff6e88; border: 1px solid rgba(255,69,96,0.2); }
+    .social-time { font-size: 10px; color: var(--muted); font-family: var(--font-mono); }
+    .social-body { font-size: 13px; color: var(--text); line-height: 1.6; margin-bottom: 10px; }
+    .social-body a { color: var(--accent2); text-decoration: none; }
+    .social-footer { display: flex; align-items: center; gap: 10px; }
+    .social-sent {
+      font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 6px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .social-sent.pos { background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); }
+    .social-sent.neg { background: rgba(255,69,96,0.1); color: var(--danger); border: 1px solid rgba(255,69,96,0.2); }
+    .social-sent.neu { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.1); }
+    .social-likes { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+    .social-link { font-size: 11px; color: var(--accent2); text-decoration: none; margin-left: auto; }
+    .social-link:hover { text-decoration: underline; }
+    /* Sentiment gauge sidebar */
+    .sg-ring-wrap { display: flex; justify-content: center; margin: 16px 0 10px; }
+    .sg-ring { position: relative; width: 120px; height: 120px; }
+    .sg-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .sg-ring-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .sg-ring-pct { font-size: 26px; font-weight: 900; font-family: var(--font-mono); color: var(--accent); }
+    .sg-ring-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .sg-breakdown { display: flex; gap: 6px; justify-content: center; margin-top: 8px; }
+    .sg-item { text-align: center; flex: 1; padding: 8px 6px; background: rgba(255,255,255,0.03); border-radius: 8px; }
+    .sg-val { font-size: 20px; font-weight: 800; font-family: var(--font-mono); }
+    .sg-lbl { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .sg-item.pos .sg-val { color: var(--accent); }
+    .sg-item.neu .sg-val { color: var(--muted); }
+    .sg-item.neg .sg-val { color: var(--danger); }
+    /* Trending tickers */
+    .trend-ticker-list { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+    .tt-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: rgba(255,255,255,0.03); border-radius: 8px; }
+    .tt-rank { font-size: 10px; font-family: var(--font-mono); color: var(--muted); width: 16px; }
+    .tt-sym { font-size: 13px; font-weight: 800; color: var(--accent); flex: 1; font-family: var(--font-mono); }
+    .tt-cnt { font-size: 11px; color: var(--muted); }
+    .tt-sent { font-size: 18px; }
+    .social-empty { text-align: center; padding: 48px 20px; color: var(--muted); }
+    .social-empty-icon { font-size: 40px; margin-bottom: 12px; }
+    .social-empty p { font-size: 13px; line-height: 1.7; }
+    @media (max-width: 768px) {
+      .social-layout { grid-template-columns: 1fr; }
+      .main-tabs { gap: 4px; }
+      .main-tab { padding: 8px 14px; font-size: 12px; }
+    }
+
     /* News layout */
     .news-layout {
       display: grid;
@@ -552,6 +650,7 @@
     <a href="ai-signal.html">🧠 AI Signal</a>
     <a href="news.html" class="active">📰 News</a>
     <a href="kalender.html">📅 Kalender</a>
+    <a href="entry.html">🎯 Entry</a>
   </nav>
 
   <div class="bg-grid"></div>
@@ -608,7 +707,16 @@
       </div>
     </div>
 
-    <!-- Filter row -->
+    <!-- Tab Navigation -->
+    <div class="main-tabs">
+      <button class="main-tab active" id="tabNews" onclick="switchTab('news')">📰 Berita</button>
+      <button class="main-tab" id="tabSocial" onclick="switchTab('social')">💬 Social Pulse</button>
+    </div>
+
+    <!-- NEWS SECTION (toggled by tab) -->
+    <div id="newsSection">
+
+    <!-- Filter row (news tab only) -->
     <div class="filter-row">
       <span style="font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-right:2px">SUMBER:</span>
       <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">Semua</button>
@@ -819,6 +927,71 @@
         </div>
       </div>
     </div>
+
+    </div><!-- /#newsSection -->
+
+    <!-- ═══ SOCIAL PULSE SECTION ═══ -->
+    <div id="socialSection">
+
+      <!-- Search bar -->
+      <div class="social-search-bar">
+        <input class="social-inp" id="socialTickerInp" placeholder="Cari ticker: BBCA, TLKM, GOTO, BTC..." maxlength="12" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')socialSearch()">
+        <button class="social-search-btn" onclick="socialSearch()">🔍 Cari</button>
+      </div>
+
+      <!-- Source tabs -->
+      <div class="social-tabs">
+        <button class="social-tab active" id="stTabAll" onclick="setSocialTab('all')">⚡ Semua</button>
+        <button class="social-tab"        id="stTabID"  onclick="setSocialTab('id')">🇮🇩 Indonesia</button>
+        <button class="social-tab"        id="stTabEN"  onclick="setSocialTab('en')">🌐 Global</button>
+      </div>
+
+      <div class="social-layout">
+        <!-- Feed -->
+        <div>
+          <div class="social-feed" id="socialFeed">
+            <div class="social-empty">
+              <div class="social-empty-icon">💬</div>
+              <p>Masukkan kode saham atau crypto di atas<br>untuk melihat sentimen publik dari<br><strong style="color:var(--accent2)">StockTwits</strong> &amp; <strong style="color:#ff6e88">Reddit</strong></p>
+            </div>
+          </div>
+          <button class="btn-load-more" id="btnSocialMore" onclick="loadMoreSocial()" style="display:none">
+            + Muat Lebih Banyak
+          </button>
+        </div>
+
+        <!-- Sidebar -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+
+          <!-- Sentiment gauge -->
+          <div class="sidebar-card">
+            <div class="sidebar-title">🧠 Sentimen Publik</div>
+            <div id="socialSentPanel">
+              <p style="font-size:12px;color:var(--muted);margin-top:8px">Cari ticker untuk melihat distribusi sentimen komunitas.</p>
+            </div>
+          </div>
+
+          <!-- Trending tickers on StockTwits -->
+          <div class="sidebar-card">
+            <div class="sidebar-title">⚡ Cari Cepat</div>
+            <div class="trend-ticker-list" id="trendingList">
+              <div style="font-size:12px;color:var(--muted)">Memuat trending...</div>
+            </div>
+          </div>
+
+          <!-- Info card -->
+          <div class="sidebar-card">
+            <div class="sidebar-title">ℹ️ Tentang Ticker Sentiment</div>
+            <p style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:8px">
+              Berita dari <strong style="color:var(--accent2)">Google News</strong> dikumpulkan khusus per ticker — dari Bisnis.com, Kontan, CNBC ID, Reuters, dan sumber lainnya.<br><br>
+              Sentimen dianalisis oleh <strong style="color:var(--accent2)">AI Claude</strong> secara real-time. Filter <strong>🇮🇩 Indonesia</strong> untuk berita Bahasa Indonesia, <strong>🌐 Global</strong> untuk berita internasional.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <script>
@@ -1556,6 +1729,329 @@ STRICT RULES — follow exactly:
 
     // Initial load
     fetchAllNews();
+
+  // ═══════════════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════════════
+  // SOCIAL PULSE — News Sentiment per Ticker (Google News RSS + AI)
+  // ═══════════════════════════════════════════════════════════════════
+
+  let socialArticles   = [];
+  let socialPage       = 0;
+  const socialPageSize = 12;
+  let socialLastTicker = '';
+  let socialTabActive  = 'all';
+
+  // ── TAB SWITCHER ────────────────────────────────────────────────────
+  function switchTab(tab) {
+    const isNews = tab === 'news';
+    document.getElementById('tabNews').classList.toggle('active', isNews);
+    document.getElementById('tabSocial').classList.toggle('active', !isNews);
+    const newsSec   = document.getElementById('newsSection');
+    const socialSec = document.getElementById('socialSection');
+    if (newsSec)   newsSec.style.display   = isNews ? 'block' : 'none';
+    if (socialSec) socialSec.style.display = isNews ? 'none'  : 'block';
+    if (!isNews && !socialArticles.length) renderPopularTickers();
+  }
+
+  function setSocialTab(t) {
+    socialTabActive = t;
+    ['All','ID','EN'].forEach(s => {
+      const el = document.getElementById('stTab' + s);
+      if (el) el.classList.toggle('active', t === s.toLowerCase());
+    });
+    socialPage = 0;
+    renderSocialFeed();
+    renderSentGauge();
+  }
+
+  // ── MAIN SEARCH ─────────────────────────────────────────────────────
+  async function socialSearch() {
+    const raw    = document.getElementById('socialTickerInp').value.trim().toUpperCase();
+    const ticker = raw.replace(/[^A-Z0-9]/g, '');
+    if (!ticker) return;
+    socialLastTicker = ticker;
+    socialArticles   = [];
+    socialPage       = 0;
+    document.getElementById('socialFeed').innerHTML = buildSocialSkeletons(5);
+    document.getElementById('btnSocialMore').style.display = 'none';
+    resetSentPanel();
+
+    const queries = buildTickerQueries(ticker);
+    const results = await Promise.all(queries.map(q => fetchTickerRSS(q)));
+    const all     = results.flat().filter(Boolean);
+
+    // Deduplicate by title
+    const seen = new Set();
+    socialArticles = all.filter(a => {
+      const key = a.title.slice(0, 60).toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key); return true;
+    }).sort((a, b) => b.ts - a.ts);
+
+    if (!socialArticles.length) {
+      document.getElementById('socialFeed').innerHTML =
+        '<div class="social-empty"><div class="social-empty-icon">😕</div>' +
+        '<p>Tidak ada berita ditemukan untuk <strong style="color:var(--accent)">' + ticker + '</strong>.<br>' +
+        '<span style="font-size:12px;color:var(--muted)">Coba nama emiten, mis: "Bank BCA", atau ticker global seperti AAPL</span></p></div>';
+      return;
+    }
+
+    // Rule-based dulu (instan)
+    socialArticles.forEach(a => applyRuleBasedSentiment(a));
+    renderSocialFeed();
+    renderSentGauge();
+
+    // AI untuk sisanya
+    const needAI = socialArticles.filter(a => !a.sentiment);
+    if (needAI.length) {
+      await analyzeSocialBatch(needAI);
+      renderSocialFeed();
+      renderSentGauge();
+    }
+  }
+
+  // ── BUILD QUERY LIST ────────────────────────────────────────────────
+  function buildTickerQueries(ticker) {
+    const nameMap = {
+      BBCA:'BCA Bank Central Asia', BBRI:'Bank BRI Rakyat Indonesia',
+      BMRI:'Bank Mandiri', BBNI:'Bank BNI Negara Indonesia',
+      TLKM:'Telkom Indonesia', ASII:'Astra International',
+      GOTO:'GoTo Gojek Tokopedia', ANTM:'Aneka Tambang',
+      PTBA:'Bukit Asam', UNVR:'Unilever Indonesia',
+      KLBF:'Kalbe Farma', ICBP:'Indofood CBP',
+      INDF:'Indofood', PGAS:'Perusahaan Gas Negara',
+      ADRO:'Adaro Energy', BREN:'Barito Renewables',
+      MDKA:'Merdeka Copper Gold', INCO:'Vale Indonesia',
+      EXCL:'XL Axiata', ISAT:'Indosat Ooredoo Hutchison',
+      SMGR:'Semen Indonesia', BSDE:'BSD City Sinar Mas Land',
+      CTRA:'Ciputra', MAPI:'Matahari Pacific', ITMG:'Indo Tambangraya',
+      HRUM:'Harum Energy', INKP:'Indah Kiat', TKIM:'Tjiwi Kimia'
+    };
+    const fullName = nameMap[ticker] || '';
+    const queries  = [];
+
+    // Bahasa Indonesia
+    queries.push({ url: 'https://news.google.com/rss/search?q=' + encodeURIComponent(ticker + ' saham') + '&hl=id&gl=ID&ceid=ID:id', lang:'id' });
+    if (fullName) {
+      queries.push({ url: 'https://news.google.com/rss/search?q=' + encodeURIComponent(fullName) + '&hl=id&gl=ID&ceid=ID:id', lang:'id' });
+    }
+    // English
+    queries.push({ url: 'https://news.google.com/rss/search?q=' + encodeURIComponent(ticker + ' stock Indonesia BEI IDX') + '&hl=en&gl=ID&ceid=ID:en', lang:'en' });
+    // Crypto khusus
+    const cryptos = ['BTC','ETH','BNB','SOL','XRP','ADA','DOGE','MATIC','AVAX'];
+    if (cryptos.includes(ticker)) {
+      queries.push({ url: 'https://news.google.com/rss/search?q=' + encodeURIComponent(ticker + ' crypto price') + '&hl=en&gl=US&ceid=US:en', lang:'en' });
+    }
+    return queries;
+  }
+
+  // ── FETCH RSS PER TICKER ────────────────────────────────────────────
+  async function fetchTickerRSS(query) {
+    try {
+      const rawXml = await fetchWithProxies(query.url, 9000);
+      if (!rawXml || rawXml.length < 100) return [];
+      const parser = new DOMParser();
+      const xml    = parser.parseFromString(rawXml, 'text/xml');
+      const items  = xml.querySelectorAll('item');
+      const arts   = [];
+      items.forEach((item, idx) => {
+        if (idx >= 10) return;
+        const title   = (item.querySelector('title')?.textContent || '').replace(/<!\\[CDATA\\[|\\]\\]>/g,'').trim();
+        const desc    = (item.querySelector('description')?.textContent || '').replace(/<!\\[CDATA\\[|\\]\\]>/g,'').replace(/<[^>]+>/g,'').trim().slice(0,200);
+        const link    = (item.querySelector('link')?.textContent || '').trim() || '#';
+        const pubDate = (item.querySelector('pubDate')?.textContent || '').trim();
+        const src     = (item.querySelector('source')?.textContent || 'Google News').trim();
+        if (!title || title.length < 8) return;
+        arts.push({
+          id: 'sn_' + idx + '_' + Math.random().toString(36).slice(2),
+          title, desc, link, src,
+          lang:      query.lang,
+          ts:        pubDate ? new Date(pubDate).getTime() : (Date.now() - idx * 120000),
+          pubDate,
+          sentiment: null, sentScore: null, sentReason: null
+        });
+      });
+      return arts;
+    } catch(e) { return []; }
+  }
+
+  // ── AI SENTIMENT BATCH ───────────────────────────────────────────────
+  async function analyzeSocialBatch(articles) {
+    const batchSize = 12;
+    for (let i = 0; i < articles.length; i += batchSize) {
+      const batch     = articles.slice(i, i + batchSize);
+      const headlines = batch.map((a, idx) => (idx+1) + '. ' + a.title).join('\n');
+      try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 800,
+            system: 'You are a financial sentiment analyzer for Indonesian stock market (IDX).\nReturn ONLY a JSON array. Each item: {"idx":number,"sentiment":"pos"|"neg"|"neu","score":0.0-1.0,"reason":"max 6 words Indonesian"}\npos=good for stock price. neg=bad for stock price. neu=neutral.',
+            messages: [{ role: 'user', content: 'Analyze these news headlines:\n\n' + headlines + '\n\nReturn ONLY JSON array.' }]
+          })
+        });
+        if (res.ok) {
+          const data    = await res.json();
+          const text    = (data.content?.[0]?.text || '').replace(/```json[\s\S]*?```|```/g,'').trim();
+          const results = JSON.parse(text);
+          results.forEach(r => {
+            const a = batch[r.idx - 1];
+            if (a && !a.sentiment) { a.sentiment = r.sentiment; a.sentScore = r.score; a.sentReason = r.reason; }
+          });
+        }
+      } catch(e) {
+        batch.forEach(a => { if (!a.sentiment) a.sentiment = 'neu'; });
+      }
+    }
+  }
+
+  // ── FILTER & RENDER ─────────────────────────────────────────────────
+  function getFilteredArticles() {
+    if (socialTabActive === 'id') return socialArticles.filter(a => a.lang === 'id');
+    if (socialTabActive === 'en') return socialArticles.filter(a => a.lang === 'en');
+    return socialArticles;
+  }
+
+  function renderSocialFeed() {
+    const feed     = document.getElementById('socialFeed');
+    const filtered = getFilteredArticles();
+    const slice    = filtered.slice(0, (socialPage + 1) * socialPageSize);
+    if (!slice.length && socialLastTicker) {
+      feed.innerHTML = '<div class="social-empty"><div class="social-empty-icon">🔍</div><p>Tidak ada berita di filter ini.</p></div>';
+      document.getElementById('btnSocialMore').style.display = 'none';
+      return;
+    }
+    feed.innerHTML = slice.map(a => renderSocialCard(a)).join('');
+    document.getElementById('btnSocialMore').style.display =
+      slice.length < filtered.length ? '' : 'none';
+  }
+
+  function renderSocialCard(a) {
+    const sent       = a.sentiment || 'neu';
+    const sentLabel  = sent === 'pos' ? '📈 Bullish' : sent === 'neg' ? '📉 Bearish' : '➡️ Netral';
+    const langBadge  = a.lang === 'id'
+      ? '<span class="social-source st">🇮🇩 Indonesia</span>'
+      : '<span class="social-source rd">🌐 Global</span>';
+    const age        = timeAgo(a.ts);
+    return '<div class="social-card">' +
+      '<div class="social-card-top">' +
+        '<div class="social-avatar">📰</div>' +
+        '<div style="flex:1"><div class="social-author">' + escHtml(a.src) + '</div>' +
+        '<div class="social-time">' + age + '</div></div>' +
+        langBadge +
+      '</div>' +
+      '<div class="social-body"><strong>' + escHtml(a.title) + '</strong>' +
+        (a.desc ? '<br><span style="font-size:12px;color:var(--muted)">' + escHtml(a.desc) + '</span>' : '') +
+      '</div>' +
+      '<div class="social-footer">' +
+        '<span class="social-sent ' + sent + '">' + sentLabel + '</span>' +
+        (a.sentReason ? '<span style="font-size:10px;color:var(--muted);margin-left:6px">' + escHtml(a.sentReason) + '</span>' : '') +
+        '<a href="' + a.link + '" target="_blank" rel="noopener" class="social-link">Baca ↗</a>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function loadMoreSocial() { socialPage++; renderSocialFeed(); }
+
+  // ── SENTIMENT GAUGE ─────────────────────────────────────────────────
+  function renderSentGauge() {
+    const panel    = document.getElementById('socialSentPanel');
+    const articles = getFilteredArticles().filter(a => a.sentiment);
+    if (!articles.length) { resetSentPanel(); return; }
+    const pos    = articles.filter(a => a.sentiment === 'pos').length;
+    const neg    = articles.filter(a => a.sentiment === 'neg').length;
+    const neu    = articles.filter(a => a.sentiment === 'neu').length;
+    const total  = articles.length;
+    const posPct = Math.round(pos / total * 100);
+    const negPct = Math.round(neg / total * 100);
+    const mood   = posPct >= 60 ? { label:'🚀 Sangat Bullish', color:'var(--accent)' }
+                 : posPct >= 45 ? { label:'📈 Bullish',         color:'var(--accent)' }
+                 : negPct >= 60 ? { label:'📉 Sangat Bearish',  color:'var(--danger)' }
+                 : negPct >= 45 ? { label:'🔻 Bearish',         color:'var(--danger)' }
+                 :                { label:'➡️ Mixed / Netral',  color:'var(--muted)'  };
+    const r = 46, cx = 60, cy = 60, circ = 2 * Math.PI * r;
+    const posArc = circ * posPct / 100;
+    const negArc = circ * negPct / 100;
+    panel.innerHTML =
+      '<div class="sg-ring-wrap"><div class="sg-ring">' +
+        '<svg viewBox="0 0 120 120">' +
+          '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="12"/>' +
+          '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="var(--accent)" stroke-width="12" ' +
+            'stroke-dasharray="' + posArc + ' ' + (circ-posArc) + '" stroke-dashoffset="0"/>' +
+          '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="var(--danger)" stroke-width="12" ' +
+            'stroke-dasharray="' + negArc + ' ' + (circ-negArc) + '" stroke-dashoffset="' + (-posArc) + '"/>' +
+        '</svg>' +
+        '<div class="sg-ring-label">' +
+          '<div class="sg-ring-pct" style="color:' + mood.color + '">' + posPct + '%</div>' +
+          '<div class="sg-ring-sub">Bullish</div>' +
+        '</div>' +
+      '</div></div>' +
+      '<div class="sg-breakdown">' +
+        '<div class="sg-item pos"><div class="sg-val">' + pos + '</div><div class="sg-lbl">Bullish</div></div>' +
+        '<div class="sg-item neu"><div class="sg-val">' + neu + '</div><div class="sg-lbl">Netral</div></div>' +
+        '<div class="sg-item neg"><div class="sg-val">' + neg + '</div><div class="sg-lbl">Bearish</div></div>' +
+      '</div>' +
+      '<div style="margin-top:12px;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.06)">' +
+        '<div style="font-size:10px;color:var(--muted);font-family:var(--font-mono);margin-bottom:4px">SENTIMEN BERITA</div>' +
+        '<div style="font-size:14px;font-weight:700;color:' + mood.color + '">' + mood.label + '</div>' +
+        '<div style="font-size:10px;color:var(--muted);margin-top:4px">' + total + ' berita · ' + socialLastTicker + '</div>' +
+      '</div>';
+  }
+
+  function resetSentPanel() {
+    document.getElementById('socialSentPanel').innerHTML =
+      '<p style="font-size:12px;color:var(--muted);margin-top:8px">Cari ticker untuk melihat sentimen berita terkini.</p>';
+  }
+
+  // ── POPULAR TICKERS SHORTCUT ─────────────────────────────────────────
+  function renderPopularTickers() {
+    const el = document.getElementById('trendingList');
+    if (!el) return;
+    const tickers = [
+      { sym:'BBCA', name:'Bank BCA'      },
+      { sym:'BBRI', name:'Bank BRI'      },
+      { sym:'TLKM', name:'Telkom'        },
+      { sym:'GOTO', name:'GoTo'          },
+      { sym:'BMRI', name:'Bank Mandiri'  },
+      { sym:'ASII', name:'Astra'         },
+      { sym:'ANTM', name:'Antam'         },
+      { sym:'BTC',  name:'Bitcoin'       },
+    ];
+    el.innerHTML = tickers.map((t, i) =>
+      '<div class="tt-row" style="cursor:pointer" onclick="document.getElementById(\'socialTickerInp\').value=\'' + t.sym + '\';socialSearch()">' +
+        '<span class="tt-rank">#' + (i+1) + '</span>' +
+        '<span class="tt-sym">' + t.sym + '</span>' +
+        '<span class="tt-cnt" style="color:var(--muted)">' + t.name + '</span>' +
+      '</div>').join('');
+  }
+
+  // ── HELPERS ─────────────────────────────────────────────────────────
+  function timeAgo(ts) {
+    if (!ts) return '–';
+    const diff = Date.now() - ts;
+    if (diff < 60000)    return 'baru saja';
+    if (diff < 3600000)  return Math.floor(diff/60000) + ' menit lalu';
+    if (diff < 86400000) return Math.floor(diff/3600000) + ' jam lalu';
+    return Math.floor(diff/86400000) + ' hari lalu';
+  }
+  function escHtml(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function buildSocialSkeletons(n) {
+    return Array(n).fill(
+      '<div class="social-card">' +
+        '<div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">' +
+          '<div class="skel" style="width:32px;height:32px;border-radius:50%"></div>' +
+          '<div style="flex:1"><div class="skel" style="width:120px;height:12px;border-radius:3px;margin-bottom:4px"></div>' +
+          '<div class="skel" style="width:70px;height:10px;border-radius:3px"></div></div>' +
+          '<div class="skel" style="width:60px;height:18px;border-radius:4px"></div></div>' +
+        '<div class="skel" style="height:16px;border-radius:3px;margin-bottom:4px"></div>' +
+        '<div class="skel" style="height:14px;border-radius:3px;width:75%;margin-bottom:10px"></div>' +
+        '<div class="skel" style="width:80px;height:22px;border-radius:6px"></div>' +
+      '</div>').join('');
+  }
   </script>
 </body>
 </html>

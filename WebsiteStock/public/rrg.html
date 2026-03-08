@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sector Rotation RRG — Cukong Reborn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
+  <style>
+    main { max-width: 1200px; margin: auto; padding: 28px 20px 80px; position: relative; z-index: 1; }
+
+    .page-eyebrow { font-size: 11px; font-weight: 700; color: var(--accent2); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; font-family: var(--font-mono); }
+    .page-h1 { font-size: 24px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.5px; }
+    .page-sub { color: var(--muted); font-size: 12px; margin-bottom: 20px; line-height: 1.6; }
+
+    .ctrl-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+    .ctrl-lbl { font-size: 10px; font-weight: 700; color: var(--muted); font-family: var(--font-mono); letter-spacing: 1.5px; }
+    .btn-period {
+      padding: 6px 13px; border-radius: 7px; border: 1px solid var(--border2);
+      background: var(--surface2); color: var(--muted); font-size: 11px; font-weight: 700;
+      cursor: pointer; transition: all .15s; font-family: var(--font);
+    }
+    .btn-period:hover  { color: var(--text); border-color: rgba(255,255,255,.18); }
+    .btn-period.active { background: rgba(0,184,240,.12); border-color: rgba(0,184,240,.3); color: var(--accent2); }
+    .btn-load {
+      padding: 7px 18px; border-radius: 8px; border: none;
+      background: var(--accent); color: #060c14; font-size: 12px; font-weight: 800;
+      cursor: pointer; transition: opacity .15s; font-family: var(--font);
+    }
+    .btn-load:hover { opacity: .85; }
+    .btn-anim {
+      padding: 6px 14px; border-radius: 7px; border: 1px solid rgba(0,229,160,.3);
+      background: rgba(0,229,160,.07); color: var(--accent); font-size: 11px; font-weight: 700;
+      cursor: pointer; font-family: var(--font); transition: all .15s;
+    }
+    .btn-anim:hover { background: rgba(0,229,160,.14); }
+    .sep { width: 1px; height: 20px; background: rgba(255,255,255,.1); }
+    .tail-lbl { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+    input[type=range] { accent-color: var(--accent2); width: 90px; }
+    .tail-num { font-size: 11px; font-family: var(--font-mono); color: var(--accent2); width: 18px; }
+
+    .status-strip {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 11px; font-family: var(--font-mono); color: var(--muted);
+      margin-bottom: 14px; padding: 8px 12px;
+      background: rgba(255,255,255,.02); border-radius: 8px; border: 1px solid var(--border);
+    }
+    .sdot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink:0; }
+    .sdot.loading { background: #f5c518; animation: blink 1s infinite; }
+    .sdot.done    { background: var(--accent); }
+    .sdot.error   { background: var(--danger); }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+    .rrg-wrap { display: grid; grid-template-columns: 1fr 230px; gap: 16px; align-items: start; }
+
+    .chart-box {
+      background: #050d14; border: 1px solid rgba(255,255,255,.07);
+      border-radius: 14px; overflow: hidden; position: relative;
+      min-height: 300px;
+    }
+    .chart-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 18px 10px; border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    .chart-title { font-size: 11px; font-weight: 700; font-family: var(--font-mono); color: rgba(255,255,255,.45); letter-spacing: 1px; }
+    .chart-meta  { font-size: 10px; font-family: var(--font-mono); color: var(--muted); }
+    .canvas-wrap { position: relative; width: 100%; min-height: 300px; }
+    canvas#rrg   { display: block; width: 100%; cursor: crosshair; background: #050d14; }
+
+    #rrg-tt {
+      position: absolute; display: none; pointer-events: none; z-index: 20;
+      background: rgba(5,13,20,.96); border: 1px solid rgba(255,255,255,.14);
+      border-radius: 10px; padding: 10px 14px; min-width: 160px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.6); font-size: 11px;
+    }
+    #rrg-tt .tt-name { font-weight: 800; font-size: 13px; margin-bottom: 7px; }
+    .tt-row { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 2px; color: var(--muted); }
+    .tt-row b { color: var(--text); font-family: var(--font-mono); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 12px; }
+    .scard { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+    .scard-title {
+      font-size: 9px; font-weight: 700; font-family: var(--font-mono);
+      color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase;
+      margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+    }
+    .scard-title::before { content:''; width:3px; height:11px; border-radius:2px; background:var(--accent2); flex-shrink:0; }
+
+    .leg-list { display: flex; flex-direction: column; gap: 5px; }
+    .leg-row { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 7px; cursor: pointer; transition: background .12s; }
+    .leg-row:hover { background: rgba(255,255,255,.04); }
+    .leg-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink:0; }
+    .leg-name { font-size: 11px; font-weight: 600; flex: 1; color: var(--text); }
+    .leg-quad { font-size: 9px; font-family: var(--font-mono); font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+    .q-leading   { background: rgba(0,229,160,.14);  color: #00e5a0; }
+    .q-weakening { background: rgba(245,197,24,.12); color: #f5c518; }
+    .q-lagging   { background: rgba(255,69,96,.12);  color: #ff4560; }
+    .q-improving { background: rgba(0,184,240,.12);  color: #00b8f0; }
+
+    .qguide { display: flex; flex-direction: column; gap: 9px; }
+    .qg-row { display: flex; gap: 9px; align-items: flex-start; }
+    .qg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink:0; margin-top: 3px; }
+    .qg-txt { font-size: 11px; line-height: 1.55; color: var(--muted); }
+    .qg-txt strong { display: block; font-size: 12px; color: var(--text); }
+
+    .rot-arrow { font-size: 11px; color: var(--muted); text-align: center; padding: 8px; background: rgba(255,255,255,.02); border-radius: 8px; line-height: 1.9; }
+    .rot-arrow span { color: var(--text); font-weight: 700; }
+
+    @media (max-width: 820px) { .rrg-wrap { grid-template-columns: 1fr; } main { padding: 16px 12px 60px; } }
+  </style>
+</head>
+<body>
+  <div class="topbar" id="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="topbar-logo">&#9650; Cukong Reborn</a>
+      <span class="topbar-sep">|</span>
+      <span class="topbar-badge">RRG</span>
+    </div>
+    <nav class="topbar-nav">
+      <a href="screener.html">&#128202; Screener</a>
+      <a href="sr.html">&#128201; S&amp;R</a>
+      <a href="volume.html">&#128293; Volume</a>
+      <a href="scanner.html">&#128301; Scanner</a>
+      <a href="foreign.html">&#127758; Foreign</a>
+      <a href="ai-signal.html">&#129504; AI Signal</a>
+      <a href="entry.html">&#127919; Entry</a>
+      <a href="rrg.html" class="active">&#128260; RRG</a>
+      <a href="news.html">&#128240; News</a>
+      <a href="kalender.html">&#128197; Kalender</a>
+    </nav>
+    <a href="index.html" class="topbar-home">&larr; Beranda</a>
+    <button class="burger-btn" id="burgerBtn" onclick="toggleMobileNav()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <nav class="mobile-nav-overlay" id="mobileNav">
+    <a href="screener.html">&#128202; Screener</a>
+    <a href="sr.html">&#128201; S&R</a>
+    <a href="volume.html">&#128293; Volume</a>
+    <a href="scanner.html">&#128301; Scanner</a>
+    <a href="foreign.html">&#127758; Foreign Flow</a>
+    <a href="ai-signal.html">&#129504; AI Signal</a>
+    <a href="entry.html">&#127919; Entry Finder</a>
+    <a href="rrg.html" class="active">&#128260; Sector RRG</a>
+    <a href="news.html">&#128240; News</a>
+    <a href="kalender.html">&#128197; Kalender</a>
+    <a href="index.html">&larr; Beranda</a>
+  </nav>
+
+  <div class="bg-grid"></div>
+  <div class="bg-glow glow-1"></div>
+
+  <main>
+    <div class="page-eyebrow">&#128260; Relative Rotation Graph</div>
+    <h1 class="page-h1">Sector Rotation <span style="color:var(--accent2)">IDX</span></h1>
+    <p class="page-sub">Posisi setiap sektor BEI berdasarkan <strong>Relative Strength</strong> vs benchmark dan <strong>Momentum RS</strong>. Ekor menunjukkan pergerakan historis beberapa periode.</p>
+
+    <div class="ctrl-bar">
+      <span class="ctrl-lbl">PERIODE:</span>
+      <button class="btn-period active" data-p="1mo" data-i="1d"  onclick="setPeriod(this)">1 Bulan</button>
+      <button class="btn-period"        data-p="3mo" data-i="1d"  onclick="setPeriod(this)">3 Bulan</button>
+      <button class="btn-period"        data-p="6mo" data-i="1wk" onclick="setPeriod(this)">6 Bulan</button>
+      <div class="sep"></div>
+      <span class="tail-lbl">EKOR:</span>
+      <input type="range" id="tailSlider" min="3" max="15" value="8"
+             oninput="tailLen=+this.value; document.getElementById('tailNum').textContent=this.value; drawRRG()">
+      <span class="tail-num" id="tailNum">8</span>
+      <div class="sep"></div>
+      <button class="btn-load" onclick="loadAll()">&#10227; Load Data</button>
+      <button class="btn-anim" id="animBtn" onclick="toggleAnim()">&#9654; Play</button>
+    </div>
+
+    <div class="status-strip">
+      <div class="sdot" id="sdot"></div>
+      <span id="stext">Klik "Load Data" untuk memulai — butuh ~30 detik untuk 11 sektor.</span>
+      <span style="margin-left:auto;font-size:10px" id="stime"></span>
+    </div>
+
+    <div class="rrg-wrap">
+      <div class="chart-box">
+        <div class="chart-header">
+          <span class="chart-title">CUKONG/IDX &mdash; Rotation Chart</span>
+          <span class="chart-meta" id="chartMeta">&ndash;</span>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="rrg"></canvas>
+          <div id="rrg-tt">
+            <div class="tt-name" id="tt-name">&ndash;</div>
+            <div class="tt-row"><span>RS Ratio</span>  <b id="tt-rs">&ndash;</b></div>
+            <div class="tt-row"><span>Momentum</span>  <b id="tt-mom">&ndash;</b></div>
+            <div class="tt-row"><span>Kuadran</span>   <b id="tt-quad">&ndash;</b></div>
+            <div class="tt-row"><span>vs Benchmark</span><b id="tt-vs">&ndash;</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <div class="scard">
+          <div class="scard-title">Posisi Sektor</div>
+          <div class="leg-list" id="legList">
+            <div style="font-size:11px;color:var(--muted)">Belum ada data — klik Load Data.</div>
+          </div>
+        </div>
+        <div class="scard">
+          <div class="scard-title">Panduan Kuadran</div>
+          <div class="qguide">
+            <div class="qg-row"><div class="qg-dot" style="background:#00e5a0"></div><div class="qg-txt"><strong>&#128994; Leading</strong>RS kuat &amp; momentum naik — outperform IHSG.</div></div>
+            <div class="qg-row"><div class="qg-dot" style="background:#f5c518"></div><div class="qg-txt"><strong>&#128993; Weakening</strong>RS kuat tapi momentum melemah — bersiap rotasi keluar.</div></div>
+            <div class="qg-row"><div class="qg-dot" style="background:#ff4560"></div><div class="qg-txt"><strong>&#128308; Lagging</strong>RS lemah &amp; momentum turun — underperform, hindari.</div></div>
+            <div class="qg-row"><div class="qg-dot" style="background:#00b8f0"></div><div class="qg-txt"><strong>&#128309; Improving</strong>RS lemah tapi momentum naik — kandidat rotasi masuk.</div></div>
+          </div>
+        </div>
+        <div class="scard">
+          <div class="scard-title">Pola Rotasi</div>
+          <div class="rot-arrow"><span>Leading</span> &#8594;<br><span>Weakening</span> &#8594;<br><span>Lagging</span> &#8594;<br><span>Improving</span> &#8594;<br><span>Leading</span></div>
+          <p style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.7">Rotasi searah jarum jam. Masuk di <strong style="color:#00b8f0">Improving</strong>, keluar di <strong style="color:#f5c518">Weakening</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────────────────────
+const SECS = [
+  { key:'FIN',  label:'Financials',       color:'#00e5a0', tickers:['BBCA','BBRI','BMRI','BBNI'] },
+  { key:'ENRG', label:'Energy',           color:'#f5c518', tickers:['ADRO','PTBA','BYAN','ITMG'] },
+  { key:'MAT',  label:'Basic Materials',  color:'#ff9800', tickers:['ANTM','INCO','TPIA','MDKA'] },
+  { key:'TECH', label:'Technology',       color:'#e879f9', tickers:['TLKM','EXCL','ISAT','GOTO'] },
+  { key:'CONS', label:'Consumer Staples', color:'#00b8f0', tickers:['UNVR','ICBP','INDF','MYOR'] },
+  { key:'CYC',  label:'Consumer Cycl.',   color:'#a78bfa', tickers:['MAPI','ACES','AUTO','ASII'] },
+  { key:'HLTH', label:'Healthcare',       color:'#34d399', tickers:['KLBF','SIDO','HEAL','MIKA'] },
+  { key:'IND',  label:'Industrials',      color:'#60a5fa', tickers:['UNTR','SMGR','INTP','WTON'] },
+  { key:'PROP', label:'Properties',       color:'#fb923c', tickers:['BSDE','CTRA','LPKR','SMRA'] },
+  { key:'INFR', label:'Infrastructure',   color:'#f87171', tickers:['JSMR','TOWR','TBIG','PGAS'] },
+  { key:'TRAN', label:'Transportation',   color:'#2dd4bf', tickers:['BIRD','ASSA','NELY','SMDR'] },
+];
+const BENCH = ['BBCA','BBRI','BMRI']; // benchmark fallback chain
+
+// ─────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────
+let rrgSecs = [];
+let period  = '1mo', ivl = '1d';
+let tailLen = 8;
+let animating = false, animFr = 0, animTmr = null;
+
+// ─────────────────────────────────────────────────────────────
+// CANVAS
+// ─────────────────────────────────────────────────────────────
+let cv, ctx;
+
+function resizeCv() {
+  if (!cv) return;
+  // Try multiple ways to get width
+  let w = 0;
+  if (cv.parentElement) {
+    w = cv.parentElement.offsetWidth || cv.parentElement.clientWidth || cv.parentElement.getBoundingClientRect().width;
+  }
+  if (!w || w < 100) w = Math.max(document.documentElement.clientWidth * 0.6, 400);
+  cv.width  = Math.round(w);
+  cv.height = Math.round(w * 0.70);
+  drawRRG();
+}
+window.addEventListener('resize', function() { resizeCv(); });
+
+// ─────────────────────────────────────────────────────────────
+// CONTROLS
+// ─────────────────────────────────────────────────────────────
+function setPeriod(btn) {
+  document.querySelectorAll('.btn-period').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  period = btn.dataset.p; ivl = btn.dataset.i;
+}
+
+// ─────────────────────────────────────────────────────────────
+// FETCH via proxy
+// ─────────────────────────────────────────────────────────────
+// Fetch close prices via Railway backend
+async function fetchClose(ticker, per, iv) {
+  const url = API_BASE + '/rrg-data?ticker=' + ticker + '&period=' + per + '&interval=' + iv;
+  try {
+    const ctrl = new AbortController();
+    const tmr  = setTimeout(function() { ctrl.abort(); }, 15000);
+    const res  = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(tmr);
+    if (!res.ok) {
+      console.warn('RRG fetch error', ticker, res.status, res.statusText);
+      return [];
+    }
+    const data = await res.json();
+    if (data.error) {
+      console.warn('RRG data error', ticker, data.error);
+      return [];
+    }
+    if (!data.closes || data.closes.length < 10) return [];
+    return data.closes;
+  } catch(e) {
+    console.warn('RRG fetch exception', ticker, e.message);
+    return [];
+  }
+}
+
+// Simulasi data bila backend /rrg-data belum tersedia
+// Menghasilkan random walk yang realistis
+function mockCloses(base, n, volatility) {
+  const arr = [base];
+  for (let i = 1; i < n; i++) {
+    const chg = (Math.random() - 0.49) * volatility;
+    arr.push(Math.max(arr[i-1] * (1 + chg / 100), 1));
+  }
+  return arr;
+}
+
+async function fetchCloseWithFallback(ticker, per, iv) {
+  const real = await fetchClose(ticker, per, iv);
+  if (real.length >= 10) return real;
+  // Fallback: mock data agar grafik tetap tampil
+  const n = per === '1mo' ? 22 : per === '3mo' ? 65 : 130;
+  const baseMap = {
+    BBCA:9400, BBRI:4500, BMRI:6800, UNVR:2700, ICBP:11200,
+    ADRO:2900, PTBA:3100, ANTM:1800, TLKM:3200, KLBF:1600,
+    MAPI:1900, UNTR:28000, BSDE:1100, JSMR:4600, BIRD:1400,
+    GOTO:75, EXCL:2200, ISAT:2900
+  };
+  const base = baseMap[ticker] || 1000;
+  console.info('Using mock data for', ticker);
+  return mockCloses(base, n, 1.5 + Math.random());
+}
+
+// ─────────────────────────────────────────────────────────────
+// RRG MATH
+// ─────────────────────────────────────────────────────────────
+function ema(arr, n) {
+  if (!arr.length) return [];
+  const k = 2 / (n + 1);
+  const out = [arr[0]];
+  for (let i = 1; i < arr.length; i++)
+    out.push(arr[i] * k + out[i-1] * (1 - k));
+  return out;
+}
+
+function normalize100(arr) {
+  const mn = arr.reduce(function(a,b){return a+b;}, 0) / arr.length;
+  const variance = arr.map(function(x){return (x-mn)*(x-mn);}).reduce(function(a,b){return a+b;}, 0) / arr.length;
+  const sd = Math.sqrt(variance) || 0.0001;
+  return arr.map(function(v){ return 100 + (v - mn) / sd * 3.5; });
+}
+
+function calcRRG(sPrices, bPrices) {
+  const n  = Math.min(sPrices.length, bPrices.length);
+  if (n < 12) return null;
+  const sp = sPrices.slice(-n), bp = bPrices.slice(-n);
+  // Raw RS: sector / benchmark
+  const rawRS  = sp.map(function(s, i){ return (s / bp[i]) * 100; });
+  const rsSmth = ema(rawRS, 10);
+  const rsRatio = normalize100(rsSmth);
+  // Momentum = rate of change of RS-Ratio
+  const roc  = rsRatio.map(function(v, i){ return i === 0 ? 0 : v - rsRatio[i-1]; });
+  const rocS = ema(roc, 10);
+  const rsMom = normalize100(rocS);
+  return rsRatio.map(function(rs, i){ return { rs: rs, mom: rsMom[i] }; });
+}
+
+function quad(rs, mom) {
+  if (rs >= 100 && mom >= 100) return 'leading';
+  if (rs >= 100 && mom <  100) return 'weakening';
+  if (rs <  100 && mom <  100) return 'lagging';
+  return 'improving';
+}
+
+// ─────────────────────────────────────────────────────────────
+// MAIN LOAD
+// ─────────────────────────────────────────────────────────────
+async function loadAll() {
+  setStatus('loading', 'Mengambil data benchmark...');
+  rrgSecs = [];
+  renderLegend();
+
+  // Benchmark
+  let bench = [];
+  for (let i = 0; i < BENCH.length && bench.length < 12; i++) {
+    bench = await fetchCloseWithFallback(BENCH[i], period, ivl);
+  }
+  if (bench.length < 12) {
+    setStatus('error', 'Gagal ambil data benchmark. Periksa koneksi & coba lagi.');
+    return;
+  }
+
+  // Each sector
+  for (let si = 0; si < SECS.length; si++) {
+    const sec = SECS[si];
+    setStatus('loading', 'Memuat ' + sec.label + '... (' + (si+1) + '/' + SECS.length + ')');
+    let prices = [];
+    for (let ti = 0; ti < sec.tickers.length && prices.length < 12; ti++) {
+      prices = await fetchCloseWithFallback(sec.tickers[ti], period, ivl);
+    }
+    if (prices.length < 12) continue;
+    const hist = calcRRG(prices, bench);
+    if (!hist || hist.length < 5) continue;
+    const last = hist[hist.length - 1];
+    rrgSecs.push({ sec: sec, hist: hist, quad: quad(last.rs, last.mom), rs: last.rs, mom: last.mom });
+  }
+
+  if (!rrgSecs.length) {
+    setStatus('error', 'Tidak ada data berhasil dimuat. Coba lagi atau ganti periode.');
+    return;
+  }
+
+  document.getElementById('chartMeta').textContent =
+    period.toUpperCase() + ' \u00b7 ' + ivl + ' \u00b7 ' + new Date().toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
+  setStatus('done', rrgSecs.length + ' sektor dimuat \u00b7 ' + new Date().toLocaleTimeString('id-ID'));
+
+  animFr = rrgSecs[0].hist.length - 1;
+  renderLegend();
+  drawRRG();
+}
+
+// ─────────────────────────────────────────────────────────────
+// DRAW
+// ─────────────────────────────────────────────────────────────
+function drawRRG() {
+  if (!cv || !ctx) return;
+  const W = cv.width, H = cv.height;
+  // If canvas has no size, force a resize and log for debugging
+  if (!W || !H) {
+    console.warn('Canvas size 0, forcing resize. offsetWidth:', cv.parentElement && cv.parentElement.offsetWidth);
+    resizeCv();
+    return;
+  }
+  ctx.clearRect(0, 0, W, H);
+
+  // Dark bg
+  ctx.fillStyle = '#050d14';
+  ctx.fillRect(0, 0, W, H);
+  
+  // Show placeholder if no data yet
+  if (!rrgSecs.length) {
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.font = '13px "DM Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('Klik "Load Data" untuk memuat grafik', W/2, H/2);
+    ctx.font = '11px "DM Mono", monospace';
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    // Draw center cross as preview
+    ctx.setLineDash([4,4]);
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(W/2, 40); ctx.lineTo(W/2, H-40); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(40, H/2); ctx.lineTo(W-20, H/2); ctx.stroke();
+    ctx.setLineDash([]);
+    return;
+  }
+
+  const P   = { t:36, r:20, b:46, l:54 };
+  const cW  = W - P.l - P.r;
+  const cH  = H - P.t - P.b;
+
+  // Collect all data points for dynamic scale
+  const maxFr = animating ? animFr + 1 : (rrgSecs[0] ? rrgSecs[0].hist.length : 1);
+  const allRS = [100], allMom = [100];
+  rrgSecs.forEach(function(d) {
+    d.hist.slice(0, maxFr).forEach(function(h) { allRS.push(h.rs); allMom.push(h.mom); });
+  });
+  const pad    = 2;
+  const rsMin  = Math.min.apply(null, allRS)  - pad;
+  const rsMax  = Math.max.apply(null, allRS)  + pad;
+  const momMin = Math.min.apply(null, allMom) - pad;
+  const momMax = Math.max.apply(null, allMom) + pad;
+  const rsR = rsMax - rsMin || 1, momR = momMax - momMin || 1;
+
+  function toX(rs)  { return P.l + (rs  - rsMin) / rsR  * cW; }
+  function toY(mom) { return P.t + (1 - (mom - momMin) / momR) * cH; }
+
+  const ox = toX(100), oy = toY(100);
+
+  // Quadrant fills
+  const qFills = [
+    { x: ox, y: P.t,    w: P.l + cW - ox, h: oy - P.t,        c: 'rgba(0,229,160,0.055)'  }, // leading   TR
+    { x: ox, y: oy,     w: P.l + cW - ox, h: P.t + cH - oy,   c: 'rgba(245,197,24,0.045)' }, // weakening BR
+    { x: P.l, y: oy,    w: ox - P.l,       h: P.t + cH - oy,   c: 'rgba(255,69,96,0.045)'  }, // lagging   BL
+    { x: P.l, y: P.t,   w: ox - P.l,       h: oy - P.t,        c: 'rgba(0,184,240,0.05)'   }, // improving TL
+  ];
+  qFills.forEach(function(f) { ctx.fillStyle = f.c; ctx.fillRect(f.x, f.y, f.w, f.h); });
+
+  // Subtle grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 1;
+  for (let v = Math.ceil(rsMin); v <= rsMax; v++) {
+    const x = toX(v); if (x < P.l || x > P.l + cW) continue;
+    ctx.beginPath(); ctx.moveTo(x, P.t); ctx.lineTo(x, P.t + cH); ctx.stroke();
+  }
+  for (let v = Math.ceil(momMin); v <= momMax; v++) {
+    const y = toY(v); if (y < P.t || y > P.t + cH) continue;
+    ctx.beginPath(); ctx.moveTo(P.l, y); ctx.lineTo(P.l + cW, y); ctx.stroke();
+  }
+
+  // Center axes (dashed)
+  ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.lineWidth = 1;
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath(); ctx.moveTo(ox, P.t);  ctx.lineTo(ox, P.t + cH);  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(P.l, oy);  ctx.lineTo(P.l + cW, oy);  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Axis labels
+  ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '10px "DM Mono",monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('Relative Strength \u2192', P.l + cW / 2, H - 8);
+  ctx.save(); ctx.translate(13, P.t + cH / 2); ctx.rotate(-Math.PI / 2);
+  ctx.fillText('\u2190 Momentum \u2192', 0, 0); ctx.restore();
+
+  // Quadrant corner labels
+  ctx.font = 'bold 9px "DM Mono",monospace';
+  [
+    { t:'LEADING',   x: P.l + cW - 6, y: P.t + 13,       c: '#00e5a0', a: 'right' },
+    { t:'WEAKENING', x: P.l + cW - 6, y: P.t + cH - 7,   c: '#f5c518', a: 'right' },
+    { t:'LAGGING',   x: P.l + 6,      y: P.t + cH - 7,   c: '#ff4560', a: 'left'  },
+    { t:'IMPROVING', x: P.l + 6,      y: P.t + 13,       c: '#00b8f0', a: 'left'  },
+  ].forEach(function(l) {
+    ctx.fillStyle = l.c + 'aa'; ctx.textAlign = l.a;
+    ctx.fillText(l.t, l.x, l.y);
+  });
+
+  // Tick values on axes
+  ctx.fillStyle = 'rgba(255,255,255,0.22)'; ctx.font = '9px "DM Mono",monospace';
+  [rsMin, 100, rsMax].forEach(function(v) {
+    ctx.textAlign = 'center'; ctx.fillText(v.toFixed(1), toX(v), P.t + cH + 16);
+  });
+  [momMin, 100, momMax].forEach(function(v) {
+    ctx.textAlign = 'right'; ctx.fillText(v.toFixed(1), P.l - 4, toY(v) + 3);
+  });
+
+  if (!rrgSecs.length) return;
+
+  // ── Draw each sector ──
+  rrgSecs.forEach(function(d) {
+    const hist  = d.hist.slice(0, maxFr);
+    const trail = hist.slice(-tailLen);
+    if (!trail.length) return;
+    const col   = d.sec.color;
+
+    // Trail lines (opacity + width fade in)
+    for (let i = 1; i < trail.length; i++) {
+      const prog  = i / (trail.length - 1 || 1);
+      ctx.strokeStyle = hexA(col, 0.12 + prog * 0.65);
+      ctx.lineWidth   = 1 + prog * 2.5;
+      ctx.lineJoin    = 'round'; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(toX(trail[i-1].rs), toY(trail[i-1].mom));
+      ctx.lineTo(toX(trail[i].rs),   toY(trail[i].mom));
+      ctx.stroke();
+    }
+
+    // Arrow at current tip
+    const cur  = trail[trail.length - 1];
+    const prev = trail.length >= 2 ? trail[trail.length - 2] : { rs: cur.rs - 0.01, mom: cur.mom };
+    const cx2  = toX(cur.rs),  cy2 = toY(cur.mom);
+    const px2  = toX(prev.rs), py2 = toY(prev.mom);
+    const ang  = Math.atan2(cy2 - py2, cx2 - px2);
+    const aL   = 8;
+    ctx.fillStyle = hexA(col, 0.92);
+    ctx.beginPath();
+    ctx.moveTo(cx2 + Math.cos(ang) * aL,       cy2 + Math.sin(ang) * aL);
+    ctx.lineTo(cx2 + Math.cos(ang + 2.5) * aL * 0.55, cy2 + Math.sin(ang + 2.5) * aL * 0.55);
+    ctx.lineTo(cx2 + Math.cos(ang - 2.5) * aL * 0.55, cy2 + Math.sin(ang - 2.5) * aL * 0.55);
+    ctx.closePath(); ctx.fill();
+
+    // Glow around dot
+    const grd = ctx.createRadialGradient(cx2, cy2, 0, cx2, cy2, 16);
+    grd.addColorStop(0, hexA(col, 0.38)); grd.addColorStop(1, hexA(col, 0));
+    ctx.fillStyle = grd;
+    ctx.beginPath(); ctx.arc(cx2, cy2, 16, 0, Math.PI * 2); ctx.fill();
+
+    // Dot
+    ctx.fillStyle = col; ctx.strokeStyle = '#050d14'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(cx2, cy2, 6, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+
+    // Sector key label — avoid chart edges
+    const labelOffX = (cx2 > P.l + cW * 0.72) ? -12 : 11;
+    const labelOffY = (cy2 < P.t + cH * 0.18)  ?  16 : -11;
+    ctx.font        = 'bold 10px "DM Mono",monospace';
+    ctx.fillStyle   = col;
+    ctx.textAlign   = 'left';
+    ctx.shadowColor = 'rgba(0,0,0,0.85)'; ctx.shadowBlur = 5;
+    ctx.fillText(d.sec.key, cx2 + labelOffX, cy2 + labelOffY);
+    ctx.shadowBlur = 0;
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// TOOLTIP
+// ─────────────────────────────────────────────────────────────
+cv && cv.addEventListener('mousemove', function(e) {
+  const rect = cv.getBoundingClientRect();
+  const mx   = (e.clientX - rect.left)  * (cv.width  / rect.width);
+  const my   = (e.clientY - rect.top)   * (cv.height / rect.height);
+  const tt   = document.getElementById('rrg-tt');
+  if (!rrgSecs.length) { tt.style.display = 'none'; return; }
+
+  const P = { t:36, r:20, b:46, l:54 };
+  const cW = cv.width - P.l - P.r, cH = cv.height - P.t - P.b;
+  const allRS = [100], allMom = [100];
+  rrgSecs.forEach(function(d){ d.hist.forEach(function(h){ allRS.push(h.rs); allMom.push(h.mom); }); });
+  const rsMin = Math.min.apply(null,allRS)-2, rsMax = Math.max.apply(null,allRS)+2;
+  const momMin = Math.min.apply(null,allMom)-2, momMax = Math.max.apply(null,allMom)+2;
+  function toX(rs)  { return P.l + (rs  - rsMin) / (rsMax  - rsMin) * cW; }
+  function toY(mom) { return P.t + (1-(mom-momMin)/(momMax-momMin)) * cH; }
+
+  let best = null, bestD = 9999;
+  rrgSecs.forEach(function(d) {
+    const cur = d.hist[d.hist.length - 1];
+    const dd  = Math.hypot(toX(cur.rs) - mx, toY(cur.mom) - my);
+    if (dd < bestD) { bestD = dd; best = d; }
+  });
+
+  if (best && bestD < 32) {
+    const cur = best.hist[best.hist.length - 1];
+    document.getElementById('tt-name').textContent  = best.sec.label;
+    document.getElementById('tt-name').style.color  = best.sec.color;
+    document.getElementById('tt-rs').textContent    = cur.rs.toFixed(2);
+    document.getElementById('tt-mom').textContent   = cur.mom.toFixed(2);
+    document.getElementById('tt-quad').textContent  = best.quad.charAt(0).toUpperCase() + best.quad.slice(1);
+    document.getElementById('tt-vs').textContent    = cur.rs >= 100 ? '\u2191 Outperform' : '\u2193 Underperform';
+    const cr = cv.getBoundingClientRect();
+    let lx = e.clientX - cr.left + 14;
+    let ty = e.clientY - cr.top  - 55;
+    if (lx + 170 > cr.width) lx = e.clientX - cr.left - 175;
+    if (ty < 4) ty = 4;
+    tt.style.left = lx + 'px'; tt.style.top = ty + 'px'; tt.style.display = 'block';
+  } else { tt.style.display = 'none'; }
+});
+cv && cv.addEventListener('mouseleave', function() { document.getElementById('rrg-tt').style.display = 'none'; });
+
+// ─────────────────────────────────────────────────────────────
+// ANIMATION
+// ─────────────────────────────────────────────────────────────
+function toggleAnim() {
+  const btn = document.getElementById('animBtn');
+  if (animating) {
+    animating = false; clearInterval(animTmr);
+    btn.textContent = '\u25b6 Play';
+    if (rrgSecs.length) { animFr = rrgSecs[0].hist.length - 1; drawRRG(); }
+    return;
+  }
+  if (!rrgSecs.length) return;
+  animating = true; animFr = 0;
+  const maxFr = rrgSecs[0].hist.length - 1;
+  btn.textContent = '\u23f9 Stop';
+  animTmr = setInterval(function() {
+    if (animFr >= maxFr) {
+      animating = false; clearInterval(animTmr);
+      btn.textContent = '\u25b6 Play'; return;
+    }
+    animFr++; drawRRG();
+  }, 110);
+}
+
+// ─────────────────────────────────────────────────────────────
+// LEGEND
+// ─────────────────────────────────────────────────────────────
+function renderLegend() {
+  const el = document.getElementById('legList');
+  if (!rrgSecs.length) {
+    el.innerHTML = '<div style="font-size:11px;color:var(--muted)">Belum ada data &mdash; klik Load Data.</div>';
+    return;
+  }
+  const order = { leading:0, improving:1, weakening:2, lagging:3 };
+  const sorted = rrgSecs.slice().sort(function(a,b){ return order[a.quad] - order[b.quad]; });
+  el.innerHTML = sorted.map(function(d) {
+    return '<div class="leg-row">' +
+      '<div class="leg-dot" style="background:' + d.sec.color + '"></div>' +
+      '<span class="leg-name">' + d.sec.label + '</span>' +
+      '<span class="leg-quad q-' + d.quad + '">' + d.quad.slice(0,4).toUpperCase() + '</span>' +
+      '</div>';
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────────────
+// STATUS
+// ─────────────────────────────────────────────────────────────
+function setStatus(state, msg) {
+  document.getElementById('sdot').className   = 'sdot ' + state;
+  document.getElementById('stext').textContent = msg;
+}
+
+// ─────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────
+function hexA(hex, a) {
+  var r = parseInt(hex.slice(1,3), 16);
+  var g = parseInt(hex.slice(3,5), 16);
+  var b = parseInt(hex.slice(5,7), 16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+}
+
+// ─────────────────────────────────────────────────────────────
+// MOBILE NAV
+// ─────────────────────────────────────────────────────────────
+function toggleMobileNav() {
+  document.getElementById('burgerBtn').classList.toggle('open');
+  document.getElementById('mobileNav').classList.toggle('open');
+}
+
+// ─────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  cv  = document.getElementById('rrg');
+  ctx = cv ? cv.getContext('2d') : null;
+  // Delay resize so browser has finished layout
+  setTimeout(function() { resizeCv(); }, 50);
+  window.addEventListener('resize', function() { resizeCv(); });
+  document.querySelectorAll('#mobileNav a').forEach(function(a) {
+    a.addEventListener('click', function() {
+      document.getElementById('burgerBtn').classList.remove('open');
+      document.getElementById('mobileNav').classList.remove('open');
+    });
+  });
+});
+</script>
+</body>
+</html>

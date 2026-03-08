@@ -1071,5 +1071,39 @@ def foreign_scan():
 
 
 # ================================================================
+# ENDPOINT: RRG Data — Close prices per sektor untuk Relative Rotation Graph
+# GET /rrg-data?ticker=BBCA&period=3mo&interval=1d
+# Returns: {"symbol": "BBCA", "closes": [1234, 1245, ...], "period": "3mo"}
+# ================================================================
+@app.route("/rrg-data")
+def rrg_data():
+    symbol   = request.args.get("ticker", "BBCA").upper().strip()
+    period   = request.args.get("period",   "3mo")
+    interval = request.args.get("interval", "1d")
+
+    # Whitelist period & interval to prevent abuse
+    if period   not in ["1mo", "3mo", "6mo", "1y"]:  period   = "3mo"
+    if interval not in ["1d", "1wk", "1mo"]:          interval = "1d"
+
+    ticker = symbol + ".JK"
+    try:
+        hist = fetch_history(ticker, period, interval)
+        if hist.empty or len(hist) < 10:
+            return jsonify({"error": f"{symbol}: data tidak cukup"}), 404
+        closes = [round(float(v), 2) for v in hist["Close"].values if v and not pd.isna(v)]
+        dates  = [str(d.date()) for d in hist.index]
+        return jsonify({
+            "symbol":   symbol,
+            "closes":   closes,
+            "dates":    dates,
+            "count":    len(closes),
+            "period":   period,
+            "interval": interval,
+        })
+    except Exception as e:
+        return jsonify({"error": f"Gagal ambil data {symbol}: {str(e)}"}), 500
+
+
+# ================================================================
 if __name__ == "__main__":
     app.run(debug=True, port=5000, threaded=True)

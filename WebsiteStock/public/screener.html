@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BSJP/BPJS Screener — Cukong Reborn</title>
+  <title>BSJP Screener — Cukong Reborn</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
   <script src="https://s3.tradingview.com/tv.js"></script>
@@ -384,6 +384,7 @@
     <a href="ai-signal.html">&#129504; AI Signal</a>
     <a href="news.html">&#128240; News</a>
     <a href="kalender.html">&#128197; Kalender</a>
+    <a href="entry.html">&#127919; Entry</a>
     <a href="index.html">&#8592; Beranda</a>
   </nav>
   <div class="bg-grid"></div>
@@ -499,7 +500,7 @@
         <div class="score-gauge-wrap">
           <div class="score-gauge-num" id="gaugeNum">0</div>
           <div class="score-gauge-info">
-            <div class="score-gauge-label" id="score-gauge-label-text">Score &mdash; Max 130 poin</div>
+            <div class="score-gauge-label" id="score-gauge-label-text">Score &mdash; Max 150 poin</div>
             <div class="score-gauge-bar">
               <div class="score-gauge-fill" id="gaugeFill" style="width:0%"></div>
             </div>
@@ -561,37 +562,39 @@
           <div class="info-icon">&#127761;</div>
           <h4>BSJP — Beli Sore Jual Pagi</h4>
           <p><strong>Waktu beli:</strong> 14:00–15:50 WIB · <strong>Waktu jual:</strong> Pagi berikutnya 09:00–10:00 WIB</p>
-          <p style="margin-top:8px;font-size:12px;color:var(--muted)">Strategi overnight: manfaatkan saham yang tertekan sore tapi close kuat, berharap gap up keesokan paginya.</p>
+          <p style="margin-top:8px;font-size:12px;color:var(--muted)">Strategi overnight: beli menjelang close saat saham masih kuat, harap gap up pagi. Butuh tren naik + close mendekati high + volume aktif.</p>
           <ul style="margin-top:8px">
-            <li><strong>+25</strong> Harga &gt; MA5 (tren naik)</li>
-            <li><strong>+25</strong> Dekat high harian (0.5–3%)</li>
-            <li><strong>+30</strong> Volume &gt; 150% rata-rata</li>
-            <li><strong>+20</strong> Body ratio candle &gt; 0.65</li>
-            <li><strong>+15</strong> RSI di zona 40–65</li>
-            <li><strong>+15</strong> Harga naik 0.5–5% hari ini</li>
+            <li><strong>+30</strong> Harga &gt; MA5 &amp; MA20 (tren naik)</li>
+            <li><strong>+35</strong> Close ≤ 1% dari high harian</li>
+            <li><strong>+25</strong> Volume &gt; 180% rata-rata</li>
+            <li><strong>+25</strong> Candle bullish solid (body &gt; 0.7)</li>
+            <li><strong>+20</strong> RSI zona 45–62 (ruang naik masih ada)</li>
+            <li><strong>+15</strong> Naik 1.5–5% hari ini</li>
           </ul>
+          <p style="margin-top:8px;font-size:11px;color:var(--danger)">❌ Gugur jika: naik &gt;7% (ARA), RSI &gt;78, close &gt;4% dari high, atau turun &gt;2%</p>
         </div>
         <div class="info-card" style="border-color:rgba(167,139,250,0.2)">
           <div class="info-icon">&#9728;&#65039;</div>
           <h4>BPJS — Beli Pagi Jual Sore</h4>
           <p><strong>Waktu beli:</strong> 09:00–10:30 WIB · <strong>Waktu jual:</strong> Sore hari ini 13:30–15:50 WIB</p>
-          <p style="margin-top:8px;font-size:12px;color:var(--muted)">Strategi intraday: manfaatkan gap up + volume meledak di sesi pagi, jual sebelum close. Jangan overnight.</p>
+          <p style="margin-top:8px;font-size:12px;color:var(--muted)">Strategi intraday: manfaatkan gap up + volume meledak di sesi pagi. Butuh katalis nyata — jangan hold jika momentum habis.</p>
           <ul style="margin-top:8px">
-            <li><strong>+30</strong> Gap up &gt; 0.5% dari kemarin</li>
-            <li><strong>+30</strong> Volume &gt; 200% rata-rata</li>
-            <li><strong>+20</strong> Body ratio &gt; 0.7</li>
-            <li><strong>+20</strong> Harga &gt; MA5 &amp; MA20</li>
-            <li><strong>+20</strong> Kenaikan kuat &gt; 3%</li>
-            <li><strong>+10</strong> RSI aktif 50–72</li>
+            <li><strong>+40</strong> Gap up &gt; 3% dari kemarin</li>
+            <li><strong>+40</strong> Volume &gt; 250% rata-rata</li>
+            <li><strong>+25</strong> Candle bullish kuat (body &gt; 0.7)</li>
+            <li><strong>+25</strong> Naik &gt; 5% hari ini</li>
+            <li><strong>+15</strong> Harga &gt; MA5 &amp; MA20</li>
+            <li><strong>+5</strong> RSI aktif 55–72</li>
           </ul>
+          <p style="margin-top:8px;font-size:11px;color:var(--danger)">❌ Gugur jika: RSI &gt;78, tidak ada gap up &amp; tidak naik, volume &lt;80%, atau gap down + turun</p>
         </div>
         <div class="info-card">
           <div class="info-icon">&#127919;</div>
           <h4>Interpretasi Status</h4>
           <ul>
-            <li><span class="badge-strong">STRONG</span> Score &ge; 100 &middot; Entry ideal</li>
-            <li><span class="badge-valid">VALID</span> Score 80–99 &middot; Konfirmasi dulu</li>
-            <li><span class="badge-skip">SKIP</span> Score &lt; 80 &middot; Hindari</li>
+            <li><span class="badge-strong">STRONG</span> BSJP ≥ 105 / BPJS ≥ 110 · Entry ideal</li>
+            <li><span class="badge-valid">VALID</span> BSJP 80–104 / BPJS 85–109 · Konfirmasi dulu</li>
+            <li><span class="badge-skip">SKIP</span> Di bawah threshold atau terkena disqualifikasi</li>
           </ul>
         </div>
         <div class="info-card">
@@ -759,104 +762,189 @@
   function quickAdd(sym) { document.getElementById("sym").value = sym; addStock(); }
 
   // ── DUAL SCORING ENGINE ──────────────────────────────────────────────────
-  // BSJP = Beli Sore Jual Pagi (overnight trade)
-  //   Sinyal dicari di sesi SORE → hold overnight → jual pagi berikutnya
-  //   Ciri: harga tertekan sore tapi masih kuat di close, volume aktif,
-  //         body candle solid, gap up potensi, tidak overbought
+  // ═══════════════════════════════════════════════════════════════════════
+  // BSJP = Beli Sore Jual Pagi  →  overnight swing, entry menjelang close
+  // BPJS = Beli Pagi Jual Sore  →  intraday murni, entry open/pre-sesi 1
   //
-  // BPJS = Beli Pagi Jual Sore (intraday trade)
-  //   Sinyal dicari di pagi hari → jual sebelum close sesi sore
-  //   Ciri: gap up open, volume meledak di sesi 1, momentum kuat pagi,
-  //         harga masih bergerak naik, RSI aktif tapi tidak jenuh
-  // ─────────────────────────────────────────────────────────────────────────
+  // PERBEDAAN FUNDAMENTAL:
+  //   BSJP: cari saham yang "diam" / tertekan sore tapi BELUM dibuang
+  //         → buyer masih menahan posisi → potensi gap up besok pagi
+  //         → WAJIB: harga close mendekati high, RSI belum jenuh, candle positif
+  //         → DILARANG: gap up hari ini sudah besar (artinya sudah terlambat)
+  //         → DILARANG: change > 7% (ARA / sudah euforia, risiko jual pagi)
+  //
+  //   BPJS: cari saham yang SUDAH bergerak / gap up / volume meledak PAGI ini
+  //         → manfaatkan momentum sesi 1, jual sebelum momentum habis sore
+  //         → WAJIB: gap up positif dari kemarin, volume sangat tinggi pagi ini
+  //         → WAJIB: price action kuat (candle body besar, naik signifikan)
+  //         → DILARANG: RSI sudah overbought >75 (terlalu jenuh untuk BPJS)
+  //         → DILARANG: harga belum naik (gap + volume tanpa kenaikan = fake)
+  // ═══════════════════════════════════════════════════════════════════════
 
   function calcDualScore(d) {
-    const volRatio   = d.avg_volume > 0 ? (d.volume / d.avg_volume) * 100 : 0;
-    const nearHigh   = d.high > 0 ? ((d.high - d.price) / d.high) * 100 : 99;
-    const nearLow    = d.low  > 0 ? ((d.price - d.low)  / d.price) * 100 : 99;
-    const rsi        = d.rsi || 50;
-    const gap        = d.gap  || 0;
+    const price      = d.price      || 0;
+    const open       = d.open       || price;
+    const high       = d.high       || price;
+    const low        = d.low        || price;
+    const ma5        = d.ma5        || 0;
+    const ma20       = d.ma20       || 0;
+    const rsi        = d.rsi        || 50;
+    const gap        = d.gap        || 0;   // (close - open) / open * 100
     const bodyRatio  = d.body_ratio || 0;
-    const chgPct     = d.change_pct || 0;
-    const aboveMA5   = d.price > d.ma5;
-    const aboveMA20  = d.ma20 > 0 && d.price > d.ma20;
+    const chgPct     = d.change_pct || 0;   // vs previous close
+    const volRatio   = d.avg_volume > 0 ? (d.volume / d.avg_volume) * 100 : 0;
 
-    // ── BSJP SCORE (max 130) ─────────────────────────────────────────────
-    // Strategi: Beli Sore menjelang close — antisipasi gap up pagi berikutnya
+    // Derived indicators
+    const aboveMA5   = ma5  > 0 && price > ma5;
+    const aboveMA20  = ma20 > 0 && price > ma20;
+    const aboveBoth  = aboveMA5 && aboveMA20;
+    // Jarak harga dari high harian (%) — kecil = close mendekati high
+    const distFromHigh = high > 0 ? ((high - price) / high) * 100 : 99;
+    // Jarak harga dari low harian (%) — besar = harga jauh dari low = kuat
+    const distFromLow  = low  > 0 ? ((price - low)  / price) * 100 : 0;
+    // Gap hari ini dari open ke close (intraday body direction)
+    const intradayChg  = open > 0  ? ((price - open)  / open)  * 100 : 0;
+
+    // ─────────────────────────────────────────────────────────────────────
+    // BSJP SCORE  (max 150 — bobot lebih ketat overnight)
+    // Logika: saham ini layak di-hold semalam → diharapkan gap up pagi
+    // ─────────────────────────────────────────────────────────────────────
     let bsjpScore = 0;
+    let bsjpDisqualified = false;
 
-    // Harga masih di atas MA5 → tren harian masih naik (+25)
-    if (aboveMA5) bsjpScore += 25;
+    // ❌ DISQUALIFIKASI BSJP — kondisi yang membuat overnight BERBAHAYA
+    if (chgPct > 7.0)          bsjpDisqualified = true; // sudah ARA / euforia
+    if (rsi > 78)              bsjpDisqualified = true; // overbought ekstrem, risiko jual pagi
+    if (distFromHigh > 4.0)    bsjpDisqualified = true; // close lemah, jauh dari high
+    if (chgPct < -2.0)         bsjpDisqualified = true; // hari ini sudah turun = tren bearish
 
-    // Harga mendekati high harian tapi belum ARA → kekuatan beli masih ada di close (+25)
-    // Sore yang ideal: buyer bertahan, tidak terjadi profit taking besar
-    if (nearHigh >= 0.5 && nearHigh < 3.0) bsjpScore += 25;
+    if (!bsjpDisqualified) {
+      // ✅ Tren naik — harga di atas MA5 → landasan kuat untuk overnight
+      if (aboveBoth)           bsjpScore += 30;
+      else if (aboveMA5)       bsjpScore += 18;
 
-    // Volume tinggi di hari ini → ada akumulasi (+30)
-    if (volRatio > 150) bsjpScore += 30;
-    else if (volRatio > 120) bsjpScore += 15;
+      // ✅ Close mendekati high harian — buyer belum mau lepas posisi sore ini
+      // Range ideal: 0–2.5% dari high (bukan ARA, tapi kuat)
+      if (distFromHigh <= 1.0)                    bsjpScore += 35; // sangat dekat high
+      else if (distFromHigh <= 2.5)               bsjpScore += 22; // dekat high
+      else if (distFromHigh <= 4.0)               bsjpScore += 8;  // masih oke
 
-    // Candle solid → close kuat menjelang sore (+20)
-    if (bodyRatio > 0.65) bsjpScore += 20;
-    else if (bodyRatio > 0.45) bsjpScore += 10;
+      // ✅ Volume moderat-tinggi — ada akumulasi, bukan sepi
+      // BSJP tidak butuh volume ekstrem, cukup di atas rata-rata
+      if (volRatio > 180)      bsjpScore += 25;
+      else if (volRatio > 130) bsjpScore += 18;
+      else if (volRatio > 100) bsjpScore += 10;
+      else if (volRatio > 70)  bsjpScore += 4;
 
-    // RSI tidak overbought → masih ada ruang naik pagi berikutnya (+15)
-    if (rsi >= 40 && rsi <= 65) bsjpScore += 15;
-    else if (rsi > 65 && rsi < 75) bsjpScore += 5;
+      // ✅ Candle positif dan solid — body naik (close > open hari ini)
+      if (intradayChg > 0 && bodyRatio > 0.7)     bsjpScore += 25; // candle bullish solid
+      else if (intradayChg > 0 && bodyRatio > 0.5) bsjpScore += 16;
+      else if (intradayChg > 0 && bodyRatio > 0.3) bsjpScore += 8;
 
-    // Harga naik hari ini (tidak tertekan habis) → momentum masih positif (+15)
-    if (chgPct >= 0.5 && chgPct <= 5.0) bsjpScore += 15;
-    else if (chgPct > 0 && chgPct < 0.5) bsjpScore += 7;
+      // ✅ RSI zona sehat untuk overnight — ruang naik masih ada
+      // Terlalu rendah = downtrend, terlalu tinggi = overbought
+      if (rsi >= 45 && rsi <= 62)      bsjpScore += 20; // zona ideal BSJP
+      else if (rsi > 62 && rsi <= 72)  bsjpScore += 10; // masih ok tapi waspada
+      else if (rsi >= 35 && rsi < 45)  bsjpScore += 6;  // agak lemah
 
-    // ── BPJS SCORE (max 130) ─────────────────────────────────────────────
-    // Strategi: Beli Pagi saat open — manfaatkan momentum sesi 1, jual sore
+      // ✅ Kenaikan harian moderat — sudah naik tapi belum kehabisan bensin
+      // BSJP ideal: naik 0.5–5% hari ini (bukan flat, bukan sudah euforia)
+      if (chgPct >= 1.5 && chgPct <= 5.0)  bsjpScore += 15;
+      else if (chgPct >= 0.5 && chgPct < 1.5) bsjpScore += 9;
+      else if (chgPct > 0   && chgPct < 0.5)  bsjpScore += 3;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // BPJS SCORE  (max 150 — intraday, butuh momentum nyata pagi ini)
+    // Logika: saham sudah bergerak pagi ini → manfaatkan momentum, jual sore
+    // ─────────────────────────────────────────────────────────────────────
     let bpjsScore = 0;
+    let bpjsDisqualified = false;
 
-    // Gap up dari kemarin → open kuat, momentum pagi terbentuk (+30)
-    if (gap > 1.5) bpjsScore += 30;
-    else if (gap > 0.5) bpjsScore += 15;
-    else if (gap > 0) bpjsScore += 5;
+    // ❌ DISQUALIFIKASI BPJS — kondisi yang membuat intraday BERBAHAYA
+    if (rsi > 78)              bpjsDisqualified = true; // overbought, momentum habis
+    if (gap <= 0 && chgPct <= 0) bpjsDisqualified = true; // tidak ada momentum sama sekali
+    if (volRatio < 80)         bpjsDisqualified = true; // volume sepi = tidak ada driver
+    if (chgPct < 0 && gap < 0) bpjsDisqualified = true; // gap down + turun = distribusi
 
-    // Volume meledak → konfirmasi buyer berdatangan pagi hari (+30)
-    if (volRatio > 200) bpjsScore += 30;
-    else if (volRatio > 150) bpjsScore += 20;
-    else if (volRatio > 120) bpjsScore += 10;
+    if (!bpjsDisqualified) {
+      // ✅ Gap up dari kemarin — ini adalah SYARAT UTAMA BPJS
+      // Gap up = ada katalis semalam (berita, foreign buy, dll)
+      if (gap > 3.0)           bpjsScore += 40; // gap up besar = momentum kuat
+      else if (gap > 1.5)      bpjsScore += 30;
+      else if (gap > 0.5)      bpjsScore += 18;
+      else if (gap > 0)        bpjsScore += 8;
+      // Gap flat (0) tapi naik karena intraday = masih bisa tapi lebih lemah
+      else if (gap === 0 && chgPct > 1.5) bpjsScore += 5;
 
-    // Candle kuat (body besar) → momentum intraday nyata (+20)
-    if (bodyRatio > 0.7) bpjsScore += 20;
-    else if (bodyRatio > 0.5) bpjsScore += 10;
+      // ✅ Volume meledak — BPJS WAJIB ada volume tinggi, konfirmasi buyer
+      if (volRatio > 250)      bpjsScore += 40; // volume sangat ekstrem
+      else if (volRatio > 180) bpjsScore += 30;
+      else if (volRatio > 130) bpjsScore += 18;
+      else if (volRatio > 100) bpjsScore += 8;
 
-    // Harga di atas MA5 DAN MA20 → tren mendukung intraday (+20)
-    if (aboveMA5 && aboveMA20) bpjsScore += 20;
-    else if (aboveMA5) bpjsScore += 10;
+      // ✅ Kenaikan signifikan hari ini — momentum intraday harus terasa
+      if (chgPct > 5.0)        bpjsScore += 25; // naik kencang, momentum kuat
+      else if (chgPct > 3.0)   bpjsScore += 18;
+      else if (chgPct > 1.5)   bpjsScore += 10;
+      else if (chgPct > 0.5)   bpjsScore += 4;
 
-    // Change pct positif kuat → momentum pagi sedang berjalan (+20)
-    if (chgPct > 3.0) bpjsScore += 20;
-    else if (chgPct > 1.5) bpjsScore += 12;
-    else if (chgPct > 0.5) bpjsScore += 5;
+      // ✅ Candle body besar ke atas — harga benar-benar bergerak, bukan spike
+      if (intradayChg > 0 && bodyRatio > 0.7)     bpjsScore += 25;
+      else if (intradayChg > 0 && bodyRatio > 0.5) bpjsScore += 15;
+      else if (intradayChg > 0 && bodyRatio > 0.3) bpjsScore += 7;
 
-    // RSI aktif tapi belum jenuh → masih bisa lanjut naik (+10)
-    if (rsi > 50 && rsi < 72) bpjsScore += 10;
+      // ✅ Harga di atas MA — tren mendukung, bukan kontra-tren
+      if (aboveBoth)           bpjsScore += 15;
+      else if (aboveMA5)       bpjsScore += 8;
 
-    // ── PILIH MODE DOMINAN ────────────────────────────────────────────────
+      // ✅ RSI aktif tapi belum jenuh — masih ada ruang gerak intraday
+      if (rsi > 55 && rsi <= 72)      bpjsScore += 5;
+      else if (rsi > 45 && rsi <= 55) bpjsScore += 2;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // PENENTUAN MODE DOMINAN
+    // ─────────────────────────────────────────────────────────────────────
+    // Threshold berbeda: BPJS butuh lebih tinggi karena intraday lebih riskan
+    const BSJP_STRONG = 105, BSJP_VALID = 80;
+    const BPJS_STRONG = 110, BPJS_VALID = 85;
+
     let mode, status, cls, risk;
 
-    if (bsjpScore >= 80 && bsjpScore >= bpjsScore) {
-      mode = "BSJP";
-      if (bsjpScore >= 100) { status = "STRONG"; cls = "strong"; risk = "LOW"; }
-      else if (bsjpScore >= 80) { status = "VALID"; cls = "valid"; risk = "MEDIUM"; }
-      else { status = "SKIP"; cls = "skip"; risk = "HIGH"; }
-    } else if (bpjsScore >= 80) {
-      mode = "BPJS";
-      if (bpjsScore >= 100) { status = "STRONG"; cls = "strong"; risk = "LOW"; }
-      else if (bpjsScore >= 80) { status = "VALID"; cls = "valid"; risk = "MEDIUM"; }
-      else { status = "SKIP"; cls = "skip"; risk = "HIGH"; }
+    const bsjpOk = !bsjpDisqualified && bsjpScore >= BSJP_VALID;
+    const bpjsOk = !bpjsDisqualified && bpjsScore >= BPJS_VALID;
+
+    if (bsjpOk && bpjsOk) {
+      // Kedua sinyal valid → pilih yang skornya lebih dominan
+      if (bsjpScore >= bpjsScore) {
+        mode = "BSJP";
+        status = bsjpScore >= BSJP_STRONG ? "STRONG" : "VALID";
+        cls    = bsjpScore >= BSJP_STRONG ? "strong" : "valid";
+        risk   = bsjpScore >= BSJP_STRONG ? "LOW"    : "MEDIUM";
+      } else {
+        mode = "BPJS";
+        status = bpjsScore >= BPJS_STRONG ? "STRONG" : "VALID";
+        cls    = bpjsScore >= BPJS_STRONG ? "strong" : "valid";
+        risk   = bpjsScore >= BPJS_STRONG ? "LOW"    : "MEDIUM";
+      }
+    } else if (bsjpOk) {
+      mode   = "BSJP";
+      status = bsjpScore >= BSJP_STRONG ? "STRONG" : "VALID";
+      cls    = bsjpScore >= BSJP_STRONG ? "strong" : "valid";
+      risk   = bsjpScore >= BSJP_STRONG ? "LOW"    : "MEDIUM";
+    } else if (bpjsOk) {
+      mode   = "BPJS";
+      status = bpjsScore >= BPJS_STRONG ? "STRONG" : "VALID";
+      cls    = bpjsScore >= BPJS_STRONG ? "strong" : "valid";
+      risk   = bpjsScore >= BPJS_STRONG ? "LOW"    : "MEDIUM";
     } else {
-      mode = bsjpScore >= bpjsScore ? "BSJP?" : "BPJS?";
+      mode   = bsjpScore >= bpjsScore ? "BSJP?" : "BPJS?";
       status = "SKIP"; cls = "skip"; risk = "HIGH";
     }
 
-    return { bsjpScore, bpjsScore, mode, status, cls, risk };
+    return { bsjpScore, bpjsScore, mode, status, cls, risk,
+             bsjpDisq: bsjpDisqualified, bpjsDisq: bpjsDisqualified };
   }
 
   // Legacy shim agar backtest tidak error
@@ -889,7 +977,7 @@
       const riskClass = e.risk === "LOW" ? "risk-low" : e.risk === "MEDIUM" ? "risk-med" : "risk-high";
       const dispScore = isBSJP ? (e.bsjpScore || e.score) : (e.bpjsScore || e.score);
       const scoreColor= dispScore >= 100 ? "#00e5a0" : dispScore >= 80 ? "#f5c518" : "#ff4560";
-      const fillPct   = Math.min((dispScore / 130) * 100, 100);
+      const fillPct   = Math.min((dispScore / 150) * 100, 100);
       const starClass = e.inWatchlist ? "btn-wl starred" : "btn-wl";
       const starIcon  = e.inWatchlist ? "&#11088;" : "&#9734;";
       const chgPct    = d.change_pct || 0;
@@ -970,7 +1058,7 @@
     const entryWindow= isBSJP ? "Beli: 14:00–15:50 WIB · Jual: 09:00–10:00 WIB pagi berikutnya" : isBPJS ? "Beli: 09:00–10:30 WIB · Jual: 14:00–15:50 WIB hari ini" : "Tunggu sinyal konfirmasi";
 
     const scoreColor = score >= 100 ? "#00e5a0" : score >= 80 ? "#f5c518" : "#ff4560";
-    const fillPct    = Math.min((score / 130) * 100, 100);
+    const fillPct    = Math.min((score / 150) * 100, 100);
     document.getElementById("gaugeNum").textContent = score;
     document.getElementById("gaugeNum").style.color = scoreColor;
     document.getElementById("gaugeFill").style.width = fillPct + "%";
@@ -1073,11 +1161,11 @@
       recText  = `<strong>Strategi:</strong> Beli ${sym} di sesi sore hari ini antara pukul <strong>14:00–15:50 WIB</strong> di harga sekitar ${rupiah(d.price)}.<br>
         <strong>Jual:</strong> Di sesi pre-opening atau pagi hari berikutnya (09:00–10:00 WIB) saat harga berpeluang gap up.<br>
         TP: ${rupiah(tp1)} (+2%) atau agresif ${rupiah(tp2)} (+4%). Cut loss jika turun ke ${rupiah(cl)} (-2.5%).<br>
-        <em>Score BSJP: ${score}/130 — Semua kriteria overnight terpenuhi.</em>`;
+        <em>Score BSJP: ${score}/150 — Semua kriteria overnight terpenuhi.</em>`;
     } else if (score >= 80 && isBSJP) {
       recClass = "rec-buy";
       recTitle = "&#9989; BSJP VALID — Beli Sore Jual Pagi";
-      recText  = `<strong>Strategi:</strong> Setup BSJP valid (score ${score}/130). Beli di sesi sore <strong>14:00–15:50 WIB</strong> jika harga tidak turun signifikan dari level saat ini.<br>
+      recText  = `<strong>Strategi:</strong> Setup BSJP valid (score ${score}/150). Beli di sesi sore <strong>14:00–15:50 WIB</strong> jika harga tidak turun signifikan dari level saat ini.<br>
         Target pagi berikutnya: ${rupiah(tp1)}. Cut loss: ${rupiah(cl)}.`;
     } else if (score >= 100 && isBPJS) {
       recClass = "rec-buy";
@@ -1085,16 +1173,16 @@
       recText  = `<strong>Strategi:</strong> Beli ${sym} di sesi pagi <strong>09:00–10:30 WIB</strong> saat open gap up terkonfirmasi dengan volume tinggi.<br>
         <strong>Jual:</strong> Di sesi sore sebelum close (13:30–15:50 WIB), jangan overnight.<br>
         TP intraday: ${rupiah(tp1)} (+1.5%) atau ${rupiah(tp2)} (+3%). Cut loss: ${rupiah(cl)} (-2%).<br>
-        <em>Score BPJS: ${score}/130 — Momentum intraday sangat kuat.</em>`;
+        <em>Score BPJS: ${score}/150 — Momentum intraday sangat kuat.</em>`;
     } else if (score >= 80 && isBPJS) {
       recClass = "rec-buy";
       recTitle = "&#9989; BPJS VALID — Beli Pagi Jual Sore";
-      recText  = `<strong>Strategi:</strong> BPJS valid (score ${score}/130). Beli di pagi hari <strong>09:00–10:30 WIB</strong> jika volume masih tinggi dan harga di atas open.<br>
+      recText  = `<strong>Strategi:</strong> BPJS valid (score ${score}/150). Beli di pagi hari <strong>09:00–10:30 WIB</strong> jika volume masih tinggi dan harga di atas open.<br>
         Jual sebelum close sore. Target: ${rupiah(tp1)}. CL: ${rupiah(cl)}.`;
     } else {
       recClass = "rec-avoid";
       recTitle = "&#9940; SKIP — Belum Ada Sinyal Jelas";
-      recText  = `${sym} belum memenuhi kriteria BSJP (score: ${entry.bsjpScore||0}/130) maupun BPJS (score: ${entry.bpjsScore||0}/130).<br>
+      recText  = `${sym} belum memenuhi kriteria BSJP (score: ${entry.bsjpScore||0}/150) maupun BPJS (score: ${entry.bpjsScore||0}/150).<br>
         Pantau kembali: untuk <strong>BSJP</strong> — cek kondisi sore hari (volume, close dekat high, RSI 40–65). Untuk <strong>BPJS</strong> — cek gap up & volume pagi hari.`;
     }
     document.getElementById("recBox").innerHTML = `<div class="rec-box ${recClass}"><div class="rec-title">${recTitle}</div><div>${recText}</div></div>`;
@@ -1261,7 +1349,7 @@
       cardClass = 'card-bsjp'; recClass = 'rec-bsjp';
     } else if (mode === 'BSJP' && bsjpScore >= 80) {
       recommendation = 'BSJP';
-      reason = 'BSJP Valid (score ' + bsjpScore + '/130): Setup overnight ok. Beli sore 14:00-15:50, jual pagi berikutnya.';
+      reason = 'BSJP Valid (score ' + bsjpScore + '/150): Setup overnight ok. Beli sore 14:00-15:50, jual pagi berikutnya.';
       cardClass = 'card-bsjp'; recClass = 'rec-bsjp';
     } else if (mode === 'BPJS' && bpjsScore >= 100) {
       recommendation = 'BPJS';
@@ -1269,11 +1357,11 @@
       cardClass = 'card-bpjs'; recClass = 'rec-bpjs';
     } else if (mode === 'BPJS' && bpjsScore >= 80) {
       recommendation = 'BPJS';
-      reason = 'BPJS Valid (score ' + bpjsScore + '/130): Intraday ok. Beli pagi 09:00-10:30, jual sebelum close sore.';
+      reason = 'BPJS Valid (score ' + bpjsScore + '/150): Intraday ok. Beli pagi 09:00-10:30, jual sebelum close sore.';
       cardClass = 'card-bpjs'; recClass = 'rec-bpjs';
     } else if (bsjpScore >= 60 || bpjsScore >= 60) {
       recommendation = 'WAIT';
-      reason = 'Setup belum matang (BSJP: ' + bsjpScore + ', BPJS: ' + bpjsScore + '/130). Pantau dan tunggu konfirmasi sinyal.';
+      reason = 'Setup belum matang (BSJP: ' + bsjpScore + ', BPJS: ' + bpjsScore + '/150). Pantau dan tunggu konfirmasi sinyal.';
       cardClass = 'card-wait'; recClass = 'rec-wait';
     } else {
       recommendation = 'SKIP';

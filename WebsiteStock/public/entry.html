@@ -217,7 +217,7 @@
     <div class="page-hero">
       <div class="page-hero-eyebrow">&#127919; Entry Point Calculator</div>
       <h1>Cari Titik Entry yang <span style="color:var(--accent2)">Presisi</span></h1>
-      <p>Metode Fibonacci-Range: hitung Buy Level (76.4%) atau Sell Level (23.6%) dari range candle secara otomatis. Pilih arah, masukkan High &amp; Low, sistem langsung kalkulasi titik entry Anda.</p>
+      <p>Metode Fibonacci-Range: hitung Buy Level (76.4%) atau Sell Level (23.6%) dari range candle secara otomatis. Bekerja untuk <strong>saham, crypto, forex, komoditas</strong> — entry point dihitung proporsional dari range, bukan nilai tetap.</p>
     </div>
 
     <!-- WIZARD 3 STEPS -->
@@ -294,17 +294,17 @@
       <div class="inp-grid">
         <div class="inp-group">
           <label>&#128200; High</label>
-          <input type="number" class="inp-field" id="inpH" placeholder="mis: 1550" min="0" step="1" oninput="liveCalc()">
+          <input type="number" class="inp-field" id="inpH" placeholder="mis: 1550 / 0.0042" min="0" step="any" oninput="liveCalc()">
           <div class="inp-hint">Harga tertinggi candle</div>
         </div>
         <div class="inp-group">
           <label>&#128201; Low</label>
-          <input type="number" class="inp-field" id="inpL" placeholder="mis: 1480" min="0" step="1" oninput="liveCalc()">
+          <input type="number" class="inp-field" id="inpL" placeholder="mis: 1480 / 0.0038" min="0" step="any" oninput="liveCalc()">
           <div class="inp-hint">Harga terendah candle</div>
         </div>
         <div class="inp-group">
           <label>&#9632; Close <span style="color:var(--muted);font-weight:400;font-size:9px">(opsional)</span></label>
-          <input type="number" class="inp-field" id="inpC" placeholder="mis: 1515" min="0" step="1" oninput="liveCalc()">
+          <input type="number" class="inp-field" id="inpC" placeholder="mis: 1515 / 0.0041" min="0" step="any" oninput="liveCalc()">
           <div class="inp-hint">Untuk hitung TP referensi</div>
         </div>
       </div>
@@ -329,7 +329,7 @@
         <div class="eh-tag" id="ehTag">&#8212; BUY SIGNAL &#8212;</div>
         <div class="eh-label">Titik Entry</div>
         <div class="eh-val" id="ehVal">&#8212;</div>
-        <div class="eh-formula" id="ehFormula">Buy Level &minus; 2 &nbsp;|&nbsp; Fib 76.4% dari Range</div>
+        <div class="eh-formula" id="ehFormula">Buy Level &minus; 0.5% Range &nbsp;|&nbsp; Fib 76.4%</div>
       </div>
 
       <div class="metric-row">
@@ -454,17 +454,18 @@
     const H = num('inpH'), L = num('inpL');
     const preview = document.getElementById('rangePreview');
     if (H > 0 && L > 0 && H > L) {
-      const R = H - L;
-      setText('pvRange', p(R));
-      setText('pv764',   p(0.764 * R));
-      setText('pv236',   p(0.236 * R));
+      const R     = H - L;
+      const pad   = R * 0.005;           // 0.5% dari range — universal (saham, crypto, forex, dll)
       const level = dir === 'buy' ? H - 0.764 * R : H - 0.236 * R;
-      const entry = dir === 'buy' ? level - 2 : level + 2;
+      const entry = dir === 'buy' ? level - pad : level + pad;
       const col   = dir === 'buy' ? 'var(--accent)' : 'var(--danger)';
       const lbl   = dir === 'buy' ? 'Buy Level' : 'Sell Level';
+      setText('pvRange', fmt(R));
+      setText('pv764',   fmt(0.764 * R));
+      setText('pv236',   fmt(0.236 * R));
       document.getElementById('pvEntry').innerHTML =
-        lbl + ': <strong style="color:' + col + '">' + p(level) + '</strong>' +
-        ' &rarr; Entry: <strong style="color:' + col + '">' + p(entry) + '</strong>';
+        lbl + ': <strong style="color:' + col + '">' + fmt(level) + '</strong>' +
+        ' &rarr; Entry: <strong style="color:' + col + '">' + fmt(entry) + '</strong>';
       preview.style.display = 'flex';
       document.getElementById('btnCalc').disabled = false;
     } else {
@@ -479,15 +480,18 @@
     if (!H || !L || H <= L) { toast('⚠️ High harus lebih besar dari Low'); return; }
     const isBuy = dir === 'buy';
     const R     = H - L;
+    const pad   = R * 0.005;             // 0.5% dari range — universal (saham, crypto, forex, dll)
     const fib   = isBuy ? 0.764 : 0.236;
     const level = H - fib * R;
-    const entry = isBuy ? level - 2 : level + 2;
-    const sl    = isBuy ? L - 2 : H + 2;
+    const entry = isBuy ? level - pad : level + pad;
+    const sl    = isBuy ? L - pad     : H + pad;
     const tp    = C ? (isBuy ? entry + (C - sl) : entry - (sl - C))
                     : (isBuy ? entry + R * 1.2  : entry - R * 1.2);
-    const risk  = Math.abs(entry - sl);
-    const reward= Math.abs(tp - entry);
-    const rr    = risk > 0 ? reward / risk : 0;
+    const risk   = Math.abs(entry - sl);
+    const reward = Math.abs(tp - entry);
+    const rr     = risk > 0 ? reward / risk : 0;
+
+    const padLabel = (pad * 100 / R).toFixed(1) + '% Range';   // contoh: "0.5% Range"
 
     setStep(2, 'done'); setStep(3, 'active');
 
@@ -495,33 +499,35 @@
     setText('ehTag', isBuy ? '— BUY SIGNAL —' : '— SELL SIGNAL —');
     const ev = document.getElementById('ehVal');
     ev.className = 'eh-val ' + (isBuy ? 'buy' : 'sell');
-    ev.textContent = 'Rp ' + fmt(entry);
+    ev.textContent = fmt(entry);
     setText('ehFormula', isBuy
-      ? 'Entry = Buy Level − 2  |  Fib 76.4% dari Range (' + p(R) + ')'
-      : 'Entry = Sell Level + 2  |  Fib 23.6% dari Range (' + p(R) + ')');
+      ? 'Entry = Buy Level − ' + padLabel + '  |  Fib 76.4% dari Range'
+      : 'Entry = Sell Level + ' + padLabel + '  |  Fib 23.6% dari Range');
 
     setText('mHigh', fmt(H)); setText('mLow', fmt(L));
     setText('mLevelLbl', isBuy ? 'Buy Level (76.4%)' : 'Sell Level (23.6%)');
     setText('mLevel', fmt(level));
     setText('mLevelSub', isBuy ? 'High − 0.764 × Range' : 'High − 0.236 × Range');
 
-    setText('fRange', p(R));
+    setText('fRange', fmt(R));
     setText('fFibKey', isBuy ? '0.764 × Range' : '0.236 × Range');
     const ff = document.getElementById('fFibVal');
-    ff.textContent = p(fib * R); ff.className = 'f-val ' + (isBuy ? 'green' : 'red');
+    ff.textContent = fmt(fib * R); ff.className = 'f-val ' + (isBuy ? 'green' : 'red');
     setText('fLevelKey', isBuy ? 'Buy Level = High − (0.764 × Range)' : 'Sell Level = High − (0.236 × Range)');
     const fl = document.getElementById('fLevelVal');
-    fl.textContent = p(level); fl.className = 'f-val ' + (isBuy ? 'green' : 'red');
-    setText('fEntryKey', isBuy ? 'Entry = Buy Level − 2' : 'Entry = Sell Level + 2');
+    fl.textContent = fmt(level); fl.className = 'f-val ' + (isBuy ? 'green' : 'red');
+    setText('fEntryKey', isBuy
+      ? 'Entry = Buy Level − ' + padLabel
+      : 'Entry = Sell Level + ' + padLabel);
     const fe = document.getElementById('fEntryVal');
-    fe.textContent = 'Rp ' + fmt(entry);
+    fe.textContent = fmt(entry);
     fe.style.color = isBuy ? 'var(--accent)' : 'var(--danger)';
 
     renderLevels(H, L, level, entry, sl, tp, isBuy);
 
     const tpPct = ((Math.abs(tp-entry)/entry)*100).toFixed(2);
     const slPct = ((Math.abs(sl-entry)/entry)*100).toFixed(2);
-    setText('tpVal','Rp '+fmt(tp)); setText('slVal','Rp '+fmt(sl));
+    setText('tpVal', fmt(tp));  setText('slVal', fmt(sl));
     setText('tpPct','+'+tpPct+'%'); setText('slPct','−'+slPct+'%');
 
     setText('rrVal','1 : '+rr.toFixed(2));
@@ -533,6 +539,10 @@
     document.getElementById('resultSec').style.display = 'block';
     smooth('resultSec');
   }
+
+    document.getElementById('resultSec').style.display = 'block';
+    smooth('resultSec');
+  
 
   function renderLevels(H, L, level, entry, sl, tp, isBuy) {
     const items = isBuy ? [
@@ -593,10 +603,24 @@
     if (line) line.style.background = state === 'done' ? 'var(--accent)' : 'var(--border)';
   }
 
-  function setText(id,v) { document.getElementById(id).textContent = v; }
+  function setText(id,v) { const el=document.getElementById(id); if(el) el.textContent = v; }
   function num(id)       { return parseFloat(document.getElementById(id).value) || 0; }
-  function p(n)          { return n.toFixed(2); }
-  function fmt(n)        { return Math.round(n).toLocaleString('id-ID'); }
+
+  // fmt() — universal: auto-detect jumlah desimal berdasarkan magnitude harga
+  // Saham IDX (≥1000): 0 desimal | Saham murah: 2 desimal
+  // Crypto/forex (1–99): 4 desimal | Crypto micro (<0.01): 8 desimal
+  function fmt(n) {
+    if (n == null || isNaN(n)) return '—';
+    const abs = Math.abs(n);
+    let decimals;
+    if      (abs >= 1000)  decimals = 0;
+    else if (abs >= 100)   decimals = 2;
+    else if (abs >= 1)     decimals = 4;
+    else if (abs >= 0.01)  decimals = 6;
+    else                   decimals = 8;
+    // Gunakan en-US untuk avoid titik ribuan yang membingungkan di display harga
+    return n.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  }
   function smooth(id)    { setTimeout(()=>document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'}),80); }
   function toast(msg)    {
     const t = document.getElementById('toast');
